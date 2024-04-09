@@ -1,0 +1,15 @@
+syntax = "proto3";
+package Meeting.rtc;
+
+option go_package="./pb";
+
+message DeleteMeetingRecordsReq {
+  repeated string roomIDs = 1;
+}
+
+message DeleteMeetingRecordsResp {
+}
+
+service MeetingService {
+  rpc DeleteMeetingRecords(DeleteMeetingRecordsReq) returns(DeleteMeetingRecordsResp);
+}

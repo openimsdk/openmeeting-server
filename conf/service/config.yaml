@@ -1,0 +1,44 @@
+
+rpc:
+  rtc:
+    name: Rtc
+    port:
+      - 11300
+
+log:
+  storageLocation: ./../logs/
+  rotationTime: 24
+  remainRotationCount: 2
+  remainLogLevel: 6
+  isStdout: false
+  isJson: false
+  withStack: false
+
+etcd:
+  address: [ 127.0.0.1:2379 ]
+  username:
+  password:
+  ttl: 5
+  lease: 10
+  timeout: 5
+
+
+mongo:
+  uri: ''
+  # List of MongoDB server addresses.
+  # Used for constructing the MongoDB URI if 'uri' above is empty.
+  # For a standalone setup, specify the address of the single server.
+  # For a sharded cluster, specify the addresses of the Mongos servers.
+  # Example: [ '127.0.0.1:37017', '172.28.0.2:37017' ]
+  # Default MongoDB database name
+  # Maximum connection pool size
+  address: [ 127.0.0.1:27017 ]
+  database: meeting_v1
+  username:
+  password:
+  maxPoolSize: 100
+
+redis:
+  address: [ 127.0.0.1:6379 ]
+  username: ''
+  password: openIM123

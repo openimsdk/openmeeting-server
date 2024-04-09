@@ -1,0 +1,12 @@
+syntax = "proto3";
+package Meeting.rtc;
+
+option go_package="./pb";
+
+service Health {
+  rpc Ping(PingBody) returns (PingBody) {}
+}
+
+message PingBody {
+  string str = 1;
+}
