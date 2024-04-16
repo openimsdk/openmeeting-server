@@ -1,4 +1,5 @@
 #!/bin/bash
+
 if [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
     TARGET_DIR="$HOME/.local/bin"
 else

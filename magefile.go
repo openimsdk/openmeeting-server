@@ -4,7 +4,7 @@
 package main
 
 import (
-	"github.com/openimsdk/tools/utils/mageutil"
+	"github.com/openimsdk/gomake/mageutil"
 	"os"
 	"strings"
 )
@@ -21,11 +21,16 @@ func Build() {
 		mageutil.CompileForPlatform(platform)
 	}
 
-	mageutil.PrintGreen("Compilation complete.")
+	mageutil.PrintGreen("All binaries under cmd and tools were successfully compiled.")
 }
 
 func Start() {
-	setMaxOpenFiles()
+	mageutil.InitForSSC()
+	err := setMaxOpenFiles()
+	if err != nil {
+		mageutil.PrintRed("setMaxOpenFiles failed " + err.Error())
+		os.Exit(1)
+	}
 	mageutil.StartToolsAndServices()
 }
 
