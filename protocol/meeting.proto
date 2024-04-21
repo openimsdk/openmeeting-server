@@ -1,164 +1,148 @@
 syntax = "proto3";
 package Meeting.rtc;
 
-import "sdkws/sdkws.proto";
-
 option go_package="./pb";
 
 
-message ParticipantMetaData{
-  OpenIMServer.sdkws.GroupInfo groupInfo = 1;
-  OpenIMServer.sdkws.GroupMemberFullInfo groupMemberInfo = 2;
-  OpenIMServer.sdkws.PublicUserInfo userInfo = 3;
+message GetMeetingListReq {
+
 }
 
-// update global meeting configuration for user
-message UpdateUserGlobalMeetingConfReq {
-  uint64 configFlag  = 1;
+message GetMeetingListResp {
+
 }
 
-message UpdateUserGlobalMeetingConfResp {
-  uint64 configFlag  = 1;
+// join meeting
+message  JoinMeetingReq {
+  string meetingID = 1;
+  // user who join the meeting
+  string userID = 2;
 }
+
+message JoinMeetingResp{
+  string meetingID = 1;
+  string token = 2;
+  string liveURL = 3;
+}
+
+message QuickCreateMeetingReq {
+  string meetingName = 1;
+  // the meeting creator
+  string userID = 2;
+}
+
+// quick start meeting
+message QuickCreateMeetingResp {
+  string meetingID = 1;
+  string token = 2;
+  string liveURL = 3;
+}
+
 
 //
 message  PreBookCreateMeetingReq {
-  int64 meetingDuration = 1;
-  string roomID = 2;
-  string meetingName = 3;
-  string meetingHostUserID = 4;
-  ParticipantMetaData participant = 5;
-  repeated string invitedUserIDList = 6;
-  int64 startTime = 7;
-  string ex = 8;
+  // meeting name refers to the topic of the meeting.
+  string meetingName = 1;
+  // the meeting creator equals the meeting host by default.
+  // duration refers to the length of time that the meeting lasts from its beginning to its end.
+  int64 meetingDuration = 2;
+  string userID = 3;
+  // who are planed to be invited in the meeting
+  repeated string invitedUserIDList = 4;
+  // the time when the meeting starts
+  int64 startTime = 5;
 }
 
-message TypeUserIdListData {
-  int32 type = 1;
-  repeated string UserIDList = 2;
-}
 
 message  PreBookCreateMeetingResp {
-  string token = 1;
-  string roomID = 2;
+  string meetingID = 1;
+  string token = 2;
   string liveURL = 3;
 }
 
 message  PreBookUpdateMeetingReq {
-  string roomID = 1;
+  string meetingId = 1;
   string meetingName = 2;
-  int64  startTime = 3;
-  int64  endTime = 4;
-  repeated TypeUserIdListData userIDList = 5;
+  repeated string invitedUserIDList = 3;
+  int64 meetingDuration = 4;
+  int64  startTime = 5;
 }
 
 message  PreBookUpdateMeetingResp {
 }
 
 
-message DeleteMeetingRecordsReq {
-  repeated string roomIDs = 1;
+message DeleteMeetingReq {
+  string meeting = 1;
 }
 
-message DeleteMeetingRecordsResp {
-}
-
-message QuickCreateMeetingReq {
-  string meetingName = 1;
-  int64  meetingConfigFlag = 2;
-
-}
-
-// quick start meeting
-message QuickCreateMeetingResp {
-  string token = 1;
-  string roomID = 2;
-  string liveURL = 3;
-}
-
-message InvitationInfo  {
-  string inviterUserID = 1;
-  repeated string invitedUserIDList = 2;
-  string customData = 3;
-  string  groupID = 4;
-  string roomID = 5;
-  int32 timeout = 6;
-  string mediaType = 7;
-  int32 platformID = 8;
-  int32 sessionType = 9;
-  int64 initiateTime = 10;
-  repeated string busyLineUserIDList = 11;
-}
-
-message InviteMeetingReq {
-  InvitationInfo invitation = 1;
-//  sdkws.OfflinePushInfo offlinePushInfo  = 2;
-  ParticipantMetaData participant = 3;
-//  string userID = 4;
+message DeleteMeetingResp {
 }
 
 
-message InviteMeetingResp {
-  string token = 1;
-  string roomID = 2;
-  string liveURL = 3;
-  repeated string busyLineUserIDList = 4;
-}
-
-message InviteInGroupReq {
-  InvitationInfo invitation = 1;
-  sdkws.OfflinePushInfo offlinePushInfo  = 2;
-  ParticipantMetaData participant = 3;
-//  string userID = 4;
-}
-
-message InviteInGroupResp {
-  string token = 1;
-  string roomID = 2;
-  string liveURL = 3;
-  repeated string busyLineUserIDList = 4;
-}
-
-message  JoinMeetingReq {
-  string roomID = 1;
-//  string userID = 2;
-  ParticipantMetaData participant = 2;
-}
-
-message JoinMeetingResp{
-  string token = 1;
-  string roomID = 2;
-  string liveURL = 3;
+message MeetingPermissionConf {
+  OpenIMServer.protobuf.BoolValue participantCanUnmuteSelf = 1;
+  OpenIMServer.protobuf.BoolValue participantCanEnableVideo = 2;
+  OpenIMServer.protobuf.BoolValue onlyHostCanInviteUser = 3;
+  OpenIMServer.protobuf.BoolValue onlyHostCanShareScreen = 4;
+  OpenIMServer.protobuf.BoolValue joinDisableMicrophone = 5;
+  OpenIMServer.protobuf.BoolValue joinDisableVideo = 6;
+  OpenIMServer.protobuf.BoolValue isMuteAllVideo = 7;
+  OpenIMServer.protobuf.BoolValue isMuteAllMicrophone = 8;
 }
 
 message UpdateMeetingInfoReq {
-  string roomID = 1;
+  string meetingID = 1;
   string meetingName = 2;
   int64  startTime = 3;
-  int64  endTime = 4;
-  int64  meetingConfigFlag = 5;
-  repeated TypeUserIdListData userIDList = 6;
+  MeetingPermissionConf  meetingPermissionConf = 4;
 }
 
 message UpdateMeetingInfoResp {
 
 }
 
-message ShareTypeInfo {
-  int32  type = 1;
-  int32  value = 2;
+message MediaTypeInfo {
+  int32  mediaType = 1;
+  // disable or enable for media type
+  int32  enableStatus = 2;
 }
 
-message OnShareMeetingReq {
-  ShareTypeInfo shareInfo = 1;
+// user try to toggle on or off the media type
+message ToggleMeetingMediaReq {
+  MediaTypeInfo mediaTypeInfo = 1;
 }
 
-message OnShareMeetingResp {
+message ToggleMeetingMediaResp {
 
+}
+
+//
+message ManageMeetingMediaReq {
+  MediaTypeInfo mediaTypeInfo = 1;
+  string userID = 2;
+}
+
+message ManageMeetingMediaResp {
+}
+
+message MeetingActionTypeInfo {
+  // refers to pin user up to the user list or to be watched by other user.
+  int32 meetingAction = 1;
+  int32 addOrRemove = 2;
+}
+
+message UpdateMeetingActionReq {
+  MeetingActionTypeInfo meetingActionTypeInfo = 1;
+  string userID = 2;
+}
+
+message UpdateMeetingActionResp {
 }
 
 message CloseMeetingReq {
-  string roomID = 1;
+  string meetingID = 1;
+  string userID = 2;
 }
 
 message CloseMeetingResp {
@@ -166,82 +150,72 @@ message CloseMeetingResp {
 }
 
 message LeaveMeetingReq {
-  string roomID = 1;
-  int32 type = 2;
-  int64 value = 3;
+  string meetingID = 1;
+  int32 leaveType = 2; // define in constant document, identify leave himself or by kickoff
+  string leaveUserID = 3; // user who leave the room
+  string kickerUserID = 4; // user who kicked somebody out of the meeting
 }
 
 message LeaveMeetingResp {
 
 }
 
-message TypeUserListValueData {
-  int64 userID = 1;
-  string name = 2;
-
+message GetMeetingDetailInfoReq {
+  string meetingID = 1;
 }
 
-message UpdateMeetingParticipateInfoReq {
-  // 头像?
-  TypeUserListValueData userValueData = 1;
-}
-
-message UpdateMeetingParticipateInfoResp {
-  TypeUserListValueData userValueData = 1;
-}
-
-message GetMeetingHistoryListReq {
-
-}
-
-message MeetingHistoryLiteInfo {
-  string roomId = 1;
-  int64 startTime = 2;
-  int64 endTime = 3;
-  TypeUserIdListData hostUserList = 4;
-  repeated TypeUserListValueData participateUserList = 5;
-}
-
-message GetMeetingHistoryListResp {
-  repeated MeetingHistoryLiteInfo meetingHistoryList = 1;
-}
-
-message GetMeetingHistoryDetailReq {
-
-}
-
-message GetMeetingHistoryDetailResp {
-
+message GetMeetingDetailInfoResp {
+  // meeting name refers to the topic of the meeting.
+  string meetingName = 1;
+  // the meeting creator equals the meeting host by default.
+  // duration refers to the length of time that the meeting lasts from its beginning to its end.
+  int64 meetingDuration = 2;
+  string userID = 3;
+  // who are planed to be invited in the meeting
+  repeated string invitedUserIDList = 4;
+  // the time when the meeting starts
+  int64 startTime = 5;
 }
 
 service MeetingService {
 
-  // configuration
-  rpc UpdateUserGlobalMeetingConf(UpdateUserGlobalMeetingConfReq) returns(UpdateUserGlobalMeetingConfResp);
+  // get meeting list
+  rpc GetMeetingList(GetMeetingListReq) returns(GetMeetingListResp);
 
-  // meeting
-  //// prebook
-  rpc CreatePreBookMeeting(PreBookCreateMeetingReq) returns(PreBookCreateMeetingResp);
+  /// get meeting detail
+  rpc GetMeetingDetailInfo(GetMeetingDetailInfoReq) returns(GetMeetingDetailInfoResp);
+
+  //// quick start meeting
+  rpc CreateQuickMeeting(QuickCreateMeetingReq) returns(QuickCreateMeetingResp);
+
+  /// prebook create meeting
+  rpc PreBookCreateMeeting(PreBookCreateMeetingReq) returns(PreBookCreateMeetingResp);
+
+  //// prebook update meeting
   rpc UpdatePreBookMeeting(PreBookUpdateMeetingReq) returns(PreBookUpdateMeetingResp);
 
-  //// quick start
-  rpc CreateQuickMeeting(QuickCreateMeetingReq) returns(QuickCreateMeetingResp);
-  rpc InviteMeeting(InviteMeetingReq) returns(InviteMeetingResp);
-  rpc InviteGroupInMeeting(InviteInGroupReq) returns(InviteInGroupResp);
+  // join meeting
   rpc JoinMeeting(JoinMeetingReq) returns(JoinMeetingResp);
-  rpc LeaveMeeting(LeaveMeetingReq) returns(LeaveMeetingResp);
-  rpc DeleteMeetingRecords(DeleteMeetingRecordsReq) returns(DeleteMeetingRecordsResp);
 
-  /// update
+  //// cancel meeting, delete meeting
+  rpc DeleteMeeting(DeleteMeetingReq) returns(DeleteMeetingResp);
+
+  //// update
   rpc UpdateMeetingInfo(UpdateMeetingInfoReq) returns(UpdateMeetingInfoResp);
-  rpc UpdateMeetingParticipateInfo(UpdateMeetingParticipateInfoReq) returns(UpdateMeetingParticipateInfoResp);
 
-  // share stuff
-  //// Audi，livestream stuff are handled on and off in this function,
-  rpc OnShareMeeting(OnShareMeetingReq) returns(OnShareMeetingResp);
+  /// toggle meeting media on or off.
+  rpc ToggleMeetingMedia(ToggleMeetingMediaReq) returns(ToggleMeetingMediaResp);
+
+  //// manage user media in the meeting.
+  rpc ManageMeetingUserMedia(ManageMeetingMediaReq) returns(ManageMeetingMediaResp);
+
+  /// update meeting action in the meeting. like pin user on top of the list or watched by others
+  rpc UpdateMeetingAction(UpdateMeetingActionReq) returns(UpdateMeetingActionResp);
+
+  /// close meeting
   rpc CloseMeeting(CloseMeetingReq) returns(CloseMeetingResp);
 
-  /// history data
-  rpc GetMeetingHistoryList(GetMeetingHistoryListReq) returns(GetMeetingHistoryListResp);
-  rpc GetMeetingHistoryDetail(GetMeetingHistoryDetailReq) returns(GetMeetingHistoryDetailResp);
+  /// leave meeting
+  rpc LeaveMeeting(LeaveMeetingReq) returns(LeaveMeetingResp);
+
 }
