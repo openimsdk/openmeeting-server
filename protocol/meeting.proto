@@ -2,220 +2,174 @@ syntax = "proto3";
 package Meeting.rtc;
 
 option go_package="./pb";
-
-
-message GetMeetingListReq {
-
+// Defines LiveKit access information.
+message LiveKit{
+  string token = 2;
+  string URL = 3;
 }
 
-message GetMeetingListResp {
-
+// Information about a specific meeting.
+message MeetingInfo {
+  string title = 2;
+  string creatorUserID = 3;
+  int64 scheduledTime = 4;
+  string status = 5;
+  int64 meetingDuration = 6;
+  int64 startTime = 7;
+  string password = 8;
 }
 
-// join meeting
-message  JoinMeetingReq {
+// Settings controlling meeting features.
+message MeetingSetting {
+  bool participantCanUnmuteSelf = 1;
+  bool participantCanEnableVideo = 2;
+  bool onlyHostCanInviteUser = 3;
+  bool onlyHostCanShareScreen = 4;
+  bool joinDisableMicrophone = 5;
+  bool joinDisableVideo = 6;
+  bool isMuteAllVideo = 7;
+  bool isMuteAllMicrophone = 8;
+}
+
+// Detailed information about a meeting, combining info and settings.
+message MeetingDetail {
   string meetingID = 1;
-  // user who join the meeting
-  string userID = 2;
+  MeetingInfo info = 2;
+  MeetingSetting setting = 3;
 }
 
+// Request to create an immediate meeting.
+message CreateImmediateMeetingReq {
+  MeetingInfo info = 1;
+  MeetingSetting setting = 2;
+}
+
+// Response after creating an immediate meeting.
+message CreateImmediateMeetingResp {
+  MeetingDetail detail = 1;
+  LiveKit liveKit = 2;
+}
+
+// Request to book a future meeting.
+message BookMeetingReq {
+  MeetingInfo info = 1;
+  MeetingSetting setting = 2;
+}
+
+// Response after booking a meeting.
+message BookMeetingResp {
+  MeetingDetail detail = 1;
+}
+
+// Request to join a meeting.
+message JoinMeetingReq {
+  string meetingID = 1;
+  string userID = 2;  // User who joins the meeting
+  string password = 3;
+}
+
+// Response after joining a meeting.
 message JoinMeetingResp{
-  string meetingID = 1;
-  string token = 2;
-  string liveURL = 3;
+  LiveKit liveKit = 1;
 }
 
-message QuickCreateMeetingReq {
-  string meetingName = 1;
-  // the meeting creator
+// Request to get all meetings created by a specific user and filter by status.
+message GetCreatedMeetingsReq {
+  string userID = 1;
+  string status = 2;
+}
+
+// Response with a list of meetings created by the user.
+message GetCreatedMeetingsResp {
+  repeated MeetingDetail MeetingDetails = 1;
+}
+
+// Request to get information about a specific meeting.
+message GetMeetingReq {
+  string meetingID = 1;
+}
+
+// Response with detailed information about a meeting.
+message GetMeetingResp {
+  MeetingDetail MeetingDetail = 1;
+}
+
+// Request to update a meeting.
+message UpdateMeetingReq {
+  MeetingDetail detail = 1;
+}
+
+// Response after updating a meeting.
+message UpdateMeetingResp {
+}
+
+// Request to end a meeting.
+message EndMeetingReq {
+  string meetingID = 1;
   string userID = 2;
 }
 
-// quick start meeting
-message QuickCreateMeetingResp {
+// Response after ending a meeting.
+message EndMeetingResp {
+}
+
+// Request to leave a meeting.
+message LeaveMeetingReq {
   string meetingID = 1;
-  string token = 2;
-  string liveURL = 3;
+  string userID = 2; // User who leaves the room
 }
 
-
-//
-message  PreBookCreateMeetingReq {
-  // meeting name refers to the topic of the meeting.
-  string meetingName = 1;
-  // the meeting creator equals the meeting host by default.
-  // duration refers to the length of time that the meeting lasts from its beginning to its end.
-  int64 meetingDuration = 2;
-  string userID = 3;
-  // who are planed to be invited in the meeting
-  repeated string invitedUserIDList = 4;
-  // the time when the meeting starts
-  int64 startTime = 5;
+// Response after leaving a meeting.
+message LeaveMeetingResp {
 }
 
-
-message  PreBookCreateMeetingResp {
-  string meetingID = 1;
-  string token = 2;
-  string liveURL = 3;
-}
-
-message  PreBookUpdateMeetingReq {
-  string meetingId = 1;
-  string meetingName = 2;
-  repeated string invitedUserIDList = 3;
-  int64 meetingDuration = 4;
-  int64  startTime = 5;
-}
-
-message  PreBookUpdateMeetingResp {
-}
-
-
-message DeleteMeetingReq {
-  string meeting = 1;
-}
-
-message DeleteMeetingResp {
-}
-
-
-message MeetingPermissionConf {
-  OpenIMServer.protobuf.BoolValue participantCanUnmuteSelf = 1;
-  OpenIMServer.protobuf.BoolValue participantCanEnableVideo = 2;
-  OpenIMServer.protobuf.BoolValue onlyHostCanInviteUser = 3;
-  OpenIMServer.protobuf.BoolValue onlyHostCanShareScreen = 4;
-  OpenIMServer.protobuf.BoolValue joinDisableMicrophone = 5;
-  OpenIMServer.protobuf.BoolValue joinDisableVideo = 6;
-  OpenIMServer.protobuf.BoolValue isMuteAllVideo = 7;
-  OpenIMServer.protobuf.BoolValue isMuteAllMicrophone = 8;
-}
-
-message UpdateMeetingInfoReq {
-  string meetingID = 1;
-  string meetingName = 2;
-  int64  startTime = 3;
-  MeetingPermissionConf  meetingPermissionConf = 4;
-}
-
-message UpdateMeetingInfoResp {
-
-}
-
+// Information about media type settings.
 message MediaTypeInfo {
-  int32  mediaType = 1;
-  // disable or enable for media type
-  int32  enableStatus = 2;
+  int32 mediaType = 1;  // Media type, e.g., video, audio
+  int32 enableStatus = 2; // Disable or enable status for the media type
 }
 
-// user try to toggle on or off the media type
+// Request to toggle media settings in a meeting.
 message ToggleMeetingMediaReq {
   MediaTypeInfo mediaTypeInfo = 1;
 }
 
+// Response after toggling media settings.
 message ToggleMeetingMediaResp {
-
 }
 
-//
+// Request to manage media settings for a user in a meeting.
 message ManageMeetingMediaReq {
   MediaTypeInfo mediaTypeInfo = 1;
   string userID = 2;
 }
 
+// Response after managing media settings.
 message ManageMeetingMediaResp {
 }
 
+// Information about meeting action types.
 message MeetingActionTypeInfo {
-  // refers to pin user up to the user list or to be watched by other user.
+  // Refers to pin user up to the user list or to be watched by other users.
   int32 meetingAction = 1;
   int32 addOrRemove = 2;
 }
 
+// Request to update actions in a meeting.
 message UpdateMeetingActionReq {
   MeetingActionTypeInfo meetingActionTypeInfo = 1;
   string userID = 2;
 }
 
+// Response after updating meeting actions.
 message UpdateMeetingActionResp {
 }
 
-message CloseMeetingReq {
-  string meetingID = 1;
-  string userID = 2;
-}
-
-message CloseMeetingResp {
-
-}
-
-message LeaveMeetingReq {
-  string meetingID = 1;
-  int32 leaveType = 2; // define in constant document, identify leave himself or by kickoff
-  string leaveUserID = 3; // user who leave the room
-  string kickerUserID = 4; // user who kicked somebody out of the meeting
-}
-
-message LeaveMeetingResp {
-
-}
-
+// Request to retrieve detailed meeting information.
 message GetMeetingDetailInfoReq {
   string meetingID = 1;
 }
 
-message GetMeetingDetailInfoResp {
-  // meeting name refers to the topic of the meeting.
-  string meetingName = 1;
-  // the meeting creator equals the meeting host by default.
-  // duration refers to the length of time that the meeting lasts from its beginning to its end.
-  int64 meetingDuration = 2;
-  string userID = 3;
-  // who are planed to be invited in the meeting
-  repeated string invitedUserIDList = 4;
-  // the time when the meeting starts
-  int64 startTime = 5;
-}
-
+// Defines services related to meeting management.
 service MeetingService {
-
-  // get meeting list
-  rpc GetMeetingList(GetMeetingListReq) returns(GetMeetingListResp);
-
-  /// get meeting detail
-  rpc GetMeetingDetailInfo(GetMeetingDetailInfoReq) returns(GetMeetingDetailInfoResp);
-
-  //// quick start meeting
-  rpc CreateQuickMeeting(QuickCreateMeetingReq) returns(QuickCreateMeetingResp);
-
-  /// prebook create meeting
-  rpc PreBookCreateMeeting(PreBookCreateMeetingReq) returns(PreBookCreateMeetingResp);
-
-  //// prebook update meeting
-  rpc UpdatePreBookMeeting(PreBookUpdateMeetingReq) returns(PreBookUpdateMeetingResp);
-
-  // join meeting
-  rpc JoinMeeting(JoinMeetingReq) returns(JoinMeetingResp);
-
-  //// cancel meeting, delete meeting
-  rpc DeleteMeeting(DeleteMeetingReq) returns(DeleteMeetingResp);
-
-  //// update
-  rpc UpdateMeetingInfo(UpdateMeetingInfoReq) returns(UpdateMeetingInfoResp);
-
-  /// toggle meeting media on or off.
-  rpc ToggleMeetingMedia(ToggleMeetingMediaReq) returns(ToggleMeetingMediaResp);
-
-  //// manage user media in the meeting.
-  rpc ManageMeetingUserMedia(ManageMeetingMediaReq) returns(ManageMeetingMediaResp);
-
-  /// update meeting action in the meeting. like pin user on top of the list or watched by others
-  rpc UpdateMeetingAction(UpdateMeetingActionReq) returns(UpdateMeetingActionResp);
-
-  /// close meeting
-  rpc CloseMeeting(CloseMeetingReq) returns(CloseMeetingResp);
-
-  /// leave meeting
-  rpc LeaveMeeting(LeaveMeetingReq) returns(LeaveMeetingResp);
-
 }
