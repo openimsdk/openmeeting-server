@@ -39,11 +39,16 @@ var Config struct {
 	RPC struct {
 		ListenIP   string `yaml:"listenIP"`
 		RegisterIP string `yaml:"registerIP"`
-		RTC        struct {
-			Name string `yaml:"name"`
-			Port []int  `yaml:"port"`
-		} `yaml:"rtc"`
+		Name       string `yaml:"name"`
+		Port       []int  `yaml:"port"`
 	}
+
+	RTC struct {
+		URL       []string `yaml:"url"`
+		ApiKey    string   `yaml:"apiKey"`
+		ApiSecret string   `yaml:"apiSecret"`
+		InnerURL  string   `yaml:"innerURL"`
+	} `yaml:"rtc"`
 
 	Log struct {
 		StorageLocation     *string `yaml:"storageLocation"`

@@ -7,11 +7,12 @@ import (
 	"github.com/OpenIMSDK/tools/mw"
 	"github.com/OpenIMSDK/tools/network"
 	"github.com/OpenIMSDK/tools/utils"
+	clientv3 "go.etcd.io/etcd/client/v3"
+	"go.etcd.io/etcd/client/v3/naming/endpoints"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/grpc"
 	"net"
 	config "openmeeting-server/dto"
-	etcd_discovery "openmeeting-server/internal/infrastructure/etcd"
 	"os"
 	"os/signal"
 	"strconv"
@@ -40,12 +41,12 @@ func Start(rpcPort int,
 		return err
 	}
 
-	client, err := etcd_discovery.NewEtcdDiscovery(
-		context.Background(), rpcRegisterName, registerIP, rpcPort, &config.Config.Etcd)
-	if err != nil {
-		return utils.Wrap1(err)
-	}
-	defer client.Close()
+	//client, err := etcd_discovery.NewEtcdDiscovery(
+	//	context.Background(), rpcRegisterName, registerIP, rpcPort, &config.Config.Etcd)
+	//if err != nil {
+	//	return utils.Wrap1(err)
+	//}
+	//defer client.Close()
 
 	//client.AddOption(mw.GrpcClient(), grpc.WithTransportCredentials(insecure.NewCredentials()))
 
@@ -55,19 +56,47 @@ func Start(rpcPort int,
 	defer func() {
 		once.Do(srv.GracefulStop)
 	}()
-
 	err = rpcFn(srv)
 	if err != nil {
 		return utils.Wrap1(err)
 	}
-	err = client.Register(
-		rpcRegisterName,
-		registerIP,
-		rpcPort,
-	)
-	if err != nil {
-		return utils.Wrap1(err)
+
+	cli, cerr := clientv3.NewFromURL("http://localhost:2379")
+	if cerr != nil {
+		panic(cerr)
 	}
+
+	ctx := context.Background()
+	lease, _ := cli.Grant(ctx, 10)
+	em, err := endpoints.NewManager(cli, "openmeeting/rtc-service")
+	if err != nil {
+		panic(err)
+	}
+	grpcAddress := fmt.Sprintf("%s:%d", registerIP, rpcPort)
+	err = em.AddEndpoint(ctx, "openmeeting/rtc-service/g1", endpoints.Endpoint{Addr: grpcAddress}, clientv3.WithLease(lease.ID))
+	if err != nil {
+		panic(err)
+	}
+
+	ch, err := cli.KeepAlive(ctx, lease.ID)
+
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		for {
+			select {
+			case r := <-ch:
+				// avoid dead loop when channel was closed
+				if r == nil {
+					return
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
 
 	var wg errgroup.Group
 

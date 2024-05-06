@@ -1,12 +1,18 @@
 
 rpc:
-  rtc:
-    name: Rtc
-    port:
-      - 11300
+  name: Rtc
+  port:
+    - 11300
+
+rtc:
+  url:
+    - ws://192.168.3.10:7880
+  innerURL: ws://127.0.0.1:7880 # Internal Address
+  apiKey: "API9a68KZ52QTmX"
+  apiSecret: "ZlzM0gxLj1TqUXje2tnGGxSpiFrozDzHep0LGpfBY4cB"
 
 log:
-  storageLocation: ./../logs/
+  storageLocation: ./logs/
   rotationTime: 24
   remainRotationCount: 2
   remainLogLevel: 6

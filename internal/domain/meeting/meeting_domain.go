@@ -2,41 +2,100 @@ package meeting_domain
 
 import (
 	"context"
+	"errors"
 	"github.com/OpenIMSDK/tools/errs"
+	"github.com/OpenIMSDK/tools/log"
 	"github.com/OpenIMSDK/tools/tx"
+	"openmeeting-server/internal/domain/livekit"
 	"openmeeting-server/internal/infrastructure/cache"
 	"openmeeting-server/internal/infrastructure/repository"
+	"openmeeting-server/internal/infrastructure/repository/model"
+	"openmeeting-server/internal/utils"
+	time_utils "openmeeting-server/internal/utils/time"
+	"openmeeting-server/protocol/pb"
+	"time"
 )
 
 type MeetingDomainInterface interface {
-	CreateMeeting(ctx context.Context) error
+	PreBookCreateMeeting(ctx context.Context, req *pb.PreBookCreateMeetingReq) (*pb.PreBookCreateMeetingResp, error)
+	UpdatePreBookMeeting(ctx context.Context, req *pb.PreBookUpdateMeetingReq) (*pb.PreBookUpdateMeetingResp, error)
 	DeleteMeeting(ctx context.Context, roomId ...string) error
+	QuickStartCreateMeeting(ctx context.Context, req *pb.QuickCreateMeetingReq) (*pb.QuickCreateMeetingResp, error)
+	JoinMeeting(ctx context.Context, req *pb.JoinMeetingReq) (*pb.JoinMeetingResp, error)
+
+	UpdateMeetingInfo(ctx context.Context, req *pb.UpdateMeetingInfoReq) (*pb.UpdateMeetingInfoResp, error)
+
+	CloseMeeting(ctx context.Context, req *pb.CloseMeetingReq) (*pb.CloseMeetingResp, error)
+	LeaveMeeting(ctx context.Context, req *pb.LeaveMeetingReq) (*pb.LeaveMeetingResp, error)
+	KickOffMeeting(ctx context.Context, req *pb.KickOffMeetingReq) (*pb.KickOffMeetingResp, error)
 }
 
 type MeetingDomain struct {
 	MeetingRepository repository.MeetingInterface
-
-	tx tx.CtxTx
+	RTCLogic          livekit.RTCDomain
+	tx                tx.CtxTx
 }
 
-func NewMeetingService() *MeetingDomain {
+func NewMeetingService(ctx context.Context) (*MeetingDomain, error) {
 	repo, err := repository.NewMeetingRepository()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 	client, err := cache.GetMongoClient()
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
 	return &MeetingDomain{
 		MeetingRepository: repo,
+		RTCLogic:          livekit.NewLiveKit(ctx),
 		tx:                tx.NewMongo(client),
-	}
+	}, nil
 }
 
-func (m *MeetingDomain) CreateMeeting(ctx context.Context) error {
-	return nil
+func (m *MeetingDomain) PreBookCreateMeeting(ctx context.Context, req *pb.PreBookCreateMeetingReq) (*pb.PreBookCreateMeetingResp, error) {
+
+	meetingID := utils.GenerateUniqueKey()
+
+	info := &model.MeetingInfo{
+		MeetingID:     meetingID,
+		MeetingName:   req.MeetingName,
+		HostUserID:    req.UserID,
+		CreatorUserID: req.UserID,
+		StartTime:     time_utils.TimestampToTime(req.StartTime),
+		EndTime:       time_utils.TimestampToTime(req.StartTime + req.MeetingDuration),
+		Duration:      req.MeetingDuration,
+		CreateTime:    time.Now(),
+		UpdateTime:    time.Now(),
+	}
+
+	if err := m.MeetingRepository.CreateMeetingInfo(ctx, info); err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
+func (m *MeetingDomain) UpdatePreBookMeeting(ctx context.Context, req *pb.PreBookUpdateMeetingReq) (*pb.PreBookUpdateMeetingResp, error) {
+	updateData := map[string]any{"status": false}
+	if err := m.MeetingRepository.UpdateMeetingInfo(ctx, req.MeetingId, updateData); err != nil {
+
+	}
+
+	return nil, nil
+}
+
+func (m *MeetingDomain) UpdateMeetingInfo(ctx context.Context, req *pb.UpdateMeetingInfoReq) (*pb.UpdateMeetingInfoResp, error) {
+	info := &pb.MeetingInfo{
+		RoomID: req.MeetingID,
+	}
+
+	// update meta data
+	if err := m.RTCLogic.UpdateMetaData(ctx, info); err != nil {
+		return &pb.UpdateMeetingInfoResp{}, err
+	}
+	// update mongo db
+
+	return &pb.UpdateMeetingInfoResp{}, nil
 }
 
 func (m *MeetingDomain) DeleteMeeting(ctx context.Context, roomId ...string) error {
@@ -50,4 +109,109 @@ func (m *MeetingDomain) DeleteMeeting(ctx context.Context, roomId ...string) err
 		return errs.ErrDatabase
 	}
 	return nil
+}
+
+func (m *MeetingDomain) QuickStartCreateMeeting(ctx context.Context, req *pb.QuickCreateMeetingReq) (*pb.QuickCreateMeetingResp, error) {
+	//if _, err := x.roomIsExist(ctx, req.RoomID); err != nil && errs.Unwrap(err) != errs.ErrRecordNotFound {
+	//	return nil, err
+	//}
+	//
+	meetingID := utils.GenerateUniqueKey()
+	_, token, liveUrl, err := m.RTCLogic.CreateRoom(ctx, meetingID)
+	if err != nil {
+		return nil, nil
+	}
+
+	info := &model.MeetingInfo{
+		MeetingID:     meetingID,
+		MeetingName:   req.MeetingName,
+		HostUserID:    req.UserID,
+		CreatorUserID: req.UserID,
+		StartTime:     time.Now(),
+		EndTime:       time.Now(),
+		Duration:      600, // default configuration
+		CreateTime:    time.Now(),
+		UpdateTime:    time.Now(),
+	}
+
+	if err := m.MeetingRepository.CreateMeetingInfo(ctx, info); err != nil {
+		return nil, err
+	}
+
+	return &pb.QuickCreateMeetingResp{
+		MeetingID: meetingID,
+		Token:     token,
+		LiveURL:   liveUrl,
+	}, nil
+}
+
+func (m *MeetingDomain) JoinMeeting(ctx context.Context, req *pb.JoinMeetingReq) (*pb.JoinMeetingResp, error) {
+	metaData, err := m.RTCLogic.GetRoomData(ctx, req.MeetingID)
+	if err != nil {
+		return nil, err
+	}
+
+	log.ZDebug(ctx, "metaData", metaData)
+
+	token, liveUrl, err := m.RTCLogic.GetJoinToken(ctx, req.MeetingID, req.MeetingID)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := m.RTCLogic.UpdateMetaData(ctx, &pb.MeetingInfo{
+		RoomID: req.MeetingID,
+	}); err != nil {
+		return nil, err
+	}
+
+	return &pb.JoinMeetingResp{
+		MeetingID: req.MeetingID,
+		Token:     token,
+		LiveURL:   liveUrl,
+	}, nil
+}
+
+func (m *MeetingDomain) CloseMeeting(ctx context.Context, req *pb.CloseMeetingReq) (*pb.CloseMeetingResp, error) {
+	metaData, err := m.RTCLogic.GetRoomData(ctx, req.MeetingID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !m.checkAuthPermission(metaData.HostUserID, req.UserID) {
+		return nil, errors.New("user did not have permission to close meeting")
+	}
+
+	if err := m.RTCLogic.CloseRoom(ctx, req.MeetingID); err != nil {
+		return nil, err
+	}
+
+	return &pb.CloseMeetingResp{}, nil
+}
+
+func (m *MeetingDomain) checkAuthPermission(hostUserID, requestUserID string) bool {
+	return hostUserID == requestUserID
+}
+
+func (m *MeetingDomain) LeaveMeeting(ctx context.Context, req *pb.LeaveMeetingReq) (*pb.LeaveMeetingResp, error) {
+
+	if err := m.RTCLogic.RemoveParticipant(ctx, req.MeetingID, req.LeaveUserID); err != nil {
+		return &pb.LeaveMeetingResp{}, nil
+	}
+	return &pb.LeaveMeetingResp{}, nil
+}
+
+func (m *MeetingDomain) KickOffMeeting(ctx context.Context, req *pb.KickOffMeetingReq) (*pb.KickOffMeetingResp, error) {
+	metaData, err := m.RTCLogic.GetRoomData(ctx, req.MeetingID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !m.checkAuthPermission(metaData.HostUserID, req.KickerUserID) {
+		return nil, errors.New("user did not have permission to kick somebody out of the meeting")
+	}
+
+	if err := m.RTCLogic.RemoveParticipant(ctx, req.MeetingID, req.LeaveUserID); err != nil {
+		return &pb.KickOffMeetingResp{}, nil
+	}
+	return &pb.KickOffMeetingResp{}, nil
 }

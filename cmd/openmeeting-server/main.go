@@ -14,7 +14,7 @@ func main() {
 	if err := config.Parse(confPath); err != nil {
 		panic(err)
 	}
-	if err := startrpc.Start(config.Config.RPC.RTC.Port[0], config.Config.RPC.RTC.Name, initialize.InitServer); err != nil {
+	if err := startrpc.Start(config.Config.RPC.Port[0], config.Config.RPC.Name, initialize.InitServer); err != nil {
 		panic(err)
 	}
 }

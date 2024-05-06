@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	config "openmeeting-server/dto"
 	"openmeeting-server/internal/infrastructure/cache"
+	"openmeeting-server/internal/infrastructure/repository/model"
 )
 
 type meetingRepository struct {
@@ -37,8 +38,21 @@ func NewMeetingRepository() (MeetingInterface, error) {
 
 type MeetingInterface interface {
 	DeleteMeetingInfos(ctx context.Context, roomIDs []string) error
+	CreateMeetingInfo(ctx context.Context, meetingInfo *model.MeetingInfo) error
+	UpdateMeetingInfo(ctx context.Context, roomID string, updateData map[string]any) error
 }
 
 func (m *meetingRepository) DeleteMeetingInfos(ctx context.Context, roomIDs []string) error {
 	return mgoutil.DeleteMany(ctx, m.coll, bson.M{"room_id": bson.M{"$in": roomIDs}})
+}
+
+func (m *meetingRepository) CreateMeetingInfo(ctx context.Context, meetingInfo *model.MeetingInfo) error {
+	return mgoutil.InsertMany(ctx, m.coll, []*model.MeetingInfo{meetingInfo})
+}
+
+func (m *meetingRepository) UpdateMeetingInfo(ctx context.Context, roomID string, updateData map[string]any) error {
+	if len(updateData) == 0 {
+		return nil
+	}
+	return mgoutil.UpdateOne(ctx, m.coll, bson.M{"room_id": roomID}, bson.M{"$set": updateData}, false)
 }

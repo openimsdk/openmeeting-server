@@ -1,0 +1,255 @@
+syntax = "proto3";
+package Meeting.rtc;
+
+option go_package="./pb";
+
+
+message MeetingInfo {
+  string roomID = 1;
+  string meetingName = 2;
+  string hostUserID = 3;
+  int64 createTime = 4;
+  int64 startTime = 5;
+  int64 endTime = 6;
+  bool participantCanUnmuteSelf = 7; //成员是否能自己解除禁言
+  bool participantCanEnableVideo = 8; //成员是否能开启视频
+  bool onlyHostInviteUser = 9; //仅主持人可邀请用户
+  bool onlyHostShareScreen = 10; //仅主持人可共享屏幕
+  bool joinDisableMicrophone = 11; //加入是否默认关麦克风
+  bool joinDisableVideo = 12; //加入是否默认关视频
+  bool isMuteAllVideo = 13; // 是否全员禁用视频
+  bool isMuteAllMicrophone = 14; // 是否全员禁用麦克风
+  repeated string canScreenUserIDList = 15; // 可共享屏幕的ID列表
+  repeated string disableMicrophoneUserIDList = 16; // 当前被禁言麦克风的id列表
+  repeated string disableVideoUserIDList = 17; // 当前禁用视频流的ID列表
+  repeated string pinedUserIDList = 18; // 置顶ID列表
+  repeated string beWatchedUserIDList = 19; // 正在被观看用户列表
+}
+
+
+message GetMeetingListReq {
+
+}
+
+message GetMeetingListResp {
+
+}
+
+// join meeting
+message  JoinMeetingReq {
+  string meetingID = 1;
+  // user who join the meeting
+  string userID = 2;
+}
+
+message JoinMeetingResp{
+  string meetingID = 1;
+  string token = 2;
+  string liveURL = 3;
+}
+
+message QuickCreateMeetingReq {
+  string meetingName = 1;
+  // the meeting creator
+  string userID = 2;
+}
+
+// quick start meeting
+message QuickCreateMeetingResp {
+  string meetingID = 1;
+  string token = 2;
+  string liveURL = 3;
+}
+
+
+//
+message  PreBookCreateMeetingReq {
+  // meeting name refers to the topic of the meeting.
+  string meetingName = 1;
+  // the meeting creator equals the meeting host by default.
+  // duration refers to the length of time that the meeting lasts from its beginning to its end.
+  int64 meetingDuration = 2;
+  string userID = 3;
+  // who are planed to be invited in the meeting
+  repeated string invitedUserIDList = 4;
+  // the time when the meeting starts
+  int64 startTime = 5;
+}
+
+
+message  PreBookCreateMeetingResp {
+  string meetingID = 1;
+  string token = 2;
+  string liveURL = 3;
+}
+
+message  PreBookUpdateMeetingReq {
+  string meetingId = 1;
+  string meetingName = 2;
+  repeated string invitedUserIDList = 3;
+  int64 meetingDuration = 4;
+  int64  startTime = 5;
+}
+
+message  PreBookUpdateMeetingResp {
+}
+
+
+message DeleteMeetingReq {
+  string meetingID = 1;
+}
+
+message DeleteMeetingResp {
+}
+
+
+message MeetingPermissionConf {
+  bool participantCanUnmuteSelf = 1;
+  bool participantCanEnableVideo = 2;
+  bool onlyHostCanInviteUser = 3;
+  bool onlyHostCanShareScreen = 4;
+  bool joinDisableMicrophone = 5;
+  bool joinDisableVideo = 6;
+  bool isMuteAllVideo = 7;
+  bool isMuteAllMicrophone = 8;
+}
+
+message UpdateMeetingInfoReq {
+  string meetingID = 1;
+  string meetingName = 2;
+  int64  startTime = 3;
+  MeetingPermissionConf  meetingPermissionConf = 4;
+}
+
+message UpdateMeetingInfoResp {
+
+}
+
+message MediaTypeInfo {
+  int32  mediaType = 1;
+  // disable or enable for media type
+  int32  enableStatus = 2;
+}
+
+// user try to toggle on or off the media type
+message ToggleMeetingMediaReq {
+  MediaTypeInfo mediaTypeInfo = 1;
+}
+
+message ToggleMeetingMediaResp {
+
+}
+
+//
+message ManageMeetingMediaReq {
+  MediaTypeInfo mediaTypeInfo = 1;
+  string userID = 2;
+}
+
+message ManageMeetingMediaResp {
+}
+
+message MeetingActionTypeInfo {
+  // refers to pin user up to the user list or to be watched by other user.
+  int32 meetingAction = 1;
+  int32 addOrRemove = 2;
+}
+
+message UpdateMeetingActionReq {
+  MeetingActionTypeInfo meetingActionTypeInfo = 1;
+  string userID = 2;
+}
+
+message UpdateMeetingActionResp {
+}
+
+message CloseMeetingReq {
+  string meetingID = 1;
+  string userID = 2;
+}
+
+message CloseMeetingResp {
+
+}
+
+message LeaveMeetingReq {
+  string meetingID = 1;
+  string leaveUserID = 2; // user who leave the room
+}
+
+message LeaveMeetingResp {
+
+}
+
+message KickOffMeetingReq {
+  string meetingID = 1;
+  string leaveUserID = 2; // user who was kicked off the room
+  string kickerUserID = 3; // user who kicked somebody out of the meeting
+}
+
+message KickOffMeetingResp {
+
+}
+
+message GetMeetingDetailInfoReq {
+  string meetingID = 1;
+}
+
+message GetMeetingDetailInfoResp {
+  // meeting name refers to the topic of the meeting.
+  string meetingName = 1;
+  // the meeting creator equals the meeting host by default.
+  // duration refers to the length of time that the meeting lasts from its beginning to its end.
+  int64 meetingDuration = 2;
+  string userID = 3;
+  // who are planed to be invited in the meeting
+  repeated string invitedUserIDList = 4;
+  // the time when the meeting starts
+  int64 startTime = 5;
+}
+
+service MeetingService {
+
+  // get meeting list
+  rpc GetMeetingList(GetMeetingListReq) returns(GetMeetingListResp);
+
+  /// get meeting detail
+  rpc GetMeetingDetailInfo(GetMeetingDetailInfoReq) returns(GetMeetingDetailInfoResp);
+
+  //// quick start meeting
+  rpc CreateQuickMeeting(QuickCreateMeetingReq) returns(QuickCreateMeetingResp);
+
+  /// prebook create meeting
+  rpc PreBookCreateMeeting(PreBookCreateMeetingReq) returns(PreBookCreateMeetingResp);
+
+  //// prebook update meeting
+  rpc UpdatePreBookMeeting(PreBookUpdateMeetingReq) returns(PreBookUpdateMeetingResp);
+
+  // join meeting
+  rpc JoinMeeting(JoinMeetingReq) returns(JoinMeetingResp);
+
+  //// cancel meeting, delete meeting
+  rpc DeleteMeeting(DeleteMeetingReq) returns(DeleteMeetingResp);
+
+  //// update
+  rpc UpdateMeetingInfo(UpdateMeetingInfoReq) returns(UpdateMeetingInfoResp);
+
+  /// toggle meeting media on or off.
+  rpc ToggleMeetingMedia(ToggleMeetingMediaReq) returns(ToggleMeetingMediaResp);
+
+  //// manage user media in the meeting.
+  rpc ManageMeetingUserMedia(ManageMeetingMediaReq) returns(ManageMeetingMediaResp);
+
+  /// update meeting action in the meeting. like pin user on top of the list or watched by others
+  rpc UpdateMeetingAction(UpdateMeetingActionReq) returns(UpdateMeetingActionResp);
+
+  /// close meeting
+  rpc CloseMeeting(CloseMeetingReq) returns(CloseMeetingResp);
+
+  /// leave meeting
+  rpc LeaveMeeting(LeaveMeetingReq) returns(LeaveMeetingResp);
+
+  /// leave meeting
+  rpc KickOffMeeting(KickOffMeetingReq) returns(KickOffMeetingResp);
+
+}

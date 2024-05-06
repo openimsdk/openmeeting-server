@@ -24,16 +24,34 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type DeleteMeetingRecordsReq struct {
+type MeetingInfo struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	RoomIDs []string `protobuf:"bytes,1,rep,name=roomIDs,proto3" json:"roomIDs,omitempty"`
+	RoomID                      string   `protobuf:"bytes,1,opt,name=roomID,proto3" json:"roomID,omitempty"`
+	MeetingName                 string   `protobuf:"bytes,2,opt,name=meetingName,proto3" json:"meetingName,omitempty"`
+	HostUserID                  string   `protobuf:"bytes,3,opt,name=hostUserID,proto3" json:"hostUserID,omitempty"`
+	CreateTime                  int64    `protobuf:"varint,4,opt,name=createTime,proto3" json:"createTime,omitempty"`
+	StartTime                   int64    `protobuf:"varint,5,opt,name=startTime,proto3" json:"startTime,omitempty"`
+	EndTime                     int64    `protobuf:"varint,6,opt,name=endTime,proto3" json:"endTime,omitempty"`
+	ParticipantCanUnmuteSelf    bool     `protobuf:"varint,7,opt,name=participantCanUnmuteSelf,proto3" json:"participantCanUnmuteSelf,omitempty"`       //成员是否能自己解除禁言
+	ParticipantCanEnableVideo   bool     `protobuf:"varint,8,opt,name=participantCanEnableVideo,proto3" json:"participantCanEnableVideo,omitempty"`     //成员是否能开启视频
+	OnlyHostInviteUser          bool     `protobuf:"varint,9,opt,name=onlyHostInviteUser,proto3" json:"onlyHostInviteUser,omitempty"`                   //仅主持人可邀请用户
+	OnlyHostShareScreen         bool     `protobuf:"varint,10,opt,name=onlyHostShareScreen,proto3" json:"onlyHostShareScreen,omitempty"`                //仅主持人可共享屏幕
+	JoinDisableMicrophone       bool     `protobuf:"varint,11,opt,name=joinDisableMicrophone,proto3" json:"joinDisableMicrophone,omitempty"`            //加入是否默认关麦克风
+	JoinDisableVideo            bool     `protobuf:"varint,12,opt,name=joinDisableVideo,proto3" json:"joinDisableVideo,omitempty"`                      //加入是否默认关视频
+	IsMuteAllVideo              bool     `protobuf:"varint,13,opt,name=isMuteAllVideo,proto3" json:"isMuteAllVideo,omitempty"`                          // 是否全员禁用视频
+	IsMuteAllMicrophone         bool     `protobuf:"varint,14,opt,name=isMuteAllMicrophone,proto3" json:"isMuteAllMicrophone,omitempty"`                // 是否全员禁用麦克风
+	CanScreenUserIDList         []string `protobuf:"bytes,15,rep,name=canScreenUserIDList,proto3" json:"canScreenUserIDList,omitempty"`                 // 可共享屏幕的ID列表
+	DisableMicrophoneUserIDList []string `protobuf:"bytes,16,rep,name=disableMicrophoneUserIDList,proto3" json:"disableMicrophoneUserIDList,omitempty"` // 当前被禁言麦克风的id列表
+	DisableVideoUserIDList      []string `protobuf:"bytes,17,rep,name=disableVideoUserIDList,proto3" json:"disableVideoUserIDList,omitempty"`           // 当前禁用视频流的ID列表
+	PinedUserIDList             []string `protobuf:"bytes,18,rep,name=pinedUserIDList,proto3" json:"pinedUserIDList,omitempty"`                         // 置顶ID列表
+	BeWatchedUserIDList         []string `protobuf:"bytes,19,rep,name=beWatchedUserIDList,proto3" json:"beWatchedUserIDList,omitempty"`                 // 正在被观看用户列表
 }
 
-func (x *DeleteMeetingRecordsReq) Reset() {
-	*x = DeleteMeetingRecordsReq{}
+func (x *MeetingInfo) Reset() {
+	*x = MeetingInfo{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_meeting_proto_msgTypes[0]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -41,13 +59,13 @@ func (x *DeleteMeetingRecordsReq) Reset() {
 	}
 }
 
-func (x *DeleteMeetingRecordsReq) String() string {
+func (x *MeetingInfo) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteMeetingRecordsReq) ProtoMessage() {}
+func (*MeetingInfo) ProtoMessage() {}
 
-func (x *DeleteMeetingRecordsReq) ProtoReflect() protoreflect.Message {
+func (x *MeetingInfo) ProtoReflect() protoreflect.Message {
 	mi := &file_meeting_proto_msgTypes[0]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -59,26 +77,152 @@ func (x *DeleteMeetingRecordsReq) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteMeetingRecordsReq.ProtoReflect.Descriptor instead.
-func (*DeleteMeetingRecordsReq) Descriptor() ([]byte, []int) {
+// Deprecated: Use MeetingInfo.ProtoReflect.Descriptor instead.
+func (*MeetingInfo) Descriptor() ([]byte, []int) {
 	return file_meeting_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *DeleteMeetingRecordsReq) GetRoomIDs() []string {
+func (x *MeetingInfo) GetRoomID() string {
 	if x != nil {
-		return x.RoomIDs
+		return x.RoomID
+	}
+	return ""
+}
+
+func (x *MeetingInfo) GetMeetingName() string {
+	if x != nil {
+		return x.MeetingName
+	}
+	return ""
+}
+
+func (x *MeetingInfo) GetHostUserID() string {
+	if x != nil {
+		return x.HostUserID
+	}
+	return ""
+}
+
+func (x *MeetingInfo) GetCreateTime() int64 {
+	if x != nil {
+		return x.CreateTime
+	}
+	return 0
+}
+
+func (x *MeetingInfo) GetStartTime() int64 {
+	if x != nil {
+		return x.StartTime
+	}
+	return 0
+}
+
+func (x *MeetingInfo) GetEndTime() int64 {
+	if x != nil {
+		return x.EndTime
+	}
+	return 0
+}
+
+func (x *MeetingInfo) GetParticipantCanUnmuteSelf() bool {
+	if x != nil {
+		return x.ParticipantCanUnmuteSelf
+	}
+	return false
+}
+
+func (x *MeetingInfo) GetParticipantCanEnableVideo() bool {
+	if x != nil {
+		return x.ParticipantCanEnableVideo
+	}
+	return false
+}
+
+func (x *MeetingInfo) GetOnlyHostInviteUser() bool {
+	if x != nil {
+		return x.OnlyHostInviteUser
+	}
+	return false
+}
+
+func (x *MeetingInfo) GetOnlyHostShareScreen() bool {
+	if x != nil {
+		return x.OnlyHostShareScreen
+	}
+	return false
+}
+
+func (x *MeetingInfo) GetJoinDisableMicrophone() bool {
+	if x != nil {
+		return x.JoinDisableMicrophone
+	}
+	return false
+}
+
+func (x *MeetingInfo) GetJoinDisableVideo() bool {
+	if x != nil {
+		return x.JoinDisableVideo
+	}
+	return false
+}
+
+func (x *MeetingInfo) GetIsMuteAllVideo() bool {
+	if x != nil {
+		return x.IsMuteAllVideo
+	}
+	return false
+}
+
+func (x *MeetingInfo) GetIsMuteAllMicrophone() bool {
+	if x != nil {
+		return x.IsMuteAllMicrophone
+	}
+	return false
+}
+
+func (x *MeetingInfo) GetCanScreenUserIDList() []string {
+	if x != nil {
+		return x.CanScreenUserIDList
 	}
 	return nil
 }
 
-type DeleteMeetingRecordsResp struct {
+func (x *MeetingInfo) GetDisableMicrophoneUserIDList() []string {
+	if x != nil {
+		return x.DisableMicrophoneUserIDList
+	}
+	return nil
+}
+
+func (x *MeetingInfo) GetDisableVideoUserIDList() []string {
+	if x != nil {
+		return x.DisableVideoUserIDList
+	}
+	return nil
+}
+
+func (x *MeetingInfo) GetPinedUserIDList() []string {
+	if x != nil {
+		return x.PinedUserIDList
+	}
+	return nil
+}
+
+func (x *MeetingInfo) GetBeWatchedUserIDList() []string {
+	if x != nil {
+		return x.BeWatchedUserIDList
+	}
+	return nil
+}
+
+type GetMeetingListReq struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 }
 
-func (x *DeleteMeetingRecordsResp) Reset() {
-	*x = DeleteMeetingRecordsResp{}
+func (x *GetMeetingListReq) Reset() {
+	*x = GetMeetingListReq{}
 	if protoimpl.UnsafeEnabled {
 		mi := &file_meeting_proto_msgTypes[1]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -86,13 +230,13 @@ func (x *DeleteMeetingRecordsResp) Reset() {
 	}
 }
 
-func (x *DeleteMeetingRecordsResp) String() string {
+func (x *GetMeetingListReq) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*DeleteMeetingRecordsResp) ProtoMessage() {}
+func (*GetMeetingListReq) ProtoMessage() {}
 
-func (x *DeleteMeetingRecordsResp) ProtoReflect() protoreflect.Message {
+func (x *GetMeetingListReq) ProtoReflect() protoreflect.Message {
 	mi := &file_meeting_proto_msgTypes[1]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -104,30 +248,1974 @@ func (x *DeleteMeetingRecordsResp) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use DeleteMeetingRecordsResp.ProtoReflect.Descriptor instead.
-func (*DeleteMeetingRecordsResp) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetMeetingListReq.ProtoReflect.Descriptor instead.
+func (*GetMeetingListReq) Descriptor() ([]byte, []int) {
 	return file_meeting_proto_rawDescGZIP(), []int{1}
+}
+
+type GetMeetingListResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *GetMeetingListResp) Reset() {
+	*x = GetMeetingListResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[2]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetMeetingListResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMeetingListResp) ProtoMessage() {}
+
+func (x *GetMeetingListResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[2]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMeetingListResp.ProtoReflect.Descriptor instead.
+func (*GetMeetingListResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{2}
+}
+
+// join meeting
+type JoinMeetingReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingID string `protobuf:"bytes,1,opt,name=meetingID,proto3" json:"meetingID,omitempty"`
+	// user who join the meeting
+	UserID string `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID,omitempty"`
+}
+
+func (x *JoinMeetingReq) Reset() {
+	*x = JoinMeetingReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[3]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *JoinMeetingReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinMeetingReq) ProtoMessage() {}
+
+func (x *JoinMeetingReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[3]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinMeetingReq.ProtoReflect.Descriptor instead.
+func (*JoinMeetingReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *JoinMeetingReq) GetMeetingID() string {
+	if x != nil {
+		return x.MeetingID
+	}
+	return ""
+}
+
+func (x *JoinMeetingReq) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+type JoinMeetingResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingID string `protobuf:"bytes,1,opt,name=meetingID,proto3" json:"meetingID,omitempty"`
+	Token     string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	LiveURL   string `protobuf:"bytes,3,opt,name=liveURL,proto3" json:"liveURL,omitempty"`
+}
+
+func (x *JoinMeetingResp) Reset() {
+	*x = JoinMeetingResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *JoinMeetingResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JoinMeetingResp) ProtoMessage() {}
+
+func (x *JoinMeetingResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JoinMeetingResp.ProtoReflect.Descriptor instead.
+func (*JoinMeetingResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *JoinMeetingResp) GetMeetingID() string {
+	if x != nil {
+		return x.MeetingID
+	}
+	return ""
+}
+
+func (x *JoinMeetingResp) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *JoinMeetingResp) GetLiveURL() string {
+	if x != nil {
+		return x.LiveURL
+	}
+	return ""
+}
+
+type QuickCreateMeetingReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingName string `protobuf:"bytes,1,opt,name=meetingName,proto3" json:"meetingName,omitempty"`
+	// the meeting creator
+	UserID string `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID,omitempty"`
+}
+
+func (x *QuickCreateMeetingReq) Reset() {
+	*x = QuickCreateMeetingReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[5]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *QuickCreateMeetingReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QuickCreateMeetingReq) ProtoMessage() {}
+
+func (x *QuickCreateMeetingReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[5]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use QuickCreateMeetingReq.ProtoReflect.Descriptor instead.
+func (*QuickCreateMeetingReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *QuickCreateMeetingReq) GetMeetingName() string {
+	if x != nil {
+		return x.MeetingName
+	}
+	return ""
+}
+
+func (x *QuickCreateMeetingReq) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+// quick start meeting
+type QuickCreateMeetingResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingID string `protobuf:"bytes,1,opt,name=meetingID,proto3" json:"meetingID,omitempty"`
+	Token     string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	LiveURL   string `protobuf:"bytes,3,opt,name=liveURL,proto3" json:"liveURL,omitempty"`
+}
+
+func (x *QuickCreateMeetingResp) Reset() {
+	*x = QuickCreateMeetingResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *QuickCreateMeetingResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QuickCreateMeetingResp) ProtoMessage() {}
+
+func (x *QuickCreateMeetingResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use QuickCreateMeetingResp.ProtoReflect.Descriptor instead.
+func (*QuickCreateMeetingResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *QuickCreateMeetingResp) GetMeetingID() string {
+	if x != nil {
+		return x.MeetingID
+	}
+	return ""
+}
+
+func (x *QuickCreateMeetingResp) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *QuickCreateMeetingResp) GetLiveURL() string {
+	if x != nil {
+		return x.LiveURL
+	}
+	return ""
+}
+
+type PreBookCreateMeetingReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// meeting name refers to the topic of the meeting.
+	MeetingName string `protobuf:"bytes,1,opt,name=meetingName,proto3" json:"meetingName,omitempty"`
+	// the meeting creator equals the meeting host by default.
+	// duration refers to the length of time that the meeting lasts from its beginning to its end.
+	MeetingDuration int64  `protobuf:"varint,2,opt,name=meetingDuration,proto3" json:"meetingDuration,omitempty"`
+	UserID          string `protobuf:"bytes,3,opt,name=userID,proto3" json:"userID,omitempty"`
+	// who are planed to be invited in the meeting
+	InvitedUserIDList []string `protobuf:"bytes,4,rep,name=invitedUserIDList,proto3" json:"invitedUserIDList,omitempty"`
+	// the time when the meeting starts
+	StartTime int64 `protobuf:"varint,5,opt,name=startTime,proto3" json:"startTime,omitempty"`
+}
+
+func (x *PreBookCreateMeetingReq) Reset() {
+	*x = PreBookCreateMeetingReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PreBookCreateMeetingReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreBookCreateMeetingReq) ProtoMessage() {}
+
+func (x *PreBookCreateMeetingReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreBookCreateMeetingReq.ProtoReflect.Descriptor instead.
+func (*PreBookCreateMeetingReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *PreBookCreateMeetingReq) GetMeetingName() string {
+	if x != nil {
+		return x.MeetingName
+	}
+	return ""
+}
+
+func (x *PreBookCreateMeetingReq) GetMeetingDuration() int64 {
+	if x != nil {
+		return x.MeetingDuration
+	}
+	return 0
+}
+
+func (x *PreBookCreateMeetingReq) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+func (x *PreBookCreateMeetingReq) GetInvitedUserIDList() []string {
+	if x != nil {
+		return x.InvitedUserIDList
+	}
+	return nil
+}
+
+func (x *PreBookCreateMeetingReq) GetStartTime() int64 {
+	if x != nil {
+		return x.StartTime
+	}
+	return 0
+}
+
+type PreBookCreateMeetingResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingID string `protobuf:"bytes,1,opt,name=meetingID,proto3" json:"meetingID,omitempty"`
+	Token     string `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	LiveURL   string `protobuf:"bytes,3,opt,name=liveURL,proto3" json:"liveURL,omitempty"`
+}
+
+func (x *PreBookCreateMeetingResp) Reset() {
+	*x = PreBookCreateMeetingResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[8]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PreBookCreateMeetingResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreBookCreateMeetingResp) ProtoMessage() {}
+
+func (x *PreBookCreateMeetingResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[8]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreBookCreateMeetingResp.ProtoReflect.Descriptor instead.
+func (*PreBookCreateMeetingResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *PreBookCreateMeetingResp) GetMeetingID() string {
+	if x != nil {
+		return x.MeetingID
+	}
+	return ""
+}
+
+func (x *PreBookCreateMeetingResp) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *PreBookCreateMeetingResp) GetLiveURL() string {
+	if x != nil {
+		return x.LiveURL
+	}
+	return ""
+}
+
+type PreBookUpdateMeetingReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingId         string   `protobuf:"bytes,1,opt,name=meetingId,proto3" json:"meetingId,omitempty"`
+	MeetingName       string   `protobuf:"bytes,2,opt,name=meetingName,proto3" json:"meetingName,omitempty"`
+	InvitedUserIDList []string `protobuf:"bytes,3,rep,name=invitedUserIDList,proto3" json:"invitedUserIDList,omitempty"`
+	MeetingDuration   int64    `protobuf:"varint,4,opt,name=meetingDuration,proto3" json:"meetingDuration,omitempty"`
+	StartTime         int64    `protobuf:"varint,5,opt,name=startTime,proto3" json:"startTime,omitempty"`
+}
+
+func (x *PreBookUpdateMeetingReq) Reset() {
+	*x = PreBookUpdateMeetingReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[9]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PreBookUpdateMeetingReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreBookUpdateMeetingReq) ProtoMessage() {}
+
+func (x *PreBookUpdateMeetingReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[9]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreBookUpdateMeetingReq.ProtoReflect.Descriptor instead.
+func (*PreBookUpdateMeetingReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *PreBookUpdateMeetingReq) GetMeetingId() string {
+	if x != nil {
+		return x.MeetingId
+	}
+	return ""
+}
+
+func (x *PreBookUpdateMeetingReq) GetMeetingName() string {
+	if x != nil {
+		return x.MeetingName
+	}
+	return ""
+}
+
+func (x *PreBookUpdateMeetingReq) GetInvitedUserIDList() []string {
+	if x != nil {
+		return x.InvitedUserIDList
+	}
+	return nil
+}
+
+func (x *PreBookUpdateMeetingReq) GetMeetingDuration() int64 {
+	if x != nil {
+		return x.MeetingDuration
+	}
+	return 0
+}
+
+func (x *PreBookUpdateMeetingReq) GetStartTime() int64 {
+	if x != nil {
+		return x.StartTime
+	}
+	return 0
+}
+
+type PreBookUpdateMeetingResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *PreBookUpdateMeetingResp) Reset() {
+	*x = PreBookUpdateMeetingResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[10]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PreBookUpdateMeetingResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreBookUpdateMeetingResp) ProtoMessage() {}
+
+func (x *PreBookUpdateMeetingResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[10]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreBookUpdateMeetingResp.ProtoReflect.Descriptor instead.
+func (*PreBookUpdateMeetingResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{10}
+}
+
+type DeleteMeetingReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingID string `protobuf:"bytes,1,opt,name=meetingID,proto3" json:"meetingID,omitempty"`
+}
+
+func (x *DeleteMeetingReq) Reset() {
+	*x = DeleteMeetingReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[11]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeleteMeetingReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteMeetingReq) ProtoMessage() {}
+
+func (x *DeleteMeetingReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[11]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteMeetingReq.ProtoReflect.Descriptor instead.
+func (*DeleteMeetingReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *DeleteMeetingReq) GetMeetingID() string {
+	if x != nil {
+		return x.MeetingID
+	}
+	return ""
+}
+
+type DeleteMeetingResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *DeleteMeetingResp) Reset() {
+	*x = DeleteMeetingResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *DeleteMeetingResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteMeetingResp) ProtoMessage() {}
+
+func (x *DeleteMeetingResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteMeetingResp.ProtoReflect.Descriptor instead.
+func (*DeleteMeetingResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{12}
+}
+
+type MeetingPermissionConf struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	ParticipantCanUnmuteSelf  bool `protobuf:"varint,1,opt,name=participantCanUnmuteSelf,proto3" json:"participantCanUnmuteSelf,omitempty"`
+	ParticipantCanEnableVideo bool `protobuf:"varint,2,opt,name=participantCanEnableVideo,proto3" json:"participantCanEnableVideo,omitempty"`
+	OnlyHostCanInviteUser     bool `protobuf:"varint,3,opt,name=onlyHostCanInviteUser,proto3" json:"onlyHostCanInviteUser,omitempty"`
+	OnlyHostCanShareScreen    bool `protobuf:"varint,4,opt,name=onlyHostCanShareScreen,proto3" json:"onlyHostCanShareScreen,omitempty"`
+	JoinDisableMicrophone     bool `protobuf:"varint,5,opt,name=joinDisableMicrophone,proto3" json:"joinDisableMicrophone,omitempty"`
+	JoinDisableVideo          bool `protobuf:"varint,6,opt,name=joinDisableVideo,proto3" json:"joinDisableVideo,omitempty"`
+	IsMuteAllVideo            bool `protobuf:"varint,7,opt,name=isMuteAllVideo,proto3" json:"isMuteAllVideo,omitempty"`
+	IsMuteAllMicrophone       bool `protobuf:"varint,8,opt,name=isMuteAllMicrophone,proto3" json:"isMuteAllMicrophone,omitempty"`
+}
+
+func (x *MeetingPermissionConf) Reset() {
+	*x = MeetingPermissionConf{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MeetingPermissionConf) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MeetingPermissionConf) ProtoMessage() {}
+
+func (x *MeetingPermissionConf) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MeetingPermissionConf.ProtoReflect.Descriptor instead.
+func (*MeetingPermissionConf) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *MeetingPermissionConf) GetParticipantCanUnmuteSelf() bool {
+	if x != nil {
+		return x.ParticipantCanUnmuteSelf
+	}
+	return false
+}
+
+func (x *MeetingPermissionConf) GetParticipantCanEnableVideo() bool {
+	if x != nil {
+		return x.ParticipantCanEnableVideo
+	}
+	return false
+}
+
+func (x *MeetingPermissionConf) GetOnlyHostCanInviteUser() bool {
+	if x != nil {
+		return x.OnlyHostCanInviteUser
+	}
+	return false
+}
+
+func (x *MeetingPermissionConf) GetOnlyHostCanShareScreen() bool {
+	if x != nil {
+		return x.OnlyHostCanShareScreen
+	}
+	return false
+}
+
+func (x *MeetingPermissionConf) GetJoinDisableMicrophone() bool {
+	if x != nil {
+		return x.JoinDisableMicrophone
+	}
+	return false
+}
+
+func (x *MeetingPermissionConf) GetJoinDisableVideo() bool {
+	if x != nil {
+		return x.JoinDisableVideo
+	}
+	return false
+}
+
+func (x *MeetingPermissionConf) GetIsMuteAllVideo() bool {
+	if x != nil {
+		return x.IsMuteAllVideo
+	}
+	return false
+}
+
+func (x *MeetingPermissionConf) GetIsMuteAllMicrophone() bool {
+	if x != nil {
+		return x.IsMuteAllMicrophone
+	}
+	return false
+}
+
+type UpdateMeetingInfoReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingID             string                 `protobuf:"bytes,1,opt,name=meetingID,proto3" json:"meetingID,omitempty"`
+	MeetingName           string                 `protobuf:"bytes,2,opt,name=meetingName,proto3" json:"meetingName,omitempty"`
+	StartTime             int64                  `protobuf:"varint,3,opt,name=startTime,proto3" json:"startTime,omitempty"`
+	MeetingPermissionConf *MeetingPermissionConf `protobuf:"bytes,4,opt,name=meetingPermissionConf,proto3" json:"meetingPermissionConf,omitempty"`
+}
+
+func (x *UpdateMeetingInfoReq) Reset() {
+	*x = UpdateMeetingInfoReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateMeetingInfoReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMeetingInfoReq) ProtoMessage() {}
+
+func (x *UpdateMeetingInfoReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateMeetingInfoReq.ProtoReflect.Descriptor instead.
+func (*UpdateMeetingInfoReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *UpdateMeetingInfoReq) GetMeetingID() string {
+	if x != nil {
+		return x.MeetingID
+	}
+	return ""
+}
+
+func (x *UpdateMeetingInfoReq) GetMeetingName() string {
+	if x != nil {
+		return x.MeetingName
+	}
+	return ""
+}
+
+func (x *UpdateMeetingInfoReq) GetStartTime() int64 {
+	if x != nil {
+		return x.StartTime
+	}
+	return 0
+}
+
+func (x *UpdateMeetingInfoReq) GetMeetingPermissionConf() *MeetingPermissionConf {
+	if x != nil {
+		return x.MeetingPermissionConf
+	}
+	return nil
+}
+
+type UpdateMeetingInfoResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *UpdateMeetingInfoResp) Reset() {
+	*x = UpdateMeetingInfoResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateMeetingInfoResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMeetingInfoResp) ProtoMessage() {}
+
+func (x *UpdateMeetingInfoResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateMeetingInfoResp.ProtoReflect.Descriptor instead.
+func (*UpdateMeetingInfoResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{15}
+}
+
+type MediaTypeInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MediaType int32 ` :"varint,1,opt,name=mediaType,proto3" json:"mediaType,omitempty"`
+	// disable or enable for media type
+	EnableStatus int32 `protobuf:"varint,2,opt,name=enableStatus,proto3" json:"enableStatus,omitempty"`
+}
+
+func (x *MediaTypeInfo) Reset() {
+	*x = MediaTypeInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MediaTypeInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MediaTypeInfo) ProtoMessage() {}
+
+func (x *MediaTypeInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MediaTypeInfo.ProtoReflect.Descriptor instead.
+func (*MediaTypeInfo) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *MediaTypeInfo) GetMediaType() int32 {
+	if x != nil {
+		return x.MediaType
+	}
+	return 0
+}
+
+func (x *MediaTypeInfo) GetEnableStatus() int32 {
+	if x != nil {
+		return x.EnableStatus
+	}
+	return 0
+}
+
+// user try to toggle on or off the media type
+type ToggleMeetingMediaReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MediaTypeInfo *MediaTypeInfo `protobuf:"bytes,1,opt,name=mediaTypeInfo,proto3" json:"mediaTypeInfo,omitempty"`
+}
+
+func (x *ToggleMeetingMediaReq) Reset() {
+	*x = ToggleMeetingMediaReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[17]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ToggleMeetingMediaReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleMeetingMediaReq) ProtoMessage() {}
+
+func (x *ToggleMeetingMediaReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[17]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleMeetingMediaReq.ProtoReflect.Descriptor instead.
+func (*ToggleMeetingMediaReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *ToggleMeetingMediaReq) GetMediaTypeInfo() *MediaTypeInfo {
+	if x != nil {
+		return x.MediaTypeInfo
+	}
+	return nil
+}
+
+type ToggleMeetingMediaResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ToggleMeetingMediaResp) Reset() {
+	*x = ToggleMeetingMediaResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[18]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ToggleMeetingMediaResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToggleMeetingMediaResp) ProtoMessage() {}
+
+func (x *ToggleMeetingMediaResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[18]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToggleMeetingMediaResp.ProtoReflect.Descriptor instead.
+func (*ToggleMeetingMediaResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{18}
+}
+
+type ManageMeetingMediaReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MediaTypeInfo *MediaTypeInfo `protobuf:"bytes,1,opt,name=mediaTypeInfo,proto3" json:"mediaTypeInfo,omitempty"`
+	UserID        string         `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID,omitempty"`
+}
+
+func (x *ManageMeetingMediaReq) Reset() {
+	*x = ManageMeetingMediaReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[19]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ManageMeetingMediaReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ManageMeetingMediaReq) ProtoMessage() {}
+
+func (x *ManageMeetingMediaReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[19]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ManageMeetingMediaReq.ProtoReflect.Descriptor instead.
+func (*ManageMeetingMediaReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *ManageMeetingMediaReq) GetMediaTypeInfo() *MediaTypeInfo {
+	if x != nil {
+		return x.MediaTypeInfo
+	}
+	return nil
+}
+
+func (x *ManageMeetingMediaReq) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+type ManageMeetingMediaResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *ManageMeetingMediaResp) Reset() {
+	*x = ManageMeetingMediaResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[20]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ManageMeetingMediaResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ManageMeetingMediaResp) ProtoMessage() {}
+
+func (x *ManageMeetingMediaResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[20]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ManageMeetingMediaResp.ProtoReflect.Descriptor instead.
+func (*ManageMeetingMediaResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{20}
+}
+
+type MeetingActionTypeInfo struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// refers to pin user up to the user list or to be watched by other user.
+	MeetingAction int32 `protobuf:"varint,1,opt,name=meetingAction,proto3" json:"meetingAction,omitempty"`
+	AddOrRemove   int32 `protobuf:"varint,2,opt,name=addOrRemove,proto3" json:"addOrRemove,omitempty"`
+}
+
+func (x *MeetingActionTypeInfo) Reset() {
+	*x = MeetingActionTypeInfo{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[21]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MeetingActionTypeInfo) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MeetingActionTypeInfo) ProtoMessage() {}
+
+func (x *MeetingActionTypeInfo) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[21]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MeetingActionTypeInfo.ProtoReflect.Descriptor instead.
+func (*MeetingActionTypeInfo) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *MeetingActionTypeInfo) GetMeetingAction() int32 {
+	if x != nil {
+		return x.MeetingAction
+	}
+	return 0
+}
+
+func (x *MeetingActionTypeInfo) GetAddOrRemove() int32 {
+	if x != nil {
+		return x.AddOrRemove
+	}
+	return 0
+}
+
+type UpdateMeetingActionReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingActionTypeInfo *MeetingActionTypeInfo `protobuf:"bytes,1,opt,name=meetingActionTypeInfo,proto3" json:"meetingActionTypeInfo,omitempty"`
+	UserID                string                 `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID,omitempty"`
+}
+
+func (x *UpdateMeetingActionReq) Reset() {
+	*x = UpdateMeetingActionReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[22]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateMeetingActionReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMeetingActionReq) ProtoMessage() {}
+
+func (x *UpdateMeetingActionReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[22]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateMeetingActionReq.ProtoReflect.Descriptor instead.
+func (*UpdateMeetingActionReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *UpdateMeetingActionReq) GetMeetingActionTypeInfo() *MeetingActionTypeInfo {
+	if x != nil {
+		return x.MeetingActionTypeInfo
+	}
+	return nil
+}
+
+func (x *UpdateMeetingActionReq) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+type UpdateMeetingActionResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *UpdateMeetingActionResp) Reset() {
+	*x = UpdateMeetingActionResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[23]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UpdateMeetingActionResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateMeetingActionResp) ProtoMessage() {}
+
+func (x *UpdateMeetingActionResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[23]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateMeetingActionResp.ProtoReflect.Descriptor instead.
+func (*UpdateMeetingActionResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{23}
+}
+
+type CloseMeetingReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingID string `protobuf:"bytes,1,opt,name=meetingID,proto3" json:"meetingID,omitempty"`
+	UserID    string `protobuf:"bytes,2,opt,name=userID,proto3" json:"userID,omitempty"`
+}
+
+func (x *CloseMeetingReq) Reset() {
+	*x = CloseMeetingReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[24]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CloseMeetingReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CloseMeetingReq) ProtoMessage() {}
+
+func (x *CloseMeetingReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[24]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CloseMeetingReq.ProtoReflect.Descriptor instead.
+func (*CloseMeetingReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *CloseMeetingReq) GetMeetingID() string {
+	if x != nil {
+		return x.MeetingID
+	}
+	return ""
+}
+
+func (x *CloseMeetingReq) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+type CloseMeetingResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *CloseMeetingResp) Reset() {
+	*x = CloseMeetingResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[25]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *CloseMeetingResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CloseMeetingResp) ProtoMessage() {}
+
+func (x *CloseMeetingResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[25]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CloseMeetingResp.ProtoReflect.Descriptor instead.
+func (*CloseMeetingResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{25}
+}
+
+type LeaveMeetingReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingID   string `protobuf:"bytes,1,opt,name=meetingID,proto3" json:"meetingID,omitempty"`
+	LeaveUserID string `protobuf:"bytes,2,opt,name=leaveUserID,proto3" json:"leaveUserID,omitempty"` // user who leave the room
+}
+
+func (x *LeaveMeetingReq) Reset() {
+	*x = LeaveMeetingReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[26]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LeaveMeetingReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LeaveMeetingReq) ProtoMessage() {}
+
+func (x *LeaveMeetingReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[26]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LeaveMeetingReq.ProtoReflect.Descriptor instead.
+func (*LeaveMeetingReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *LeaveMeetingReq) GetMeetingID() string {
+	if x != nil {
+		return x.MeetingID
+	}
+	return ""
+}
+
+func (x *LeaveMeetingReq) GetLeaveUserID() string {
+	if x != nil {
+		return x.LeaveUserID
+	}
+	return ""
+}
+
+type LeaveMeetingResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *LeaveMeetingResp) Reset() {
+	*x = LeaveMeetingResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[27]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *LeaveMeetingResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*LeaveMeetingResp) ProtoMessage() {}
+
+func (x *LeaveMeetingResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[27]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use LeaveMeetingResp.ProtoReflect.Descriptor instead.
+func (*LeaveMeetingResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{27}
+}
+
+type KickOffMeetingReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingID    string `protobuf:"bytes,1,opt,name=meetingID,proto3" json:"meetingID,omitempty"`
+	LeaveUserID  string `protobuf:"bytes,2,opt,name=leaveUserID,proto3" json:"leaveUserID,omitempty"`   // user who was kicked off the room
+	KickerUserID string `protobuf:"bytes,3,opt,name=kickerUserID,proto3" json:"kickerUserID,omitempty"` // user who kicked somebody out of the meeting
+}
+
+func (x *KickOffMeetingReq) Reset() {
+	*x = KickOffMeetingReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[28]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *KickOffMeetingReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KickOffMeetingReq) ProtoMessage() {}
+
+func (x *KickOffMeetingReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[28]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KickOffMeetingReq.ProtoReflect.Descriptor instead.
+func (*KickOffMeetingReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *KickOffMeetingReq) GetMeetingID() string {
+	if x != nil {
+		return x.MeetingID
+	}
+	return ""
+}
+
+func (x *KickOffMeetingReq) GetLeaveUserID() string {
+	if x != nil {
+		return x.LeaveUserID
+	}
+	return ""
+}
+
+func (x *KickOffMeetingReq) GetKickerUserID() string {
+	if x != nil {
+		return x.KickerUserID
+	}
+	return ""
+}
+
+type KickOffMeetingResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *KickOffMeetingResp) Reset() {
+	*x = KickOffMeetingResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[29]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *KickOffMeetingResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KickOffMeetingResp) ProtoMessage() {}
+
+func (x *KickOffMeetingResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[29]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KickOffMeetingResp.ProtoReflect.Descriptor instead.
+func (*KickOffMeetingResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{29}
+}
+
+type GetMeetingDetailInfoReq struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MeetingID string `protobuf:"bytes,1,opt,name=meetingID,proto3" json:"meetingID,omitempty"`
+}
+
+func (x *GetMeetingDetailInfoReq) Reset() {
+	*x = GetMeetingDetailInfoReq{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[30]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetMeetingDetailInfoReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMeetingDetailInfoReq) ProtoMessage() {}
+
+func (x *GetMeetingDetailInfoReq) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[30]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMeetingDetailInfoReq.ProtoReflect.Descriptor instead.
+func (*GetMeetingDetailInfoReq) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *GetMeetingDetailInfoReq) GetMeetingID() string {
+	if x != nil {
+		return x.MeetingID
+	}
+	return ""
+}
+
+type GetMeetingDetailInfoResp struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// meeting name refers to the topic of the meeting.
+	MeetingName string `protobuf:"bytes,1,opt,name=meetingName,proto3" json:"meetingName,omitempty"`
+	// the meeting creator equals the meeting host by default.
+	// duration refers to the length of time that the meeting lasts from its beginning to its end.
+	MeetingDuration int64  `protobuf:"varint,2,opt,name=meetingDuration,proto3" json:"meetingDuration,omitempty"`
+	UserID          string `protobuf:"bytes,3,opt,name=userID,proto3" json:"userID,omitempty"`
+	// who are planed to be invited in the meeting
+	InvitedUserIDList []string `protobuf:"bytes,4,rep,name=invitedUserIDList,proto3" json:"invitedUserIDList,omitempty"`
+	// the time when the meeting starts
+	StartTime int64 `protobuf:"varint,5,opt,name=startTime,proto3" json:"startTime,omitempty"`
+}
+
+func (x *GetMeetingDetailInfoResp) Reset() {
+	*x = GetMeetingDetailInfoResp{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_meeting_proto_msgTypes[31]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetMeetingDetailInfoResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetMeetingDetailInfoResp) ProtoMessage() {}
+
+func (x *GetMeetingDetailInfoResp) ProtoReflect() protoreflect.Message {
+	mi := &file_meeting_proto_msgTypes[31]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetMeetingDetailInfoResp.ProtoReflect.Descriptor instead.
+func (*GetMeetingDetailInfoResp) Descriptor() ([]byte, []int) {
+	return file_meeting_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *GetMeetingDetailInfoResp) GetMeetingName() string {
+	if x != nil {
+		return x.MeetingName
+	}
+	return ""
+}
+
+func (x *GetMeetingDetailInfoResp) GetMeetingDuration() int64 {
+	if x != nil {
+		return x.MeetingDuration
+	}
+	return 0
+}
+
+func (x *GetMeetingDetailInfoResp) GetUserID() string {
+	if x != nil {
+		return x.UserID
+	}
+	return ""
+}
+
+func (x *GetMeetingDetailInfoResp) GetInvitedUserIDList() []string {
+	if x != nil {
+		return x.InvitedUserIDList
+	}
+	return nil
+}
+
+func (x *GetMeetingDetailInfoResp) GetStartTime() int64 {
+	if x != nil {
+		return x.StartTime
+	}
+	return 0
 }
 
 var File_meeting_proto protoreflect.FileDescriptor
 
 var file_meeting_proto_rawDesc = []byte{
 	0x0a, 0x0d, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x12,
-	0x0b, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x22, 0x33, 0x0a, 0x17,
-	0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x63,
-	0x6f, 0x72, 0x64, 0x73, 0x52, 0x65, 0x71, 0x12, 0x18, 0x0a, 0x07, 0x72, 0x6f, 0x6f, 0x6d, 0x49,
-	0x44, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x09, 0x52, 0x07, 0x72, 0x6f, 0x6f, 0x6d, 0x49, 0x44,
-	0x73, 0x22, 0x1a, 0x0a, 0x18, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69,
-	0x6e, 0x67, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x73, 0x52, 0x65, 0x73, 0x70, 0x32, 0x75, 0x0a,
-	0x0e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12,
-	0x63, 0x0a, 0x14, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67,
-	0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x73, 0x12, 0x24, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e,
-	0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74,
-	0x69, 0x6e, 0x67, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x73, 0x52, 0x65, 0x71, 0x1a, 0x25, 0x2e,
-	0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x44, 0x65, 0x6c, 0x65,
-	0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x63, 0x6f, 0x72, 0x64, 0x73,
-	0x52, 0x65, 0x73, 0x70, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x0b, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x22, 0xdf, 0x06, 0x0a,
+	0x0b, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x0a, 0x06,
+	0x72, 0x6f, 0x6f, 0x6d, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x72, 0x6f,
+	0x6f, 0x6d, 0x49, 0x44, 0x12, 0x20, 0x0a, 0x0b, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4e,
+	0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x6d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x1e, 0x0a, 0x0a, 0x68, 0x6f, 0x73, 0x74, 0x55, 0x73,
+	0x65, 0x72, 0x49, 0x44, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0a, 0x68, 0x6f, 0x73, 0x74,
+	0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x1e, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65,
+	0x54, 0x69, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x63, 0x72, 0x65, 0x61,
+	0x74, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x73, 0x74, 0x61, 0x72, 0x74, 0x54,
+	0x69, 0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x73, 0x74, 0x61, 0x72, 0x74,
+	0x54, 0x69, 0x6d, 0x65, 0x12, 0x18, 0x0a, 0x07, 0x65, 0x6e, 0x64, 0x54, 0x69, 0x6d, 0x65, 0x18,
+	0x06, 0x20, 0x01, 0x28, 0x03, 0x52, 0x07, 0x65, 0x6e, 0x64, 0x54, 0x69, 0x6d, 0x65, 0x12, 0x3a,
+	0x0a, 0x18, 0x70, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x43, 0x61, 0x6e,
+	0x55, 0x6e, 0x6d, 0x75, 0x74, 0x65, 0x53, 0x65, 0x6c, 0x66, 0x18, 0x07, 0x20, 0x01, 0x28, 0x08,
+	0x52, 0x18, 0x70, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x43, 0x61, 0x6e,
+	0x55, 0x6e, 0x6d, 0x75, 0x74, 0x65, 0x53, 0x65, 0x6c, 0x66, 0x12, 0x3c, 0x0a, 0x19, 0x70, 0x61,
+	0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x43, 0x61, 0x6e, 0x45, 0x6e, 0x61, 0x62,
+	0x6c, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x18, 0x08, 0x20, 0x01, 0x28, 0x08, 0x52, 0x19, 0x70,
+	0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x43, 0x61, 0x6e, 0x45, 0x6e, 0x61,
+	0x62, 0x6c, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x12, 0x2e, 0x0a, 0x12, 0x6f, 0x6e, 0x6c, 0x79,
+	0x48, 0x6f, 0x73, 0x74, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x18, 0x09,
+	0x20, 0x01, 0x28, 0x08, 0x52, 0x12, 0x6f, 0x6e, 0x6c, 0x79, 0x48, 0x6f, 0x73, 0x74, 0x49, 0x6e,
+	0x76, 0x69, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x12, 0x30, 0x0a, 0x13, 0x6f, 0x6e, 0x6c, 0x79,
+	0x48, 0x6f, 0x73, 0x74, 0x53, 0x68, 0x61, 0x72, 0x65, 0x53, 0x63, 0x72, 0x65, 0x65, 0x6e, 0x18,
+	0x0a, 0x20, 0x01, 0x28, 0x08, 0x52, 0x13, 0x6f, 0x6e, 0x6c, 0x79, 0x48, 0x6f, 0x73, 0x74, 0x53,
+	0x68, 0x61, 0x72, 0x65, 0x53, 0x63, 0x72, 0x65, 0x65, 0x6e, 0x12, 0x34, 0x0a, 0x15, 0x6a, 0x6f,
+	0x69, 0x6e, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x4d, 0x69, 0x63, 0x72, 0x6f, 0x70, 0x68,
+	0x6f, 0x6e, 0x65, 0x18, 0x0b, 0x20, 0x01, 0x28, 0x08, 0x52, 0x15, 0x6a, 0x6f, 0x69, 0x6e, 0x44,
+	0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x4d, 0x69, 0x63, 0x72, 0x6f, 0x70, 0x68, 0x6f, 0x6e, 0x65,
+	0x12, 0x2a, 0x0a, 0x10, 0x6a, 0x6f, 0x69, 0x6e, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x56,
+	0x69, 0x64, 0x65, 0x6f, 0x18, 0x0c, 0x20, 0x01, 0x28, 0x08, 0x52, 0x10, 0x6a, 0x6f, 0x69, 0x6e,
+	0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x12, 0x26, 0x0a, 0x0e,
+	0x69, 0x73, 0x4d, 0x75, 0x74, 0x65, 0x41, 0x6c, 0x6c, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x18, 0x0d,
+	0x20, 0x01, 0x28, 0x08, 0x52, 0x0e, 0x69, 0x73, 0x4d, 0x75, 0x74, 0x65, 0x41, 0x6c, 0x6c, 0x56,
+	0x69, 0x64, 0x65, 0x6f, 0x12, 0x30, 0x0a, 0x13, 0x69, 0x73, 0x4d, 0x75, 0x74, 0x65, 0x41, 0x6c,
+	0x6c, 0x4d, 0x69, 0x63, 0x72, 0x6f, 0x70, 0x68, 0x6f, 0x6e, 0x65, 0x18, 0x0e, 0x20, 0x01, 0x28,
+	0x08, 0x52, 0x13, 0x69, 0x73, 0x4d, 0x75, 0x74, 0x65, 0x41, 0x6c, 0x6c, 0x4d, 0x69, 0x63, 0x72,
+	0x6f, 0x70, 0x68, 0x6f, 0x6e, 0x65, 0x12, 0x30, 0x0a, 0x13, 0x63, 0x61, 0x6e, 0x53, 0x63, 0x72,
+	0x65, 0x65, 0x6e, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x0f, 0x20,
+	0x03, 0x28, 0x09, 0x52, 0x13, 0x63, 0x61, 0x6e, 0x53, 0x63, 0x72, 0x65, 0x65, 0x6e, 0x55, 0x73,
+	0x65, 0x72, 0x49, 0x44, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x40, 0x0a, 0x1b, 0x64, 0x69, 0x73, 0x61,
+	0x62, 0x6c, 0x65, 0x4d, 0x69, 0x63, 0x72, 0x6f, 0x70, 0x68, 0x6f, 0x6e, 0x65, 0x55, 0x73, 0x65,
+	0x72, 0x49, 0x44, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x10, 0x20, 0x03, 0x28, 0x09, 0x52, 0x1b, 0x64,
+	0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x4d, 0x69, 0x63, 0x72, 0x6f, 0x70, 0x68, 0x6f, 0x6e, 0x65,
+	0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x36, 0x0a, 0x16, 0x64, 0x69,
+	0x73, 0x61, 0x62, 0x6c, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44,
+	0x4c, 0x69, 0x73, 0x74, 0x18, 0x11, 0x20, 0x03, 0x28, 0x09, 0x52, 0x16, 0x64, 0x69, 0x73, 0x61,
+	0x62, 0x6c, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x4c, 0x69,
+	0x73, 0x74, 0x12, 0x28, 0x0a, 0x0f, 0x70, 0x69, 0x6e, 0x65, 0x64, 0x55, 0x73, 0x65, 0x72, 0x49,
+	0x44, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x12, 0x20, 0x03, 0x28, 0x09, 0x52, 0x0f, 0x70, 0x69, 0x6e,
+	0x65, 0x64, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x30, 0x0a, 0x13,
+	0x62, 0x65, 0x57, 0x61, 0x74, 0x63, 0x68, 0x65, 0x64, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x4c,
+	0x69, 0x73, 0x74, 0x18, 0x13, 0x20, 0x03, 0x28, 0x09, 0x52, 0x13, 0x62, 0x65, 0x57, 0x61, 0x74,
+	0x63, 0x68, 0x65, 0x64, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x4c, 0x69, 0x73, 0x74, 0x22, 0x13,
+	0x0a, 0x11, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74,
+	0x52, 0x65, 0x71, 0x22, 0x14, 0x0a, 0x12, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x22, 0x46, 0x0a, 0x0e, 0x4a, 0x6f, 0x69,
+	0x6e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x12, 0x1c, 0x0a, 0x09, 0x6d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09,
+	0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65,
+	0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49,
+	0x44, 0x22, 0x5f, 0x0a, 0x0f, 0x4a, 0x6f, 0x69, 0x6e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67,
+	0x52, 0x65, 0x73, 0x70, 0x12, 0x1c, 0x0a, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49,
+	0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67,
+	0x49, 0x44, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x18, 0x0a, 0x07, 0x6c, 0x69, 0x76, 0x65,
+	0x55, 0x52, 0x4c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6c, 0x69, 0x76, 0x65, 0x55,
+	0x52, 0x4c, 0x22, 0x51, 0x0a, 0x15, 0x51, 0x75, 0x69, 0x63, 0x6b, 0x43, 0x72, 0x65, 0x61, 0x74,
+	0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x12, 0x20, 0x0a, 0x0b, 0x6d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09,
+	0x52, 0x0b, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x16, 0x0a,
+	0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75,
+	0x73, 0x65, 0x72, 0x49, 0x44, 0x22, 0x66, 0x0a, 0x16, 0x51, 0x75, 0x69, 0x63, 0x6b, 0x43, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x12,
+	0x1c, 0x0a, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x12, 0x14, 0x0a,
+	0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x74, 0x6f,
+	0x6b, 0x65, 0x6e, 0x12, 0x18, 0x0a, 0x07, 0x6c, 0x69, 0x76, 0x65, 0x55, 0x52, 0x4c, 0x18, 0x03,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6c, 0x69, 0x76, 0x65, 0x55, 0x52, 0x4c, 0x22, 0xc9, 0x01,
+	0x0a, 0x17, 0x50, 0x72, 0x65, 0x42, 0x6f, 0x6f, 0x6b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x12, 0x20, 0x0a, 0x0b, 0x6d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b,
+	0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x28, 0x0a, 0x0f, 0x6d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x03, 0x52, 0x0f, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x44, 0x75, 0x72,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x2c, 0x0a,
+	0x11, 0x69, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x64, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x4c, 0x69,
+	0x73, 0x74, 0x18, 0x04, 0x20, 0x03, 0x28, 0x09, 0x52, 0x11, 0x69, 0x6e, 0x76, 0x69, 0x74, 0x65,
+	0x64, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x73,
+	0x74, 0x61, 0x72, 0x74, 0x54, 0x69, 0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09,
+	0x73, 0x74, 0x61, 0x72, 0x74, 0x54, 0x69, 0x6d, 0x65, 0x22, 0x68, 0x0a, 0x18, 0x50, 0x72, 0x65,
+	0x42, 0x6f, 0x6f, 0x6b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x52, 0x65, 0x73, 0x70, 0x12, 0x1c, 0x0a, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67,
+	0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x49, 0x44, 0x12, 0x14, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x18, 0x0a, 0x07, 0x6c, 0x69, 0x76,
+	0x65, 0x55, 0x52, 0x4c, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x6c, 0x69, 0x76, 0x65,
+	0x55, 0x52, 0x4c, 0x22, 0xcf, 0x01, 0x0a, 0x17, 0x50, 0x72, 0x65, 0x42, 0x6f, 0x6f, 0x6b, 0x55,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x12,
+	0x1c, 0x0a, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x64, 0x12, 0x20, 0x0a,
+	0x0b, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x0b, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x12,
+	0x2c, 0x0a, 0x11, 0x69, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x64, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44,
+	0x4c, 0x69, 0x73, 0x74, 0x18, 0x03, 0x20, 0x03, 0x28, 0x09, 0x52, 0x11, 0x69, 0x6e, 0x76, 0x69,
+	0x74, 0x65, 0x64, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x28, 0x0a,
+	0x0f, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e,
+	0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0f, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x44,
+	0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1c, 0x0a, 0x09, 0x73, 0x74, 0x61, 0x72, 0x74,
+	0x54, 0x69, 0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x73, 0x74, 0x61, 0x72,
+	0x74, 0x54, 0x69, 0x6d, 0x65, 0x22, 0x1a, 0x0a, 0x18, 0x50, 0x72, 0x65, 0x42, 0x6f, 0x6f, 0x6b,
+	0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73,
+	0x70, 0x22, 0x30, 0x0a, 0x10, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x52, 0x65, 0x71, 0x12, 0x1c, 0x0a, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67,
+	0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x49, 0x44, 0x22, 0x13, 0x0a, 0x11, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x22, 0xbb, 0x03, 0x0a, 0x15, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x43, 0x6f,
+	0x6e, 0x66, 0x12, 0x3a, 0x0a, 0x18, 0x70, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e,
+	0x74, 0x43, 0x61, 0x6e, 0x55, 0x6e, 0x6d, 0x75, 0x74, 0x65, 0x53, 0x65, 0x6c, 0x66, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x08, 0x52, 0x18, 0x70, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e,
+	0x74, 0x43, 0x61, 0x6e, 0x55, 0x6e, 0x6d, 0x75, 0x74, 0x65, 0x53, 0x65, 0x6c, 0x66, 0x12, 0x3c,
+	0x0a, 0x19, 0x70, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x43, 0x61, 0x6e,
+	0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x08, 0x52, 0x19, 0x70, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x43, 0x61,
+	0x6e, 0x45, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x12, 0x34, 0x0a, 0x15,
+	0x6f, 0x6e, 0x6c, 0x79, 0x48, 0x6f, 0x73, 0x74, 0x43, 0x61, 0x6e, 0x49, 0x6e, 0x76, 0x69, 0x74,
+	0x65, 0x55, 0x73, 0x65, 0x72, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x15, 0x6f, 0x6e, 0x6c,
+	0x79, 0x48, 0x6f, 0x73, 0x74, 0x43, 0x61, 0x6e, 0x49, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x55, 0x73,
+	0x65, 0x72, 0x12, 0x36, 0x0a, 0x16, 0x6f, 0x6e, 0x6c, 0x79, 0x48, 0x6f, 0x73, 0x74, 0x43, 0x61,
+	0x6e, 0x53, 0x68, 0x61, 0x72, 0x65, 0x53, 0x63, 0x72, 0x65, 0x65, 0x6e, 0x18, 0x04, 0x20, 0x01,
+	0x28, 0x08, 0x52, 0x16, 0x6f, 0x6e, 0x6c, 0x79, 0x48, 0x6f, 0x73, 0x74, 0x43, 0x61, 0x6e, 0x53,
+	0x68, 0x61, 0x72, 0x65, 0x53, 0x63, 0x72, 0x65, 0x65, 0x6e, 0x12, 0x34, 0x0a, 0x15, 0x6a, 0x6f,
+	0x69, 0x6e, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x4d, 0x69, 0x63, 0x72, 0x6f, 0x70, 0x68,
+	0x6f, 0x6e, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x15, 0x6a, 0x6f, 0x69, 0x6e, 0x44,
+	0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x4d, 0x69, 0x63, 0x72, 0x6f, 0x70, 0x68, 0x6f, 0x6e, 0x65,
+	0x12, 0x2a, 0x0a, 0x10, 0x6a, 0x6f, 0x69, 0x6e, 0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x56,
+	0x69, 0x64, 0x65, 0x6f, 0x18, 0x06, 0x20, 0x01, 0x28, 0x08, 0x52, 0x10, 0x6a, 0x6f, 0x69, 0x6e,
+	0x44, 0x69, 0x73, 0x61, 0x62, 0x6c, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x12, 0x26, 0x0a, 0x0e,
+	0x69, 0x73, 0x4d, 0x75, 0x74, 0x65, 0x41, 0x6c, 0x6c, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x18, 0x07,
+	0x20, 0x01, 0x28, 0x08, 0x52, 0x0e, 0x69, 0x73, 0x4d, 0x75, 0x74, 0x65, 0x41, 0x6c, 0x6c, 0x56,
+	0x69, 0x64, 0x65, 0x6f, 0x12, 0x30, 0x0a, 0x13, 0x69, 0x73, 0x4d, 0x75, 0x74, 0x65, 0x41, 0x6c,
+	0x6c, 0x4d, 0x69, 0x63, 0x72, 0x6f, 0x70, 0x68, 0x6f, 0x6e, 0x65, 0x18, 0x08, 0x20, 0x01, 0x28,
+	0x08, 0x52, 0x13, 0x69, 0x73, 0x4d, 0x75, 0x74, 0x65, 0x41, 0x6c, 0x6c, 0x4d, 0x69, 0x63, 0x72,
+	0x6f, 0x70, 0x68, 0x6f, 0x6e, 0x65, 0x22, 0xce, 0x01, 0x0a, 0x14, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71, 0x12,
+	0x1c, 0x0a, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x12, 0x20, 0x0a,
+	0x0b, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x0b, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x12,
+	0x1c, 0x0a, 0x09, 0x73, 0x74, 0x61, 0x72, 0x74, 0x54, 0x69, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x09, 0x73, 0x74, 0x61, 0x72, 0x74, 0x54, 0x69, 0x6d, 0x65, 0x12, 0x58, 0x0a,
+	0x15, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69,
+	0x6f, 0x6e, 0x43, 0x6f, 0x6e, 0x66, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x22, 0x2e, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73, 0x69, 0x6f, 0x6e, 0x43, 0x6f, 0x6e, 0x66,
+	0x52, 0x15, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x50, 0x65, 0x72, 0x6d, 0x69, 0x73, 0x73,
+	0x69, 0x6f, 0x6e, 0x43, 0x6f, 0x6e, 0x66, 0x22, 0x17, 0x0a, 0x15, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x73, 0x70,
+	0x22, 0x51, 0x0a, 0x0d, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x54, 0x79, 0x70, 0x65, 0x49, 0x6e, 0x66,
+	0x6f, 0x12, 0x1c, 0x0a, 0x09, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x54, 0x79, 0x70, 0x65, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x54, 0x79, 0x70, 0x65, 0x12,
+	0x22, 0x0a, 0x0c, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18,
+	0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0c, 0x65, 0x6e, 0x61, 0x62, 0x6c, 0x65, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x22, 0x59, 0x0a, 0x15, 0x54, 0x6f, 0x67, 0x67, 0x6c, 0x65, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x52, 0x65, 0x71, 0x12, 0x40, 0x0a, 0x0d,
+	0x6d, 0x65, 0x64, 0x69, 0x61, 0x54, 0x79, 0x70, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x18, 0x01, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74,
+	0x63, 0x2e, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x54, 0x79, 0x70, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x52,
+	0x0d, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x54, 0x79, 0x70, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x22, 0x18,
+	0x0a, 0x16, 0x54, 0x6f, 0x67, 0x67, 0x6c, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4d,
+	0x65, 0x64, 0x69, 0x61, 0x52, 0x65, 0x73, 0x70, 0x22, 0x71, 0x0a, 0x15, 0x4d, 0x61, 0x6e, 0x61,
+	0x67, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x52, 0x65,
+	0x71, 0x12, 0x40, 0x0a, 0x0d, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x54, 0x79, 0x70, 0x65, 0x49, 0x6e,
+	0x66, 0x6f, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x54, 0x79, 0x70, 0x65,
+	0x49, 0x6e, 0x66, 0x6f, 0x52, 0x0d, 0x6d, 0x65, 0x64, 0x69, 0x61, 0x54, 0x79, 0x70, 0x65, 0x49,
+	0x6e, 0x66, 0x6f, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x22, 0x18, 0x0a, 0x16, 0x4d,
+	0x61, 0x6e, 0x61, 0x67, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4d, 0x65, 0x64, 0x69,
+	0x61, 0x52, 0x65, 0x73, 0x70, 0x22, 0x5f, 0x0a, 0x15, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67,
+	0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x24,
+	0x0a, 0x0d, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0d, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x41, 0x63,
+	0x74, 0x69, 0x6f, 0x6e, 0x12, 0x20, 0x0a, 0x0b, 0x61, 0x64, 0x64, 0x4f, 0x72, 0x52, 0x65, 0x6d,
+	0x6f, 0x76, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x61, 0x64, 0x64, 0x4f, 0x72,
+	0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x22, 0x8a, 0x01, 0x0a, 0x16, 0x55, 0x70, 0x64, 0x61, 0x74,
+	0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65,
+	0x71, 0x12, 0x58, 0x0a, 0x15, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x41, 0x63, 0x74, 0x69,
+	0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
+	0x32, 0x22, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65,
+	0x49, 0x6e, 0x66, 0x6f, 0x52, 0x15, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x41, 0x63, 0x74,
+	0x69, 0x6f, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x0a, 0x06, 0x75,
+	0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65,
+	0x72, 0x49, 0x44, 0x22, 0x19, 0x0a, 0x17, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x22, 0x47,
+	0x0a, 0x0f, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65,
+	0x71, 0x12, 0x1c, 0x0a, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x12,
+	0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x22, 0x12, 0x0a, 0x10, 0x43, 0x6c, 0x6f, 0x73, 0x65,
+	0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x22, 0x51, 0x0a, 0x0f, 0x4c,
+	0x65, 0x61, 0x76, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x12, 0x1c,
+	0x0a, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x12, 0x20, 0x0a, 0x0b,
+	0x6c, 0x65, 0x61, 0x76, 0x65, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x0b, 0x6c, 0x65, 0x61, 0x76, 0x65, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x22, 0x12,
+	0x0a, 0x10, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65,
+	0x73, 0x70, 0x22, 0x77, 0x0a, 0x11, 0x4b, 0x69, 0x63, 0x6b, 0x4f, 0x66, 0x66, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x12, 0x1c, 0x0a, 0x09, 0x6d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x6d, 0x65, 0x65, 0x74,
+	0x69, 0x6e, 0x67, 0x49, 0x44, 0x12, 0x20, 0x0a, 0x0b, 0x6c, 0x65, 0x61, 0x76, 0x65, 0x55, 0x73,
+	0x65, 0x72, 0x49, 0x44, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x6c, 0x65, 0x61, 0x76,
+	0x65, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x22, 0x0a, 0x0c, 0x6b, 0x69, 0x63, 0x6b, 0x65,
+	0x72, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0c, 0x6b,
+	0x69, 0x63, 0x6b, 0x65, 0x72, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x22, 0x14, 0x0a, 0x12, 0x4b,
+	0x69, 0x63, 0x6b, 0x4f, 0x66, 0x66, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73,
+	0x70, 0x22, 0x37, 0x0a, 0x17, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x44,
+	0x65, 0x74, 0x61, 0x69, 0x6c, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71, 0x12, 0x1c, 0x0a, 0x09,
+	0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x09, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x44, 0x22, 0xca, 0x01, 0x0a, 0x18, 0x47,
+	0x65, 0x74, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x44, 0x65, 0x74, 0x61, 0x69, 0x6c, 0x49,
+	0x6e, 0x66, 0x6f, 0x52, 0x65, 0x73, 0x70, 0x12, 0x20, 0x0a, 0x0b, 0x6d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x6d, 0x65,
+	0x65, 0x74, 0x69, 0x6e, 0x67, 0x4e, 0x61, 0x6d, 0x65, 0x12, 0x28, 0x0a, 0x0f, 0x6d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x44, 0x75, 0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x02, 0x20, 0x01,
+	0x28, 0x03, 0x52, 0x0f, 0x6d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x44, 0x75, 0x72, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x12, 0x16, 0x0a, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x18, 0x03, 0x20,
+	0x01, 0x28, 0x09, 0x52, 0x06, 0x75, 0x73, 0x65, 0x72, 0x49, 0x44, 0x12, 0x2c, 0x0a, 0x11, 0x69,
+	0x6e, 0x76, 0x69, 0x74, 0x65, 0x64, 0x55, 0x73, 0x65, 0x72, 0x49, 0x44, 0x4c, 0x69, 0x73, 0x74,
+	0x18, 0x04, 0x20, 0x03, 0x28, 0x09, 0x52, 0x11, 0x69, 0x6e, 0x76, 0x69, 0x74, 0x65, 0x64, 0x55,
+	0x73, 0x65, 0x72, 0x49, 0x44, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x1c, 0x0a, 0x09, 0x73, 0x74, 0x61,
+	0x72, 0x74, 0x54, 0x69, 0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x03, 0x52, 0x09, 0x73, 0x74,
+	0x61, 0x72, 0x74, 0x54, 0x69, 0x6d, 0x65, 0x32, 0xf8, 0x09, 0x0a, 0x0e, 0x4d, 0x65, 0x65, 0x74,
+	0x69, 0x6e, 0x67, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12, 0x51, 0x0a, 0x0e, 0x47, 0x65,
+	0x74, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74, 0x12, 0x1e, 0x2e, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x47, 0x65, 0x74, 0x4d, 0x65,
+	0x65, 0x74, 0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x71, 0x1a, 0x1f, 0x2e, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x47, 0x65, 0x74, 0x4d, 0x65,
+	0x65, 0x74, 0x69, 0x6e, 0x67, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x12, 0x63, 0x0a,
+	0x14, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x44, 0x65, 0x74, 0x61, 0x69,
+	0x6c, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x24, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e,
+	0x72, 0x74, 0x63, 0x2e, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x44, 0x65,
+	0x74, 0x61, 0x69, 0x6c, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71, 0x1a, 0x25, 0x2e, 0x4d, 0x65,
+	0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x47, 0x65, 0x74, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x44, 0x65, 0x74, 0x61, 0x69, 0x6c, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65,
+	0x73, 0x70, 0x12, 0x5d, 0x0a, 0x12, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x51, 0x75, 0x69, 0x63,
+	0x6b, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x12, 0x22, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x51, 0x75, 0x69, 0x63, 0x6b, 0x43, 0x72, 0x65, 0x61,
+	0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x1a, 0x23, 0x2e, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x51, 0x75, 0x69, 0x63, 0x6b,
+	0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73,
+	0x70, 0x12, 0x63, 0x0a, 0x14, 0x50, 0x72, 0x65, 0x42, 0x6f, 0x6f, 0x6b, 0x43, 0x72, 0x65, 0x61,
+	0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x12, 0x24, 0x2e, 0x4d, 0x65, 0x65, 0x74,
+	0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x50, 0x72, 0x65, 0x42, 0x6f, 0x6f, 0x6b, 0x43,
+	0x72, 0x65, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x1a,
+	0x25, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x50, 0x72,
+	0x65, 0x42, 0x6f, 0x6f, 0x6b, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x12, 0x63, 0x0a, 0x14, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x50, 0x72, 0x65, 0x42, 0x6f, 0x6f, 0x6b, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x12, 0x24,
+	0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x50, 0x72, 0x65,
+	0x42, 0x6f, 0x6f, 0x6b, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x52, 0x65, 0x71, 0x1a, 0x25, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72,
+	0x74, 0x63, 0x2e, 0x50, 0x72, 0x65, 0x42, 0x6f, 0x6f, 0x6b, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65,
+	0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x12, 0x48, 0x0a, 0x0b, 0x4a,
+	0x6f, 0x69, 0x6e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x12, 0x1b, 0x2e, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x4a, 0x6f, 0x69, 0x6e, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71, 0x1a, 0x1c, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x4a, 0x6f, 0x69, 0x6e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x52, 0x65, 0x73, 0x70, 0x12, 0x4e, 0x0a, 0x0d, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x12, 0x1d, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67,
+	0x2e, 0x72, 0x74, 0x63, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x52, 0x65, 0x71, 0x1a, 0x1e, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e,
+	0x72, 0x74, 0x63, 0x2e, 0x44, 0x65, 0x6c, 0x65, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x52, 0x65, 0x73, 0x70, 0x12, 0x5a, 0x0a, 0x11, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x21, 0x2e, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x71, 0x1a, 0x22, 0x2e,
+	0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x55, 0x70, 0x64, 0x61,
+	0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x65, 0x73,
+	0x70, 0x12, 0x5d, 0x0a, 0x12, 0x54, 0x6f, 0x67, 0x67, 0x6c, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x12, 0x22, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x54, 0x6f, 0x67, 0x67, 0x6c, 0x65, 0x4d, 0x65, 0x65, 0x74,
+	0x69, 0x6e, 0x67, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x52, 0x65, 0x71, 0x1a, 0x23, 0x2e, 0x4d, 0x65,
+	0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x54, 0x6f, 0x67, 0x67, 0x6c, 0x65,
+	0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x52, 0x65, 0x73, 0x70,
+	0x12, 0x61, 0x0a, 0x16, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x55, 0x73, 0x65, 0x72, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x12, 0x22, 0x2e, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x52, 0x65, 0x71, 0x1a, 0x23,
+	0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x4d, 0x61, 0x6e,
+	0x61, 0x67, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x4d, 0x65, 0x64, 0x69, 0x61, 0x52,
+	0x65, 0x73, 0x70, 0x12, 0x60, 0x0a, 0x13, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x23, 0x2e, 0x4d, 0x65, 0x65,
+	0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x4d,
+	0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x41, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x71, 0x1a,
+	0x24, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x55, 0x70,
+	0x64, 0x61, 0x74, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x41, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x52, 0x65, 0x73, 0x70, 0x12, 0x4b, 0x0a, 0x0c, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x4d, 0x65,
+	0x65, 0x74, 0x69, 0x6e, 0x67, 0x12, 0x1c, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e,
+	0x72, 0x74, 0x63, 0x2e, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67,
+	0x52, 0x65, 0x71, 0x1a, 0x1d, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74,
+	0x63, 0x2e, 0x43, 0x6c, 0x6f, 0x73, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65,
+	0x73, 0x70, 0x12, 0x4b, 0x0a, 0x0c, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69,
+	0x6e, 0x67, 0x12, 0x1c, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63,
+	0x2e, 0x4c, 0x65, 0x61, 0x76, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x71,
+	0x1a, 0x1d, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e, 0x4c,
+	0x65, 0x61, 0x76, 0x65, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65, 0x73, 0x70, 0x12,
+	0x51, 0x0a, 0x0e, 0x4b, 0x69, 0x63, 0x6b, 0x4f, 0x66, 0x66, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e,
+	0x67, 0x12, 0x1e, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e,
+	0x4b, 0x69, 0x63, 0x6b, 0x4f, 0x66, 0x66, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65,
+	0x71, 0x1a, 0x1f, 0x2e, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x2e, 0x72, 0x74, 0x63, 0x2e,
+	0x4b, 0x69, 0x63, 0x6b, 0x4f, 0x66, 0x66, 0x4d, 0x65, 0x65, 0x74, 0x69, 0x6e, 0x67, 0x52, 0x65,
+	0x73, 0x70, 0x42, 0x06, 0x5a, 0x04, 0x2e, 0x2f, 0x70, 0x62, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74,
+	0x6f, 0x33,
 }
 
 var (
@@ -142,19 +2230,79 @@ func file_meeting_proto_rawDescGZIP() []byte {
 	return file_meeting_proto_rawDescData
 }
 
-var file_meeting_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_meeting_proto_msgTypes = make([]protoimpl.MessageInfo, 32)
 var file_meeting_proto_goTypes = []interface{}{
-	(*DeleteMeetingRecordsReq)(nil),  // 0: Meeting.rtc.DeleteMeetingRecordsReq
-	(*DeleteMeetingRecordsResp)(nil), // 1: Meeting.rtc.DeleteMeetingRecordsResp
+	(*MeetingInfo)(nil),              // 0: Meeting.rtc.MeetingInfo
+	(*GetMeetingListReq)(nil),        // 1: Meeting.rtc.GetMeetingListReq
+	(*GetMeetingListResp)(nil),       // 2: Meeting.rtc.GetMeetingListResp
+	(*JoinMeetingReq)(nil),           // 3: Meeting.rtc.JoinMeetingReq
+	(*JoinMeetingResp)(nil),          // 4: Meeting.rtc.JoinMeetingResp
+	(*QuickCreateMeetingReq)(nil),    // 5: Meeting.rtc.QuickCreateMeetingReq
+	(*QuickCreateMeetingResp)(nil),   // 6: Meeting.rtc.QuickCreateMeetingResp
+	(*PreBookCreateMeetingReq)(nil),  // 7: Meeting.rtc.PreBookCreateMeetingReq
+	(*PreBookCreateMeetingResp)(nil), // 8: Meeting.rtc.PreBookCreateMeetingResp
+	(*PreBookUpdateMeetingReq)(nil),  // 9: Meeting.rtc.PreBookUpdateMeetingReq
+	(*PreBookUpdateMeetingResp)(nil), // 10: Meeting.rtc.PreBookUpdateMeetingResp
+	(*DeleteMeetingReq)(nil),         // 11: Meeting.rtc.DeleteMeetingReq
+	(*DeleteMeetingResp)(nil),        // 12: Meeting.rtc.DeleteMeetingResp
+	(*MeetingPermissionConf)(nil),    // 13: Meeting.rtc.MeetingPermissionConf
+	(*UpdateMeetingInfoReq)(nil),     // 14: Meeting.rtc.UpdateMeetingInfoReq
+	(*UpdateMeetingInfoResp)(nil),    // 15: Meeting.rtc.UpdateMeetingInfoResp
+	(*MediaTypeInfo)(nil),            // 16: Meeting.rtc.MediaTypeInfo
+	(*ToggleMeetingMediaReq)(nil),    // 17: Meeting.rtc.ToggleMeetingMediaReq
+	(*ToggleMeetingMediaResp)(nil),   // 18: Meeting.rtc.ToggleMeetingMediaResp
+	(*ManageMeetingMediaReq)(nil),    // 19: Meeting.rtc.ManageMeetingMediaReq
+	(*ManageMeetingMediaResp)(nil),   // 20: Meeting.rtc.ManageMeetingMediaResp
+	(*MeetingActionTypeInfo)(nil),    // 21: Meeting.rtc.MeetingActionTypeInfo
+	(*UpdateMeetingActionReq)(nil),   // 22: Meeting.rtc.UpdateMeetingActionReq
+	(*UpdateMeetingActionResp)(nil),  // 23: Meeting.rtc.UpdateMeetingActionResp
+	(*CloseMeetingReq)(nil),          // 24: Meeting.rtc.CloseMeetingReq
+	(*CloseMeetingResp)(nil),         // 25: Meeting.rtc.CloseMeetingResp
+	(*LeaveMeetingReq)(nil),          // 26: Meeting.rtc.LeaveMeetingReq
+	(*LeaveMeetingResp)(nil),         // 27: Meeting.rtc.LeaveMeetingResp
+	(*KickOffMeetingReq)(nil),        // 28: Meeting.rtc.KickOffMeetingReq
+	(*KickOffMeetingResp)(nil),       // 29: Meeting.rtc.KickOffMeetingResp
+	(*GetMeetingDetailInfoReq)(nil),  // 30: Meeting.rtc.GetMeetingDetailInfoReq
+	(*GetMeetingDetailInfoResp)(nil), // 31: Meeting.rtc.GetMeetingDetailInfoResp
 }
 var file_meeting_proto_depIdxs = []int32{
-	0, // 0: Meeting.rtc.MeetingService.DeleteMeetingRecords:input_type -> Meeting.rtc.DeleteMeetingRecordsReq
-	1, // 1: Meeting.rtc.MeetingService.DeleteMeetingRecords:output_type -> Meeting.rtc.DeleteMeetingRecordsResp
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	13, // 0: Meeting.rtc.UpdateMeetingInfoReq.meetingPermissionConf:type_name -> Meeting.rtc.MeetingPermissionConf
+	16, // 1: Meeting.rtc.ToggleMeetingMediaReq.mediaTypeInfo:type_name -> Meeting.rtc.MediaTypeInfo
+	16, // 2: Meeting.rtc.ManageMeetingMediaReq.mediaTypeInfo:type_name -> Meeting.rtc.MediaTypeInfo
+	21, // 3: Meeting.rtc.UpdateMeetingActionReq.meetingActionTypeInfo:type_name -> Meeting.rtc.MeetingActionTypeInfo
+	1,  // 4: Meeting.rtc.MeetingService.GetMeetingList:input_type -> Meeting.rtc.GetMeetingListReq
+	30, // 5: Meeting.rtc.MeetingService.GetMeetingDetailInfo:input_type -> Meeting.rtc.GetMeetingDetailInfoReq
+	5,  // 6: Meeting.rtc.MeetingService.CreateQuickMeeting:input_type -> Meeting.rtc.QuickCreateMeetingReq
+	7,  // 7: Meeting.rtc.MeetingService.PreBookCreateMeeting:input_type -> Meeting.rtc.PreBookCreateMeetingReq
+	9,  // 8: Meeting.rtc.MeetingService.UpdatePreBookMeeting:input_type -> Meeting.rtc.PreBookUpdateMeetingReq
+	3,  // 9: Meeting.rtc.MeetingService.JoinMeeting:input_type -> Meeting.rtc.JoinMeetingReq
+	11, // 10: Meeting.rtc.MeetingService.DeleteMeeting:input_type -> Meeting.rtc.DeleteMeetingReq
+	14, // 11: Meeting.rtc.MeetingService.UpdateMeetingInfo:input_type -> Meeting.rtc.UpdateMeetingInfoReq
+	17, // 12: Meeting.rtc.MeetingService.ToggleMeetingMedia:input_type -> Meeting.rtc.ToggleMeetingMediaReq
+	19, // 13: Meeting.rtc.MeetingService.ManageMeetingUserMedia:input_type -> Meeting.rtc.ManageMeetingMediaReq
+	22, // 14: Meeting.rtc.MeetingService.UpdateMeetingAction:input_type -> Meeting.rtc.UpdateMeetingActionReq
+	24, // 15: Meeting.rtc.MeetingService.CloseMeeting:input_type -> Meeting.rtc.CloseMeetingReq
+	26, // 16: Meeting.rtc.MeetingService.LeaveMeeting:input_type -> Meeting.rtc.LeaveMeetingReq
+	28, // 17: Meeting.rtc.MeetingService.KickOffMeeting:input_type -> Meeting.rtc.KickOffMeetingReq
+	2,  // 18: Meeting.rtc.MeetingService.GetMeetingList:output_type -> Meeting.rtc.GetMeetingListResp
+	31, // 19: Meeting.rtc.MeetingService.GetMeetingDetailInfo:output_type -> Meeting.rtc.GetMeetingDetailInfoResp
+	6,  // 20: Meeting.rtc.MeetingService.CreateQuickMeeting:output_type -> Meeting.rtc.QuickCreateMeetingResp
+	8,  // 21: Meeting.rtc.MeetingService.PreBookCreateMeeting:output_type -> Meeting.rtc.PreBookCreateMeetingResp
+	10, // 22: Meeting.rtc.MeetingService.UpdatePreBookMeeting:output_type -> Meeting.rtc.PreBookUpdateMeetingResp
+	4,  // 23: Meeting.rtc.MeetingService.JoinMeeting:output_type -> Meeting.rtc.JoinMeetingResp
+	12, // 24: Meeting.rtc.MeetingService.DeleteMeeting:output_type -> Meeting.rtc.DeleteMeetingResp
+	15, // 25: Meeting.rtc.MeetingService.UpdateMeetingInfo:output_type -> Meeting.rtc.UpdateMeetingInfoResp
+	18, // 26: Meeting.rtc.MeetingService.ToggleMeetingMedia:output_type -> Meeting.rtc.ToggleMeetingMediaResp
+	20, // 27: Meeting.rtc.MeetingService.ManageMeetingUserMedia:output_type -> Meeting.rtc.ManageMeetingMediaResp
+	23, // 28: Meeting.rtc.MeetingService.UpdateMeetingAction:output_type -> Meeting.rtc.UpdateMeetingActionResp
+	25, // 29: Meeting.rtc.MeetingService.CloseMeeting:output_type -> Meeting.rtc.CloseMeetingResp
+	27, // 30: Meeting.rtc.MeetingService.LeaveMeeting:output_type -> Meeting.rtc.LeaveMeetingResp
+	29, // 31: Meeting.rtc.MeetingService.KickOffMeeting:output_type -> Meeting.rtc.KickOffMeetingResp
+	18, // [18:32] is the sub-list for method output_type
+	4,  // [4:18] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_meeting_proto_init() }
@@ -164,7 +2312,7 @@ func file_meeting_proto_init() {
 	}
 	if !protoimpl.UnsafeEnabled {
 		file_meeting_proto_msgTypes[0].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteMeetingRecordsReq); i {
+			switch v := v.(*MeetingInfo); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -176,7 +2324,367 @@ func file_meeting_proto_init() {
 			}
 		}
 		file_meeting_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*DeleteMeetingRecordsResp); i {
+			switch v := v.(*GetMeetingListReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetMeetingListResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[3].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*JoinMeetingReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*JoinMeetingResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QuickCreateMeetingReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*QuickCreateMeetingResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PreBookCreateMeetingReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PreBookCreateMeetingResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PreBookUpdateMeetingReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[10].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PreBookUpdateMeetingResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[11].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeleteMeetingReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*DeleteMeetingResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MeetingPermissionConf); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateMeetingInfoReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateMeetingInfoResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MediaTypeInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ToggleMeetingMediaReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ToggleMeetingMediaResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ManageMeetingMediaReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*ManageMeetingMediaResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MeetingActionTypeInfo); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateMeetingActionReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*UpdateMeetingActionResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CloseMeetingReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CloseMeetingResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[26].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LeaveMeetingReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[27].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*LeaveMeetingResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*KickOffMeetingReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*KickOffMeetingResp); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[30].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetMeetingDetailInfoReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_meeting_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*GetMeetingDetailInfoResp); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -194,7 +2702,7 @@ func file_meeting_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_meeting_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   32,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -220,7 +2728,34 @@ const _ = grpc.SupportPackageIsVersion6
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type MeetingServiceClient interface {
-	DeleteMeetingRecords(ctx context.Context, in *DeleteMeetingRecordsReq, opts ...grpc.CallOption) (*DeleteMeetingRecordsResp, error)
+	// get meeting list
+	GetMeetingList(ctx context.Context, in *GetMeetingListReq, opts ...grpc.CallOption) (*GetMeetingListResp, error)
+	// / get meeting detail
+	GetMeetingDetailInfo(ctx context.Context, in *GetMeetingDetailInfoReq, opts ...grpc.CallOption) (*GetMeetingDetailInfoResp, error)
+	// // quick start meeting
+	CreateQuickMeeting(ctx context.Context, in *QuickCreateMeetingReq, opts ...grpc.CallOption) (*QuickCreateMeetingResp, error)
+	// / prebook create meeting
+	PreBookCreateMeeting(ctx context.Context, in *PreBookCreateMeetingReq, opts ...grpc.CallOption) (*PreBookCreateMeetingResp, error)
+	// // prebook update meeting
+	UpdatePreBookMeeting(ctx context.Context, in *PreBookUpdateMeetingReq, opts ...grpc.CallOption) (*PreBookUpdateMeetingResp, error)
+	// join meeting
+	JoinMeeting(ctx context.Context, in *JoinMeetingReq, opts ...grpc.CallOption) (*JoinMeetingResp, error)
+	// // cancel meeting, delete meeting
+	DeleteMeeting(ctx context.Context, in *DeleteMeetingReq, opts ...grpc.CallOption) (*DeleteMeetingResp, error)
+	// // update
+	UpdateMeetingInfo(ctx context.Context, in *UpdateMeetingInfoReq, opts ...grpc.CallOption) (*UpdateMeetingInfoResp, error)
+	// / toggle meeting media on or off.
+	ToggleMeetingMedia(ctx context.Context, in *ToggleMeetingMediaReq, opts ...grpc.CallOption) (*ToggleMeetingMediaResp, error)
+	// // manage user media in the meeting.
+	ManageMeetingUserMedia(ctx context.Context, in *ManageMeetingMediaReq, opts ...grpc.CallOption) (*ManageMeetingMediaResp, error)
+	// / update meeting action in the meeting. like pin user on top of the list or watched by others
+	UpdateMeetingAction(ctx context.Context, in *UpdateMeetingActionReq, opts ...grpc.CallOption) (*UpdateMeetingActionResp, error)
+	// / close meeting
+	CloseMeeting(ctx context.Context, in *CloseMeetingReq, opts ...grpc.CallOption) (*CloseMeetingResp, error)
+	// / leave meeting
+	LeaveMeeting(ctx context.Context, in *LeaveMeetingReq, opts ...grpc.CallOption) (*LeaveMeetingResp, error)
+	// / leave meeting
+	KickOffMeeting(ctx context.Context, in *KickOffMeetingReq, opts ...grpc.CallOption) (*KickOffMeetingResp, error)
 }
 
 type meetingServiceClient struct {
@@ -231,9 +2766,126 @@ func NewMeetingServiceClient(cc grpc.ClientConnInterface) MeetingServiceClient {
 	return &meetingServiceClient{cc}
 }
 
-func (c *meetingServiceClient) DeleteMeetingRecords(ctx context.Context, in *DeleteMeetingRecordsReq, opts ...grpc.CallOption) (*DeleteMeetingRecordsResp, error) {
-	out := new(DeleteMeetingRecordsResp)
-	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/DeleteMeetingRecords", in, out, opts...)
+func (c *meetingServiceClient) GetMeetingList(ctx context.Context, in *GetMeetingListReq, opts ...grpc.CallOption) (*GetMeetingListResp, error) {
+	out := new(GetMeetingListResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/GetMeetingList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) GetMeetingDetailInfo(ctx context.Context, in *GetMeetingDetailInfoReq, opts ...grpc.CallOption) (*GetMeetingDetailInfoResp, error) {
+	out := new(GetMeetingDetailInfoResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/GetMeetingDetailInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) CreateQuickMeeting(ctx context.Context, in *QuickCreateMeetingReq, opts ...grpc.CallOption) (*QuickCreateMeetingResp, error) {
+	out := new(QuickCreateMeetingResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/CreateQuickMeeting", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) PreBookCreateMeeting(ctx context.Context, in *PreBookCreateMeetingReq, opts ...grpc.CallOption) (*PreBookCreateMeetingResp, error) {
+	out := new(PreBookCreateMeetingResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/PreBookCreateMeeting", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) UpdatePreBookMeeting(ctx context.Context, in *PreBookUpdateMeetingReq, opts ...grpc.CallOption) (*PreBookUpdateMeetingResp, error) {
+	out := new(PreBookUpdateMeetingResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/UpdatePreBookMeeting", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) JoinMeeting(ctx context.Context, in *JoinMeetingReq, opts ...grpc.CallOption) (*JoinMeetingResp, error) {
+	out := new(JoinMeetingResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/JoinMeeting", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) DeleteMeeting(ctx context.Context, in *DeleteMeetingReq, opts ...grpc.CallOption) (*DeleteMeetingResp, error) {
+	out := new(DeleteMeetingResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/DeleteMeeting", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) UpdateMeetingInfo(ctx context.Context, in *UpdateMeetingInfoReq, opts ...grpc.CallOption) (*UpdateMeetingInfoResp, error) {
+	out := new(UpdateMeetingInfoResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/UpdateMeetingInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) ToggleMeetingMedia(ctx context.Context, in *ToggleMeetingMediaReq, opts ...grpc.CallOption) (*ToggleMeetingMediaResp, error) {
+	out := new(ToggleMeetingMediaResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/ToggleMeetingMedia", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) ManageMeetingUserMedia(ctx context.Context, in *ManageMeetingMediaReq, opts ...grpc.CallOption) (*ManageMeetingMediaResp, error) {
+	out := new(ManageMeetingMediaResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/ManageMeetingUserMedia", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) UpdateMeetingAction(ctx context.Context, in *UpdateMeetingActionReq, opts ...grpc.CallOption) (*UpdateMeetingActionResp, error) {
+	out := new(UpdateMeetingActionResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/UpdateMeetingAction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) CloseMeeting(ctx context.Context, in *CloseMeetingReq, opts ...grpc.CallOption) (*CloseMeetingResp, error) {
+	out := new(CloseMeetingResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/CloseMeeting", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) LeaveMeeting(ctx context.Context, in *LeaveMeetingReq, opts ...grpc.CallOption) (*LeaveMeetingResp, error) {
+	out := new(LeaveMeetingResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/LeaveMeeting", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *meetingServiceClient) KickOffMeeting(ctx context.Context, in *KickOffMeetingReq, opts ...grpc.CallOption) (*KickOffMeetingResp, error) {
+	out := new(KickOffMeetingResp)
+	err := c.cc.Invoke(ctx, "/Meeting.rtc.MeetingService/KickOffMeeting", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -242,35 +2894,335 @@ func (c *meetingServiceClient) DeleteMeetingRecords(ctx context.Context, in *Del
 
 // MeetingServiceServer is the server API for MeetingService service.
 type MeetingServiceServer interface {
-	DeleteMeetingRecords(context.Context, *DeleteMeetingRecordsReq) (*DeleteMeetingRecordsResp, error)
+	// get meeting list
+	GetMeetingList(context.Context, *GetMeetingListReq) (*GetMeetingListResp, error)
+	// / get meeting detail
+	GetMeetingDetailInfo(context.Context, *GetMeetingDetailInfoReq) (*GetMeetingDetailInfoResp, error)
+	// // quick start meeting
+	CreateQuickMeeting(context.Context, *QuickCreateMeetingReq) (*QuickCreateMeetingResp, error)
+	// / prebook create meeting
+	PreBookCreateMeeting(context.Context, *PreBookCreateMeetingReq) (*PreBookCreateMeetingResp, error)
+	// // prebook update meeting
+	UpdatePreBookMeeting(context.Context, *PreBookUpdateMeetingReq) (*PreBookUpdateMeetingResp, error)
+	// join meeting
+	JoinMeeting(context.Context, *JoinMeetingReq) (*JoinMeetingResp, error)
+	// // cancel meeting, delete meeting
+	DeleteMeeting(context.Context, *DeleteMeetingReq) (*DeleteMeetingResp, error)
+	// // update
+	UpdateMeetingInfo(context.Context, *UpdateMeetingInfoReq) (*UpdateMeetingInfoResp, error)
+	// / toggle meeting media on or off.
+	ToggleMeetingMedia(context.Context, *ToggleMeetingMediaReq) (*ToggleMeetingMediaResp, error)
+	// // manage user media in the meeting.
+	ManageMeetingUserMedia(context.Context, *ManageMeetingMediaReq) (*ManageMeetingMediaResp, error)
+	// / update meeting action in the meeting. like pin user on top of the list or watched by others
+	UpdateMeetingAction(context.Context, *UpdateMeetingActionReq) (*UpdateMeetingActionResp, error)
+	// / close meeting
+	CloseMeeting(context.Context, *CloseMeetingReq) (*CloseMeetingResp, error)
+	// / leave meeting
+	LeaveMeeting(context.Context, *LeaveMeetingReq) (*LeaveMeetingResp, error)
+	// / leave meeting
+	KickOffMeeting(context.Context, *KickOffMeetingReq) (*KickOffMeetingResp, error)
 }
 
 // UnimplementedMeetingServiceServer can be embedded to have forward compatible implementations.
 type UnimplementedMeetingServiceServer struct {
 }
 
-func (*UnimplementedMeetingServiceServer) DeleteMeetingRecords(context.Context, *DeleteMeetingRecordsReq) (*DeleteMeetingRecordsResp, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteMeetingRecords not implemented")
+func (*UnimplementedMeetingServiceServer) GetMeetingList(context.Context, *GetMeetingListReq) (*GetMeetingListResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMeetingList not implemented")
+}
+func (*UnimplementedMeetingServiceServer) GetMeetingDetailInfo(context.Context, *GetMeetingDetailInfoReq) (*GetMeetingDetailInfoResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMeetingDetailInfo not implemented")
+}
+func (*UnimplementedMeetingServiceServer) CreateQuickMeeting(context.Context, *QuickCreateMeetingReq) (*QuickCreateMeetingResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateQuickMeeting not implemented")
+}
+func (*UnimplementedMeetingServiceServer) PreBookCreateMeeting(context.Context, *PreBookCreateMeetingReq) (*PreBookCreateMeetingResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PreBookCreateMeeting not implemented")
+}
+func (*UnimplementedMeetingServiceServer) UpdatePreBookMeeting(context.Context, *PreBookUpdateMeetingReq) (*PreBookUpdateMeetingResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdatePreBookMeeting not implemented")
+}
+func (*UnimplementedMeetingServiceServer) JoinMeeting(context.Context, *JoinMeetingReq) (*JoinMeetingResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method JoinMeeting not implemented")
+}
+func (*UnimplementedMeetingServiceServer) DeleteMeeting(context.Context, *DeleteMeetingReq) (*DeleteMeetingResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteMeeting not implemented")
+}
+func (*UnimplementedMeetingServiceServer) UpdateMeetingInfo(context.Context, *UpdateMeetingInfoReq) (*UpdateMeetingInfoResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateMeetingInfo not implemented")
+}
+func (*UnimplementedMeetingServiceServer) ToggleMeetingMedia(context.Context, *ToggleMeetingMediaReq) (*ToggleMeetingMediaResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ToggleMeetingMedia not implemented")
+}
+func (*UnimplementedMeetingServiceServer) ManageMeetingUserMedia(context.Context, *ManageMeetingMediaReq) (*ManageMeetingMediaResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ManageMeetingUserMedia not implemented")
+}
+func (*UnimplementedMeetingServiceServer) UpdateMeetingAction(context.Context, *UpdateMeetingActionReq) (*UpdateMeetingActionResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateMeetingAction not implemented")
+}
+func (*UnimplementedMeetingServiceServer) CloseMeeting(context.Context, *CloseMeetingReq) (*CloseMeetingResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CloseMeeting not implemented")
+}
+func (*UnimplementedMeetingServiceServer) LeaveMeeting(context.Context, *LeaveMeetingReq) (*LeaveMeetingResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LeaveMeeting not implemented")
+}
+func (*UnimplementedMeetingServiceServer) KickOffMeeting(context.Context, *KickOffMeetingReq) (*KickOffMeetingResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method KickOffMeeting not implemented")
 }
 
 func RegisterMeetingServiceServer(s *grpc.Server, srv MeetingServiceServer) {
 	s.RegisterService(&_MeetingService_serviceDesc, srv)
 }
 
-func _MeetingService_DeleteMeetingRecords_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteMeetingRecordsReq)
+func _MeetingService_GetMeetingList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMeetingListReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MeetingServiceServer).DeleteMeetingRecords(ctx, in)
+		return srv.(MeetingServiceServer).GetMeetingList(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Meeting.rtc.MeetingService/DeleteMeetingRecords",
+		FullMethod: "/Meeting.rtc.MeetingService/GetMeetingList",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MeetingServiceServer).DeleteMeetingRecords(ctx, req.(*DeleteMeetingRecordsReq))
+		return srv.(MeetingServiceServer).GetMeetingList(ctx, req.(*GetMeetingListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_GetMeetingDetailInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMeetingDetailInfoReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).GetMeetingDetailInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/GetMeetingDetailInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).GetMeetingDetailInfo(ctx, req.(*GetMeetingDetailInfoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_CreateQuickMeeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QuickCreateMeetingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).CreateQuickMeeting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/CreateQuickMeeting",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).CreateQuickMeeting(ctx, req.(*QuickCreateMeetingReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_PreBookCreateMeeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreBookCreateMeetingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).PreBookCreateMeeting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/PreBookCreateMeeting",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).PreBookCreateMeeting(ctx, req.(*PreBookCreateMeetingReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_UpdatePreBookMeeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreBookUpdateMeetingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).UpdatePreBookMeeting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/UpdatePreBookMeeting",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).UpdatePreBookMeeting(ctx, req.(*PreBookUpdateMeetingReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_JoinMeeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(JoinMeetingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).JoinMeeting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/JoinMeeting",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).JoinMeeting(ctx, req.(*JoinMeetingReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_DeleteMeeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteMeetingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).DeleteMeeting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/DeleteMeeting",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).DeleteMeeting(ctx, req.(*DeleteMeetingReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_UpdateMeetingInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMeetingInfoReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).UpdateMeetingInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/UpdateMeetingInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).UpdateMeetingInfo(ctx, req.(*UpdateMeetingInfoReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_ToggleMeetingMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ToggleMeetingMediaReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).ToggleMeetingMedia(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/ToggleMeetingMedia",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).ToggleMeetingMedia(ctx, req.(*ToggleMeetingMediaReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_ManageMeetingUserMedia_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ManageMeetingMediaReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).ManageMeetingUserMedia(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/ManageMeetingUserMedia",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).ManageMeetingUserMedia(ctx, req.(*ManageMeetingMediaReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_UpdateMeetingAction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMeetingActionReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).UpdateMeetingAction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/UpdateMeetingAction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).UpdateMeetingAction(ctx, req.(*UpdateMeetingActionReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_CloseMeeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CloseMeetingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).CloseMeeting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/CloseMeeting",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).CloseMeeting(ctx, req.(*CloseMeetingReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_LeaveMeeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LeaveMeetingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).LeaveMeeting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/LeaveMeeting",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).LeaveMeeting(ctx, req.(*LeaveMeetingReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MeetingService_KickOffMeeting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(KickOffMeetingReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MeetingServiceServer).KickOffMeeting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Meeting.rtc.MeetingService/KickOffMeeting",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MeetingServiceServer).KickOffMeeting(ctx, req.(*KickOffMeetingReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -280,8 +3232,60 @@ var _MeetingService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*MeetingServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "DeleteMeetingRecords",
-			Handler:    _MeetingService_DeleteMeetingRecords_Handler,
+			MethodName: "GetMeetingList",
+			Handler:    _MeetingService_GetMeetingList_Handler,
+		},
+		{
+			MethodName: "GetMeetingDetailInfo",
+			Handler:    _MeetingService_GetMeetingDetailInfo_Handler,
+		},
+		{
+			MethodName: "CreateQuickMeeting",
+			Handler:    _MeetingService_CreateQuickMeeting_Handler,
+		},
+		{
+			MethodName: "PreBookCreateMeeting",
+			Handler:    _MeetingService_PreBookCreateMeeting_Handler,
+		},
+		{
+			MethodName: "UpdatePreBookMeeting",
+			Handler:    _MeetingService_UpdatePreBookMeeting_Handler,
+		},
+		{
+			MethodName: "JoinMeeting",
+			Handler:    _MeetingService_JoinMeeting_Handler,
+		},
+		{
+			MethodName: "DeleteMeeting",
+			Handler:    _MeetingService_DeleteMeeting_Handler,
+		},
+		{
+			MethodName: "UpdateMeetingInfo",
+			Handler:    _MeetingService_UpdateMeetingInfo_Handler,
+		},
+		{
+			MethodName: "ToggleMeetingMedia",
+			Handler:    _MeetingService_ToggleMeetingMedia_Handler,
+		},
+		{
+			MethodName: "ManageMeetingUserMedia",
+			Handler:    _MeetingService_ManageMeetingUserMedia_Handler,
+		},
+		{
+			MethodName: "UpdateMeetingAction",
+			Handler:    _MeetingService_UpdateMeetingAction_Handler,
+		},
+		{
+			MethodName: "CloseMeeting",
+			Handler:    _MeetingService_CloseMeeting_Handler,
+		},
+		{
+			MethodName: "LeaveMeeting",
+			Handler:    _MeetingService_LeaveMeeting_Handler,
+		},
+		{
+			MethodName: "KickOffMeeting",
+			Handler:    _MeetingService_KickOffMeeting_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

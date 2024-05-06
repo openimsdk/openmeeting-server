@@ -1,6 +1,8 @@
 package initialize
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"google.golang.org/grpc"
 	"openmeeting-server/internal/initialize/base"
@@ -28,7 +30,11 @@ func InitServer(server *grpc.Server) error {
 	}
 
 	// register
-	meetingGrpc := meeting_rpc.NewMeetingGrpc()
+	context := context.Background()
+	meetingGrpc := meeting_rpc.NewMeetingGrpc(context)
+	if meetingGrpc == nil {
+		return errors.New("init meeting grpc failed")
+	}
 	healthGrpc := health_rpc.NewHealthCheckGrpc()
 	pb.RegisterHealthServer(server, healthGrpc)
 	pb.RegisterMeetingServiceServer(server, meetingGrpc)
