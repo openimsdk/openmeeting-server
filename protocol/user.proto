@@ -1,0 +1,42 @@
+syntax = "proto3";
+package user;
+
+
+// Request message for user login.
+message LoginReq {
+  string username = 1; // The username of the user trying to log in.
+  string password = 2; // The password of the user trying to log in.
+}
+
+// Response message for user login.
+message LoginResp {
+  string token = 1; // The authentication token provided upon successful login.
+  string userID = 2; // The unique identifier for the user.
+}
+
+// Request message for user logout.
+message LogoutReq {
+  string userID = 1; // The unique identifier of the user trying to log out.
+}
+
+// Response message for user logout.
+message LogoutResp {
+}
+
+message ChangePasswordReq {
+  string userID = 1;
+  string currentPassword = 2;
+  string newPassword = 3;
+}
+
+message ChangePasswordResp {
+}
+
+message CreateUserReq {
+  string username = 1;
+  string password = 2;
+}
+
+message CreateUserResp {
+}
+
