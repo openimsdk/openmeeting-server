@@ -1,7 +1,9 @@
 package main
 
-import "openmeeting-server/pkg/common/cmd"
-import "github.com/openimsdk/tools/system/program"
+import (
+	"github.com/openimsdk/tools/system/program"
+	"openmeeting-server/pkg/common/cmd"
+)
 
 func main() {
 	if err := cmd.NewMeetingRpcCmd().Exec(); err != nil {
