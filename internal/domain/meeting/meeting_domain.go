@@ -3,15 +3,16 @@ package meeting_domain
 import (
 	"context"
 	"errors"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/tx"
+	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"openmeeting-server/internal/domain/livekit"
 	"openmeeting-server/internal/infrastructure/cache"
 	"openmeeting-server/internal/infrastructure/repository"
 	"openmeeting-server/internal/infrastructure/repository/model"
 	"openmeeting-server/internal/utils"
 	time_utils "openmeeting-server/internal/utils/time"
+	"openmeeting-server/pkg/common/config"
 	"openmeeting-server/protocol/pb"
 	"time"
 )
@@ -33,23 +34,31 @@ type MeetingDomainInterface interface {
 type MeetingDomain struct {
 	MeetingRepository repository.MeetingInterface
 	RTCLogic          livekit.RTCDomain
-	tx                tx.CtxTx
+	serverConfig      *config.Config
+	mongoClient       *mongoutil.Client
 }
 
-func NewMeetingService(ctx context.Context) (*MeetingDomain, error) {
-	repo, err := repository.NewMeetingRepository()
+func NewMeetingService(ctx context.Context, c *config.Config) (*MeetingDomain, error) {
+	mongoClient, err := mongoutil.NewMongoDB(ctx, c.MongodbConfig.Build())
 	if err != nil {
 		return nil, err
 	}
-	client, err := cache.GetMongoClient()
+
+	repo, err := repository.NewMeetingRepository(mongoClient.GetDB())
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = cache.GetMongoClient()
 	if err != nil {
 		return nil, err
 	}
 
 	return &MeetingDomain{
 		MeetingRepository: repo,
-		RTCLogic:          livekit.NewLiveKit(ctx),
-		tx:                tx.NewMongo(client),
+		RTCLogic:          livekit.NewLiveKit(ctx, c),
+		serverConfig:      c,
+		mongoClient:       mongoClient,
 	}, nil
 }
 
@@ -99,14 +108,14 @@ func (m *MeetingDomain) UpdateMeetingInfo(ctx context.Context, req *pb.UpdateMee
 }
 
 func (m *MeetingDomain) DeleteMeeting(ctx context.Context, roomId ...string) error {
-	err := m.tx.Transaction(ctx, func(ctx context.Context) error {
+	err := m.mongoClient.GetTx().Transaction(ctx, func(ctx context.Context) error {
 		if err := m.MeetingRepository.DeleteMeetingInfos(ctx, roomId); err != nil {
 			return err
 		}
 		return nil
 	})
 	if err != nil {
-		return errs.ErrDatabase
+		return errs.ErrInternalServer.WrapMsg("delete meeting failed: ", roomId)
 	}
 	return nil
 }
@@ -119,7 +128,7 @@ func (m *MeetingDomain) QuickStartCreateMeeting(ctx context.Context, req *pb.Qui
 	meetingID := utils.GenerateUniqueKey()
 	_, token, liveUrl, err := m.RTCLogic.CreateRoom(ctx, meetingID)
 	if err != nil {
-		return nil, nil
+		return nil, errs.WrapMsg(err, "create room failed")
 	}
 
 	info := &model.MeetingInfo{
@@ -148,20 +157,20 @@ func (m *MeetingDomain) QuickStartCreateMeeting(ctx context.Context, req *pb.Qui
 func (m *MeetingDomain) JoinMeeting(ctx context.Context, req *pb.JoinMeetingReq) (*pb.JoinMeetingResp, error) {
 	metaData, err := m.RTCLogic.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
-		return nil, err
+		return nil, errs.WrapMsg(err, "get room data failed")
 	}
 
 	log.ZDebug(ctx, "metaData", metaData)
 
 	token, liveUrl, err := m.RTCLogic.GetJoinToken(ctx, req.MeetingID, req.MeetingID)
 	if err != nil {
-		return nil, err
+		return nil, errs.WrapMsg(err, "get join token failed")
 	}
 
 	if err := m.RTCLogic.UpdateMetaData(ctx, &pb.MeetingInfo{
 		RoomID: req.MeetingID,
 	}); err != nil {
-		return nil, err
+		return nil, errs.WrapMsg(err, "update meta data failed")
 	}
 
 	return &pb.JoinMeetingResp{

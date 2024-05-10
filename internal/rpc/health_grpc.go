@@ -2,7 +2,7 @@ package health_rpc
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/errs"
+	"github.com/openimsdk/tools/errs"
 	"openmeeting-server/protocol/pb"
 )
 

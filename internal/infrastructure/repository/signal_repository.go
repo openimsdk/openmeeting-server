@@ -5,8 +5,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	config "openmeeting-server/dto"
 	"openmeeting-server/internal/infrastructure/cache"
+	"openmeeting-server/pkg/common/config"
 )
 
 type signalRepository struct {

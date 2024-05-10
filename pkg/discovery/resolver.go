@@ -2,7 +2,7 @@ package discovery
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/log"
+	"github.com/openimsdk/tools/log"
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"

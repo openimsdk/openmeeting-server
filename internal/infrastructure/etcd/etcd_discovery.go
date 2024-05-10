@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"log"
-	config "openmeeting-server/dto"
+	"openmeeting-server/pkg/common/config"
 	"time"
 )
 

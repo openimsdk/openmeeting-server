@@ -3,14 +3,14 @@ package livekit
 import (
 	"context"
 	"encoding/json"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/log"
-	"github.com/OpenIMSDK/tools/mcontext"
 	"github.com/livekit/protocol/auth"
 	"github.com/livekit/protocol/livekit"
 	lksdk "github.com/livekit/server-sdk-go"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/mcontext"
 	"github.com/twitchtv/twirp"
-	config "openmeeting-server/dto"
+	"openmeeting-server/pkg/common/config"
 	"openmeeting-server/protocol/pb"
 	"sync/atomic"
 	"time"
@@ -30,24 +30,27 @@ type LiveKit struct {
 	roomClient *lksdk.RoomServiceClient
 	cb         CallbackInterface
 	index      uint64
+	c          *config.Config
 }
 
-func NewLiveKit(ctx context.Context) RTCDomain {
-	conf := config.Config.RTC
+func NewLiveKit(ctx context.Context, c *config.Config) RTCDomain {
+	conf := c.RpcConfig.RTC
 	return &LiveKit{
 		roomClient: lksdk.NewRoomServiceClient(conf.InnerURL, conf.ApiKey, conf.ApiSecret),
 		cb:         NewRTC(ctx),
 		index:      0,
+		c:          c,
 	}
 }
 
 func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string) (string, string, error) {
+	conf := x.c.RpcConfig.RTC
 	log.ZDebug(ctx, "getJoinToken", "roomID", roomID, "identity", identity)
 	canPublish := true
 	canSubscribe := true
 	canPublishData := true
 	// 配置里面的
-	at := auth.NewAccessToken(config.Config.RTC.ApiKey, config.Config.RTC.ApiSecret)
+	at := auth.NewAccessToken(conf.ApiKey, conf.ApiSecret)
 	grant := &auth.VideoGrant{
 		RoomJoin:       true,
 		Room:           roomID,
@@ -62,7 +65,7 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string) (st
 		SetValidFor(time.Hour)
 	jwt, err := at.ToJWT()
 	if err != nil {
-		return "", "", errs.Wrap(err, "at.ToJWT failed")
+		return "", "", errs.WrapMsg(err, "at.ToJWT failed")
 	}
 	log.ZDebug(ctx, "getJoinToken", "jwt", jwt)
 	return jwt, x.getLiveURL(), nil
@@ -91,17 +94,17 @@ func (x *LiveKit) CreateRoom(ctx context.Context, roomID string) (sID, token, li
 	if err != nil {
 		return "", "", "", errs.Wrap(err)
 	}
-	if _, err = lksdk.ConnectToRoomWithToken(config.Config.RTC.InnerURL, token, roomCallback); err != nil {
+	if _, err = lksdk.ConnectToRoomWithToken(x.c.RpcConfig.RTC.InnerURL, token, roomCallback); err != nil {
 		return "", "", "", err
 	}
 	return room.Sid, token, liveUrl, nil
 }
 
 func (x *LiveKit) getLiveURL() string {
-	if len(config.Config.RTC.URL) == 1 {
-		return config.Config.RTC.URL[0]
+	if len(x.c.RpcConfig.RTC.URL) == 1 {
+		return x.c.RpcConfig.RTC.URL[0]
 	}
-	return config.Config.RTC.URL[(atomic.AddUint64(&x.index, 1)-1)%uint64(len(config.Config.RTC.URL))]
+	return x.c.RpcConfig.RTC.URL[(atomic.AddUint64(&x.index, 1)-1)%uint64(len(x.c.RpcConfig.RTC.URL))]
 }
 
 func (x *LiveKit) RoomIsExist(ctx context.Context, roomID string) (string, error) {
@@ -112,7 +115,7 @@ func (x *LiveKit) RoomIsExist(ctx context.Context, roomID string) (string, error
 	if len(roomsResp.Rooms) > 0 {
 		return roomsResp.Rooms[0].GetSid(), nil
 	}
-	return "", errs.ErrRecordNotFound.Wrap("roomIsNotExist")
+	return "", errs.ErrRecordNotFound.WrapMsg("roomIsNotExist")
 }
 
 func (x *LiveKit) GetRoomData(ctx context.Context, roomID string) (*pb.MeetingInfo, error) {
@@ -121,7 +124,7 @@ func (x *LiveKit) GetRoomData(ctx context.Context, roomID string) (*pb.MeetingIn
 		return nil, errs.Wrap(err)
 	}
 	if len(resp.Rooms) == 0 {
-		return nil, errs.ErrRecordNotFound.Wrap("roomIsNotExist")
+		return nil, errs.ErrRecordNotFound.WrapMsg("roomIsNotExist")
 	}
 	var metaData pb.MeetingInfo
 	if resp.Rooms[0].Metadata != "" {
@@ -171,7 +174,7 @@ func (x *LiveKit) CloseRoom(ctx context.Context, roomID string) error {
 		Room: roomID,
 	})
 	if err != nil {
-		return errs.ErrInternalServer.Wrap(err.Error())
+		return errs.ErrInternalServer.WrapMsg(err.Error())
 	}
 	return nil
 }

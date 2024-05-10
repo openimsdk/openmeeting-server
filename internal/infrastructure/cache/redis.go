@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/OpenIMSDK/tools/errs"
-	"github.com/OpenIMSDK/tools/mw/specialerror"
+	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/mw/specialerror"
 	"openmeeting-server/constant"
-	config "openmeeting-server/dto"
+	"openmeeting-server/pkg/common/config"
 
 	"github.com/redis/go-redis/v9"
 	"time"

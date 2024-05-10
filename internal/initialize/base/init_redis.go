@@ -1,8 +1,8 @@
 package base
 
 import (
-	config "openmeeting-server/dto"
 	"openmeeting-server/internal/infrastructure/cache"
+	"openmeeting-server/pkg/common/config"
 )
 
 func InitRedis() error {

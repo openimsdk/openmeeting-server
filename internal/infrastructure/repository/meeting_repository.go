@@ -2,12 +2,10 @@ package repository
 
 import (
 	"context"
-	"github.com/OpenIMSDK/tools/mgoutil"
+	"github.com/openimsdk/tools/db/mongoutil"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	config "openmeeting-server/dto"
-	"openmeeting-server/internal/infrastructure/cache"
 	"openmeeting-server/internal/infrastructure/repository/model"
 )
 
@@ -15,12 +13,7 @@ type meetingRepository struct {
 	coll *mongo.Collection
 }
 
-func NewMeetingRepository() (MeetingInterface, error) {
-	client, getClientErr := cache.GetMongoClient()
-	if getClientErr != nil {
-		return nil, getClientErr
-	}
-	db := client.Database(*config.Config.Mongo.Database)
+func NewMeetingRepository(db *mongo.Database) (MeetingInterface, error) {
 	coll := db.Collection("meeting")
 	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
 		{
@@ -43,16 +36,16 @@ type MeetingInterface interface {
 }
 
 func (m *meetingRepository) DeleteMeetingInfos(ctx context.Context, roomIDs []string) error {
-	return mgoutil.DeleteMany(ctx, m.coll, bson.M{"room_id": bson.M{"$in": roomIDs}})
+	return mongoutil.DeleteMany(ctx, m.coll, bson.M{"room_id": bson.M{"$in": roomIDs}})
 }
 
 func (m *meetingRepository) CreateMeetingInfo(ctx context.Context, meetingInfo *model.MeetingInfo) error {
-	return mgoutil.InsertMany(ctx, m.coll, []*model.MeetingInfo{meetingInfo})
+	return mongoutil.InsertMany(ctx, m.coll, []*model.MeetingInfo{meetingInfo})
 }
 
 func (m *meetingRepository) UpdateMeetingInfo(ctx context.Context, roomID string, updateData map[string]any) error {
 	if len(updateData) == 0 {
 		return nil
 	}
-	return mgoutil.UpdateOne(ctx, m.coll, bson.M{"room_id": roomID}, bson.M{"$set": updateData}, false)
+	return mongoutil.UpdateOne(ctx, m.coll, bson.M{"room_id": roomID}, bson.M{"$set": updateData}, false)
 }
