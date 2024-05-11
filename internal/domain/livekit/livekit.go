@@ -129,7 +129,7 @@ func (x *LiveKit) GetRoomData(ctx context.Context, roomID string) (*pb.MeetingIn
 	var metaData pb.MeetingInfo
 	if resp.Rooms[0].Metadata != "" {
 		if err := json.Unmarshal([]byte(resp.Rooms[0].Metadata), &metaData); err != nil {
-			return nil, err
+			return nil, errs.WrapMsg(err, "Unmarshal failed roomId:", roomID)
 		}
 		return &metaData, nil
 	}

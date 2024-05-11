@@ -6,12 +6,12 @@ import (
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
+	"github.com/openimsdk/tools/utils/timeutil"
 	"openmeeting-server/internal/domain/livekit"
 	"openmeeting-server/internal/infrastructure/cache"
 	"openmeeting-server/internal/infrastructure/repository"
 	"openmeeting-server/internal/infrastructure/repository/model"
 	"openmeeting-server/internal/utils"
-	time_utils "openmeeting-server/internal/utils/time"
 	"openmeeting-server/pkg/common/config"
 	"openmeeting-server/protocol/pb"
 	"time"
@@ -71,8 +71,8 @@ func (m *MeetingDomain) PreBookCreateMeeting(ctx context.Context, req *pb.PreBoo
 		MeetingName:   req.MeetingName,
 		HostUserID:    req.UserID,
 		CreatorUserID: req.UserID,
-		StartTime:     time_utils.TimestampToTime(req.StartTime),
-		EndTime:       time_utils.TimestampToTime(req.StartTime + req.MeetingDuration),
+		StartTime:     timeutil.UnixSecondToTime(req.StartTime),
+		EndTime:       timeutil.UnixSecondToTime(req.StartTime + req.MeetingDuration),
 		Duration:      req.MeetingDuration,
 		CreateTime:    time.Now(),
 		UpdateTime:    time.Now(),
