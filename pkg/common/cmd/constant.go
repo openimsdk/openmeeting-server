@@ -10,3 +10,10 @@ var (
 	MinioConfigFileName       string
 	LogConfigFileName         string
 )
+
+var ConfigEnvPrefixMap map[string]string
+
+const (
+	FlagConf          = "config_folder_path"
+	FlagTransferIndex = "index"
+)

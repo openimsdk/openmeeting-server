@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 	grpcprometheus "github.com/grpc-ecosystem/go-grpc-prometheus"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/config"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/prommetrics"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mw"
@@ -18,7 +16,8 @@ import (
 	"net"
 	"net/http"
 	etcd_discovery "openmeeting-server/internal/infrastructure/etcd"
-	subConfig "openmeeting-server/pkg/common/config"
+	"openmeeting-server/pkg/common/config"
+	"openmeeting-server/pkg/common/prommetrics"
 	"os"
 	"os/signal"
 	"strconv"
@@ -136,8 +135,8 @@ import (
 //}
 
 func Start(ctx context.Context, prometheusConfig *config.Prometheus, listenIP,
-	registerIP string, rpcPorts []int, index int, rpcRegisterName string, serverConfig subConfig.Config, share *config.Share,
-	rpcFn func(ctx context.Context, serverConfig subConfig.Config, server *grpc.Server) error, options ...grpc.ServerOption) error {
+	registerIP string, rpcPorts []int, index int, rpcRegisterName string, serverConfig config.Config, share *config.Share,
+	rpcFn func(ctx context.Context, serverConfig config.Config, server *grpc.Server) error, options ...grpc.ServerOption) error {
 
 	rpcPort, err := datautil.GetElemByIndex(rpcPorts, index)
 	if err != nil {

@@ -5,8 +5,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"openmeeting-server/internal/infrastructure/cache"
-	"openmeeting-server/pkg/common/config"
 )
 
 type signalInvitationRepository struct {
@@ -17,12 +15,7 @@ type SignalInvitationInterface interface {
 	Delete(ctx context.Context, sids []string) error
 }
 
-func NewSignalInvitation() (SignalInvitationInterface, error) {
-	client, getClientErr := cache.GetMongoClient()
-	if getClientErr != nil {
-		return nil, getClientErr
-	}
-	db := client.Database(*config.Config.Mongo.Database)
+func NewSignalInvitation(db *mongo.Database) (SignalInvitationInterface, error) {
 	coll := db.Collection("signal_invitation")
 	_, err := coll.Indexes().CreateMany(context.Background(), []mongo.IndexModel{
 		{

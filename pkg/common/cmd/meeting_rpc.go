@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"github.com/openimsdk/open-im-server/v3/pkg/common/cmd"
 	"github.com/openimsdk/tools/system/program"
 	"github.com/spf13/cobra"
 	"openmeeting-server/internal/rpc/meeting"
@@ -11,7 +10,7 @@ import (
 )
 
 type MeetingRpcCmd struct {
-	*cmd.RootCmd
+	*RootCmd
 	ctx           context.Context
 	configMap     map[string]any
 	meetingConfig *config.Config
@@ -26,7 +25,7 @@ func NewMeetingRpcCmd() *MeetingRpcCmd {
 		EtcdConfigFileName:        &meetingConfig.EtcdConfig,
 		MongodbConfigFileName:     &meetingConfig.MongodbConfig,
 	}
-	ret.RootCmd = cmd.NewRootCmd(program.GetProcessName(), cmd.WithConfigMap(ret.configMap))
+	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.Background()
 	ret.Command.RunE = func(cmd *cobra.Command, args []string) error {
 		return ret.runE()
@@ -41,5 +40,5 @@ func (a *MeetingRpcCmd) Exec() error {
 func (a *MeetingRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.meetingConfig.RpcConfig.Prometheus, a.meetingConfig.RpcConfig.RPC.ListenIP,
 		a.meetingConfig.RpcConfig.RPC.RegisterIP, a.meetingConfig.RpcConfig.RPC.Port, a.Index(),
-		a.meetingConfig.Share.RpcRegisterName.Msg, *a.meetingConfig, &a.meetingConfig.Share, meeting.Start)
+		a.meetingConfig.Share.RpcRegisterName.Meeting, *a.meetingConfig, &a.meetingConfig.Share, meeting.Start)
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/timeutil"
 	"openmeeting-server/internal/domain/livekit"
-	"openmeeting-server/internal/infrastructure/cache"
 	"openmeeting-server/internal/infrastructure/repository"
 	"openmeeting-server/internal/infrastructure/repository/model"
 	"openmeeting-server/internal/utils"
@@ -45,11 +44,6 @@ func NewMeetingService(ctx context.Context, c *config.Config) (*MeetingDomain, e
 	}
 
 	repo, err := repository.NewMeetingRepository(mongoClient.GetDB())
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = cache.GetMongoClient()
 	if err != nil {
 		return nil, err
 	}

@@ -17,32 +17,32 @@ var (
 	mongoClient *mongo.Client
 )
 
-func InitMongoClient(conf *config.MongoConf) error {
+func InitMongoClient(conf *config.Mongo) error {
 	if mongoClient != nil {
 		return errors.New("mongo db init again, please check")
 	}
 
 	specialerror.AddReplace(mongo.ErrNoDocuments, errs.ErrRecordNotFound)
 	uri := "mongodb://sample.host:27017/?maxPoolSize=20&w=majority"
-	if *conf.Uri != "" {
-		uri = *conf.Uri
+	if conf.URI != "" {
+		uri = conf.URI
 	} else {
 		mongodbHosts := ""
-		for i, v := range *conf.Address {
-			if i == len(*conf.Address)-1 {
+		for i, v := range conf.Address {
+			if i == len(conf.Address)-1 {
 				mongodbHosts += v
 			} else {
 				mongodbHosts += v + ","
 			}
 		}
-		if conf.Username != nil && conf.Password != nil {
+		if conf.Username != "" && conf.Password != "" {
 			uri = fmt.Sprintf("mongodb://%s:%s@%s/%s?maxPoolSize=%d",
-				*conf.Username, *conf.Password, mongodbHosts,
-				*conf.Database, *conf.MaxPoolSize)
+				conf.Username, conf.Password, mongodbHosts,
+				conf.Database, conf.MaxPoolSize)
 		} else {
 			uri = fmt.Sprintf("mongodb://%s/%s/?maxPoolSize=%d",
-				mongodbHosts, *conf.Database,
-				*conf.MaxPoolSize)
+				mongodbHosts, conf.Database,
+				conf.MaxPoolSize)
 		}
 	}
 	fmt.Println("mongo:", uri)
@@ -65,11 +65,4 @@ func InitMongoClient(conf *config.MongoConf) error {
 		}
 	}
 	return err
-}
-
-func GetMongoClient() (*mongo.Client, error) {
-	if mongoClient == nil {
-		return nil, errors.New("please init mongodb first")
-	}
-	return mongoClient, nil
 }
