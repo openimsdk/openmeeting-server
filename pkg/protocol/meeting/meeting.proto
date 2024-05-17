@@ -1,0 +1,207 @@
+syntax = "proto3";
+package openmeeting.meeting;
+
+option go_package = "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting";
+
+
+
+// Defines LiveKit access information.
+message LiveKit {
+  string token = 1;  // Access token for authentication.
+  string url = 2;  // URL to connect to LiveKit.
+}
+
+// Information about a specific meeting that cannot be changed once set.
+message SystemGeneratedMeetingInfo {
+  string creatorUserID = 1; // The user ID of the meeting creator.
+  string status = 2; // The current status of the meeting, e.g., scheduled, in-progress, completed.
+  int64 startTime = 3; // The actual start time of the meeting (as a timestamp).
+  string meetingID = 4; // Unique identifier for the meeting.
+}
+
+// Information about a specific meeting that can be modified.
+message CreatorDefinedMeetingInfo {
+  string title = 1; // The title of the meeting.
+  int64 scheduledTime = 2; // The scheduled start time of the meeting (as a timestamp).
+  int64 meetingDuration = 3; // The duration of the meeting in seconds.
+  string password = 4; // Password required to join the meeting, if any.
+}
+
+// Information about a specific meeting, combining system-generated and creator-defined information.
+message MeetingInfo {
+  SystemGeneratedMeetingInfo systemGenerated = 1;
+  CreatorDefinedMeetingInfo creatorDefinedMeeting = 2;
+}
+
+// Settings controlling meeting features such as video, audio, and screen sharing permissions.
+message MeetingSetting {
+  bool canParticipantsEnableCamera = 1; // Whether participants can enable their video camera.
+  bool canParticipantsUnmuteMicrophone = 2; // Whether participants can unmute their microphone.
+  bool canParticipantsShareScreen = 3; // Whether participants can share their screen.
+  bool disableCameraOnJoin = 4; // Whether the camera is disabled by default when joining.
+  bool disableMicrophoneOnJoin = 5; // Whether the microphone is disabled by default when joining.
+}
+
+// Detailed information about a meeting, combining info and settings.
+message MeetingInfoSetting {
+  MeetingInfo info = 1;
+  MeetingSetting setting = 2;
+}
+
+// Request to book a future meeting.
+message BookMeetingReq {
+  string creatorUserID = 1;
+  CreatorDefinedMeetingInfo creatorDefinedMeetingInfo = 2;
+  MeetingSetting setting = 3;
+}
+
+// Response after booking a meeting.
+message BookMeetingResp {
+  MeetingInfoSetting detail = 1;
+}
+
+// Request to create an immediate meeting.
+message CreateImmediateMeetingReq {
+  string creatorUserID = 1;
+  CreatorDefinedMeetingInfo creatorDefinedMeetingInfo = 2;
+  MeetingSetting setting = 3;
+}
+
+// Response after creating an immediate meeting.
+message CreateImmediateMeetingResp {
+  MeetingInfoSetting detail = 1;
+  LiveKit liveKit = 2;
+}
+
+// Request to join a meeting.
+message JoinMeetingReq {
+  string meetingID = 1;
+  string userID = 2; // User who joins the meeting.
+  string password = 3;
+}
+
+// Response after joining a meeting.
+message JoinMeetingResp {
+  LiveKit liveKit = 1;
+}
+
+// Request to leave a meeting.
+message LeaveMeetingReq {
+  string meetingID = 1;
+  string userID = 2; // User who leaves the room.
+}
+
+// Response after leaving a meeting.
+message LeaveMeetingResp {
+}
+
+// Request to end a meeting.
+message EndMeetingReq {
+  string meetingID = 1;
+  string userID = 2;
+}
+
+// Response after ending a meeting.
+message EndMeetingResp {
+}
+
+// Request to get a list of meetings both created and joined by a user.
+message GetMeetingsReq {
+  string userID = 1; // The unique identifier of the user.
+  string status = 2; // The status filter for meetings, e.g., "scheduled", "in-progress", "completed".
+}
+
+// Response with a list of meetings that the user has created or joined.
+message GetMeetingsResp {
+  repeated MeetingInfoSetting meetingDetails = 1; // Detailed information about each meeting.
+}
+
+// Request to get information about a specific meeting.
+message GetMeetingReq {
+  string userID = 1;
+  string meetingID = 2;
+}
+
+// Response with detailed information about a meeting.
+message GetMeetingResp {
+  MeetingInfoSetting meetingDetail = 1;
+}
+
+// Request to update specific fields of a meeting.
+message UpdateMeetingRequest {
+  string meetingID = 1;
+  string updatingUserID = 2;
+  oneof updateField {
+    string title = 3;
+    int64 scheduledTime = 4;
+    int64 meetingDuration = 5;
+    string password = 6;
+    bool canParticipantsEnableCamera = 7;
+    bool canParticipantsUnmuteMicrophone = 8;
+    bool canParticipantsShareScreen = 9;
+    bool disableCameraOnJoin = 10;
+    bool disableMicrophoneOnJoin = 11;
+  }
+}
+
+// Response after updating meeting settings.
+message UpdateMeetingResp {
+}
+
+// Personal meeting settings related to video and audio on entry.
+message PersonalMeetingSetting {
+  bool cameraOnEntry = 1; // Whether the camera should be enabled by default when joining the meeting.
+  bool microphoneOnEntry = 2; // Whether the microphone should be enabled by default when joining the meeting.
+}
+
+// Request to get personal meeting settings.
+message GetPersonalMeetingSettingsReq {
+  string meetingID = 1;
+  string userID = 2;
+}
+
+// Response with personal meeting settings.
+message GetPersonalMeetingSettingsResp {
+  PersonalMeetingSetting setting = 1;
+}
+
+// Request to set personal meeting settings.
+message SetPersonalMeetingSettingsReq {
+  string meetingID = 1;
+  string userID = 2;
+  PersonalMeetingSetting setting = 3;
+}
+
+// Response after setting personal meeting settings.
+message SetPersonalMeetingSettingsResp {
+}
+
+// Metadata about a meeting, primarily used for encapsulating meeting details.
+message MeetingMetadata {
+  MeetingInfoSetting detail = 1;
+}
+
+
+// Defines services related to meeting management.
+service MeetingService {
+  // Books a future meeting.
+  rpc BookMeeting(BookMeetingReq) returns (BookMeetingResp);
+  // Creates an immediate meeting.
+  rpc CreateImmediateMeeting(CreateImmediateMeetingReq) returns (CreateImmediateMeetingResp);
+  // Joins a meeting.
+  rpc JoinMeeting(JoinMeetingReq) returns (JoinMeetingResp);
+  // Leaves a meeting.
+  rpc LeaveMeeting(LeaveMeetingReq) returns (LeaveMeetingResp);
+  // Ends a meeting.
+  rpc EndMeeting(EndMeetingReq) returns (EndMeetingResp);
+  // Retrieves a list of meetings that the user has created or joined, filtered by status.
+  rpc GetMeetings(GetMeetingsReq) returns (GetMeetingsResp);
+  // Gets detailed information about a specific meeting.
+  rpc GetMeeting(GetMeetingReq) returns (GetMeetingResp);
+  // Updates specific fields of a meeting.
+  rpc UpdateMeeting(UpdateMeetingRequest) returns (UpdateMeetingResp);
+  // Gets personal meeting settings.
+  rpc GetPersonalMeetingSettings(GetPersonalMeetingSettingsReq) returns (GetPersonalMeetingSettingsResp);
+  // Sets personal meeting settings.
+  rpc SetPersonalMeetingSettings(SetPersonalMeetingSettingsReq) returns (SetPersonalMeetingSettingsResp);
+}
