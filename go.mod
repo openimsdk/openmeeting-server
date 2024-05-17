@@ -8,7 +8,7 @@ require (
 	github.com/livekit/server-sdk-go v1.1.7
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/openimsdk/gomake v0.0.6
-	github.com/openimsdk/tools v0.0.49-alpha.5
+	github.com/openimsdk/tools v0.0.49-alpha.19
 	github.com/prometheus/client_golang v1.18.0
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/spf13/cobra v1.8.0
