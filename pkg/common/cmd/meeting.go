@@ -43,5 +43,5 @@ func (a *MeetingRpcCmd) Exec() error {
 func (a *MeetingRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.meetingConfig.Discovery, &a.meetingConfig.Rpc.Prometheus, a.meetingConfig.Rpc.RPC.ListenIP,
 		a.meetingConfig.Rpc.RPC.RegisterIP, a.meetingConfig.Rpc.RPC.Ports,
-		a.Index(), a.meetingConfig.Share.RpcRegisterName.User, a.meetingConfig, meeting.Start, []prometheus.Collector{prommetrics.UserRegisterCounter})
+		a.Index(), a.meetingConfig.Share.RpcRegisterName.User, a.meetingConfig, meeting.Start, []prometheus.Collector{prommetrics.MeetingCreatedCounter})
 }
