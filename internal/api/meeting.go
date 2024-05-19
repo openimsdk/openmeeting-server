@@ -16,3 +16,39 @@ func NewMeetingApi(client rpcclient.Meeting) MeetingApi {
 func (m *MeetingApi) BookMeeting(c *gin.Context) {
 	a2r.Call(meeting.MeetingServiceClient.BookMeeting, m.Client, c)
 }
+
+func (m *MeetingApi) CreateImmediateMeeting(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.CreateImmediateMeeting, m.Client, c)
+}
+
+func (m *MeetingApi) JoinMeeting(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.JoinMeeting, m.Client, c)
+}
+
+func (m *MeetingApi) LeaveMeeting(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.LeaveMeeting, m.Client, c)
+}
+
+func (m *MeetingApi) EndMeeting(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.EndMeeting, m.Client, c)
+}
+
+func (m *MeetingApi) GetMeetings(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.GetMeetings, m.Client, c)
+}
+
+func (m *MeetingApi) GetMeeting(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.GetMeeting, m.Client, c)
+}
+
+func (m *MeetingApi) GetPersonalMeetingSettings(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.GetPersonalMeetingSettings, m.Client, c)
+}
+
+func (m *MeetingApi) SetPersonalMeetingSettings(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.SetPersonalMeetingSettings, m.Client, c)
+}
+
+func (m *MeetingApi) UpdateMeeting(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.UpdateMeeting, m.Client, c)
+}

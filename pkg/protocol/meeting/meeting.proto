@@ -176,9 +176,15 @@ message SetPersonalMeetingSettingsReq {
 message SetPersonalMeetingSettingsResp {
 }
 
+message PersonalData {
+  string userID = 1;
+  PersonalMeetingSetting personalSetting = 2;
+}
+
 // Metadata about a meeting, primarily used for encapsulating meeting details.
 message MeetingMetadata {
   MeetingInfoSetting detail = 1;
+  repeated PersonalData personalData = 2;
 }
 
 

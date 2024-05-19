@@ -36,3 +36,14 @@ func (u *MeetingMgo) Create(ctx context.Context, meetings []*model.MeetingInfo) 
 func (u *MeetingMgo) Take(ctx context.Context, meetingID string) (user *model.MeetingInfo, err error) {
 	return mongoutil.FindOne[*model.MeetingInfo](ctx, u.coll, bson.M{"meeting_id": meetingID})
 }
+
+func (u *MeetingMgo) Update(ctx context.Context, meetingID string, updateData map[string]any) error {
+	if len(updateData) == 0 {
+		return nil
+	}
+	return mongoutil.UpdateOne(ctx, u.coll, bson.M{"meeting_id": meetingID}, bson.M{"$set": updateData}, false)
+}
+
+func (u *MeetingMgo) FindByStatus(ctx context.Context, status string) ([]*model.MeetingInfo, error) {
+	return mongoutil.Find[*model.MeetingInfo](ctx, u.coll, bson.M{"sid": bson.M{"status": status}})
+}

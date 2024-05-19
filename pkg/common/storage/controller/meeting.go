@@ -10,11 +10,12 @@ import (
 )
 
 type Meeting interface {
-	// TakeWithError Get the information of the specified user. If the userID is not found, it will also return an error
+	// TakeWithError Get the information of the specified meeting. If the meetingID is not found, it will also return an error
 	TakeWithError(ctx context.Context, meetingID string) (meeting *model.MeetingInfo, err error) //1
-	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the storage
+	// Create Insert multiple external guarantees that the meetingID is not repeated and does not exist in the storage
 	Create(ctx context.Context, meetings []*model.MeetingInfo) (err error) //1
-
+	Update(ctx context.Context, meetingID string, updateData map[string]any) (err error)
+	FindByStatus(ctx context.Context, status string) ([]*model.MeetingInfo, error)
 }
 
 type MeetingStorageManager struct {
@@ -45,4 +46,17 @@ func (u *MeetingStorageManager) Create(ctx context.Context, meetings []*model.Me
 		}
 		return nil
 	})
+}
+
+func (u *MeetingStorageManager) Update(ctx context.Context, meetingID string, updateData map[string]any) (err error) {
+	return u.tx.Transaction(ctx, func(ctx context.Context) error {
+		if err = u.db.Update(ctx, meetingID, updateData); err != nil {
+			return err
+		}
+		return nil
+	})
+}
+
+func (u *MeetingStorageManager) FindByStatus(ctx context.Context, status string) ([]*model.MeetingInfo, error) {
+	return u.db.FindByStatus(ctx, status)
 }

@@ -75,6 +75,22 @@ type User struct {
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 
+type Meeting struct {
+	RPC struct {
+		RegisterIP string `mapstructure:"registerIP"`
+		ListenIP   string `mapstructure:"listenIP"`
+		Ports      []int  `mapstructure:"ports"`
+	} `mapstructure:"rpc"`
+	Prometheus Prometheus `mapstructure:"prometheus"`
+}
+
+type RTC struct {
+	URL       []string `mapstructure:"url"`
+	ApiKey    string   `mapstructure:"apiKey"`
+	ApiSecret string   `mapstructure:"apiSecret"`
+	InnerURL  string   `mapstructure:"innerURL"`
+}
+
 type Redis struct {
 	Address        []string `mapstructure:"address"`
 	Username       string   `mapstructure:"username"`
@@ -87,7 +103,7 @@ type Redis struct {
 
 type RpcRegisterName struct {
 	User    string `mapstructure:"user"`
-	Meeting string `mapstructure:"user"`
+	Meeting string `mapstructure:"meeting"`
 }
 
 type Discovery struct {
