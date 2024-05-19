@@ -58,17 +58,18 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string) (st
 	return jwt, x.getLiveURL(), nil
 }
 
-func (x *LiveKit) CreateRoom(ctx context.Context, roomID string) (sID, token, liveUrl string, err error) {
+func (x *LiveKit) CreateRoom(ctx context.Context, meetingID string) (sID, token, liveUrl string, err error) {
 	room, err := x.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{
-		Name:            roomID,
+		Name:            meetingID,
 		EmptyTimeout:    3,
 		MaxParticipants: 10000,
 	})
 	if err != nil {
 		log.ZError(ctx, "Marshal failed", err)
-		return "", "", "", errs.Wrap(err)
+		return "", "", "", errs.WrapMsg(err, "create livekit room failed, meetingID", meetingID)
 	}
-	callback := rtc.NewRoomCallback(mcontext.NewCtx("room_callback_"+mcontext.GetOperationID(ctx)), roomID, room.Sid, x.roomClient)
+	callback := rtc.NewRoomCallback(
+		mcontext.NewCtx("room_callback_"+mcontext.GetOperationID(ctx)), meetingID, room.Sid, x.roomClient)
 	roomCallback := &lksdk.RoomCallback{
 		ParticipantCallback:       lksdk.ParticipantCallback{},
 		OnParticipantConnected:    callback.OnParticipantConnected,
@@ -77,12 +78,12 @@ func (x *LiveKit) CreateRoom(ctx context.Context, roomID string) (sID, token, li
 		OnReconnected:             callback.OnReconnected,
 		OnReconnecting:            callback.OnReconnecting,
 	}
-	token, liveUrl, err = x.GetJoinToken(ctx, roomID, roomID)
+	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, meetingID)
 	if err != nil {
-		return "", "", "", errs.Wrap(err)
+		return "", "", "", errs.WrapMsg(err, "get join token failed, meetingID:", meetingID)
 	}
 	if _, err = lksdk.ConnectToRoomWithToken(x.conf.InnerURL, token, roomCallback); err != nil {
-		return "", "", "", err
+		return "", "", "", errs.WrapMsg(err, "connect to room with token failed, meetingID: ", meetingID)
 	}
 	return room.Sid, token, liveUrl, nil
 }
@@ -94,15 +95,15 @@ func (x *LiveKit) getLiveURL() string {
 	return x.conf.URL[(atomic.AddUint64(&x.index, 1)-1)%uint64(len(x.conf.URL))]
 }
 
-func (x *LiveKit) RoomIsExist(ctx context.Context, roomID string) (string, error) {
-	roomsResp, err := x.roomClient.ListRooms(ctx, &livekit.ListRoomsRequest{Names: []string{roomID}})
+func (x *LiveKit) RoomIsExist(ctx context.Context, meetingID string) (string, error) {
+	roomsResp, err := x.roomClient.ListRooms(ctx, &livekit.ListRoomsRequest{Names: []string{meetingID}})
 	if err != nil {
-		return "", errs.Wrap(err)
+		return "", errs.WrapMsg(err, "list room failed, meetingID:", meetingID)
 	}
 	if len(roomsResp.Rooms) > 0 {
 		return roomsResp.Rooms[0].GetSid(), nil
 	}
-	return "", errs.ErrRecordNotFound.WrapMsg("roomIsNotExist")
+	return "", errs.ErrRecordNotFound.WrapMsg("roomIsNotExist meetingID: ", meetingID)
 }
 
 func (x *LiveKit) GetRoomData(ctx context.Context, roomID string) (*meeting.MeetingMetadata, error) {
@@ -124,17 +125,18 @@ func (x *LiveKit) GetRoomData(ctx context.Context, roomID string) (*meeting.Meet
 }
 
 func (x *LiveKit) UpdateMetaData(ctx context.Context, updateData *meeting.MeetingMetadata) error {
+	meetingID := updateData.Detail.Info.SystemGenerated.MeetingID
 	bytes, err := json.Marshal(&updateData)
 	if err != nil {
 		return errs.Wrap(err)
 	}
 	_, err = x.roomClient.UpdateRoomMetadata(ctx, &livekit.UpdateRoomMetadataRequest{
-		Room:     updateData.Detail.Info.SystemGenerated.MeetingID,
+		Room:     meetingID,
 		Metadata: string(bytes),
 	})
 
 	if err != nil {
-		return errs.Wrap(err)
+		return errs.WrapMsg(err, "update room meta data failed, meetingID: ", meetingID)
 	}
 
 	return nil
@@ -145,7 +147,7 @@ func (x *LiveKit) CloseRoom(ctx context.Context, roomID string) error {
 		Room: roomID,
 	})
 	if err != nil {
-		return errs.ErrInternalServer.WrapMsg(err.Error())
+		return errs.WrapMsg(err, "delete livekit room failed, meetingID", roomID)
 	}
 	return nil
 }
@@ -153,7 +155,7 @@ func (x *LiveKit) CloseRoom(ctx context.Context, roomID string) error {
 func (x *LiveKit) RemoveParticipant(ctx context.Context, roomID, userID string) error {
 	_, err := x.roomClient.RemoveParticipant(ctx, &livekit.RoomParticipantIdentity{Room: roomID, Identity: userID})
 	if err != nil && !x.IsNotFound(err) {
-		return err
+		return errs.WrapMsg(err, "remove participant failed, meetingID: ", roomID, "userID: ", userID)
 	}
 	return nil
 }

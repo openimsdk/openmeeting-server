@@ -29,12 +29,12 @@ func NewMeeting(meetingDB database.Meeting, cache cache.Meeting, tx tx.Tx) Meeti
 }
 
 // TakeWithError Get the information of the specified user and return an error if the userID is not found.
-func (u *MeetingStorageManager) TakeWithError(ctx context.Context, meetingsID string) (meeting *model.MeetingInfo, err error) {
-	meeting, err = u.db.Take(ctx, meetingsID)
+func (u *MeetingStorageManager) TakeWithError(ctx context.Context, meetingID string) (meeting *model.MeetingInfo, err error) {
+	meeting, err = u.db.Take(ctx, meetingID)
 	if err != nil {
-		return
+		return meeting, errs.WrapMsg(err, "get record from mongo failed, meetingID: ", meetingID)
 	}
-	err = errs.ErrRecordNotFound.WrapMsg("userID not found")
+	err = errs.ErrRecordNotFound.WrapMsg("meetingID not found")
 	return
 }
 
@@ -42,7 +42,7 @@ func (u *MeetingStorageManager) TakeWithError(ctx context.Context, meetingsID st
 func (u *MeetingStorageManager) Create(ctx context.Context, meetings []*model.MeetingInfo) (err error) {
 	return u.tx.Transaction(ctx, func(ctx context.Context) error {
 		if err = u.db.Create(ctx, meetings); err != nil {
-			return err
+			return errs.WrapMsg(err, "create meeting data failed")
 		}
 		return nil
 	})
@@ -51,7 +51,7 @@ func (u *MeetingStorageManager) Create(ctx context.Context, meetings []*model.Me
 func (u *MeetingStorageManager) Update(ctx context.Context, meetingID string, updateData map[string]any) (err error) {
 	return u.tx.Transaction(ctx, func(ctx context.Context) error {
 		if err = u.db.Update(ctx, meetingID, updateData); err != nil {
-			return err
+			return errs.WrapMsg(err, "update meeting info failed, meetingID:", meetingID)
 		}
 		return nil
 	})

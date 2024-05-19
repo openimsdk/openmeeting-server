@@ -1,0 +1,1 @@
+../cmd/openmeeting-server/openim-rtc-core --bind 0.0.0.0 --config ../conf/core.yaml > ../logs/core.log 2>&1 &

@@ -2,6 +2,7 @@ package redis
 
 import (
 	"github.com/dtm-labs/rockscache"
+	"github.com/openimsdk/openmeeting-server/pkg/common/cachekey"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/cache"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database"
 	"github.com/redis/go-redis/v9"
@@ -41,4 +42,8 @@ func (m *Meeting) NewCache() cache.Meeting {
 		rcClient:   m.rcClient,
 		Meta:       m.Copy(),
 	}
+}
+
+func (m *Meeting) getMeetingInfoKey(userID string) string {
+	return cachekey.GetUserInfoKey(userID)
 }
