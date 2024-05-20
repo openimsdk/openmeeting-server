@@ -30,6 +30,11 @@ func NewMeeting(meetingDB database.Meeting, cache cache.Meeting, tx tx.Tx) Meeti
 
 // TakeWithError Get the information of the specified user and return an error if the userID is not found.
 func (u *MeetingStorageManager) TakeWithError(ctx context.Context, meetingID string) (meeting *model.MeetingInfo, err error) {
+	meeting, err = u.cache.GetMeetingByID(ctx, meetingID)
+	if err != nil {
+		return
+	}
+
 	meeting, err = u.db.Take(ctx, meetingID)
 	if err != nil {
 		return meeting, errs.WrapMsg(err, "get record from mongo failed, meetingID: ", meetingID)

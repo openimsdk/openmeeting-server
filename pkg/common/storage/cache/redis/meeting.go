@@ -1,10 +1,12 @@
 package redis
 
 import (
+	"context"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/openmeeting-server/pkg/common/cachekey"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/cache"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database"
+	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/redis/go-redis/v9"
 	"time"
 )
@@ -44,6 +46,12 @@ func (m *Meeting) NewCache() cache.Meeting {
 	}
 }
 
-func (m *Meeting) getMeetingInfoKey(userID string) string {
-	return cachekey.GetUserInfoKey(userID)
+func (m *Meeting) getMeetingInfoKey(meetingID string) string {
+	return cachekey.GetUserInfoKey(meetingID)
+}
+
+func (m *Meeting) GetMeetingByID(ctx context.Context, meetingID string) (*model.MeetingInfo, error) {
+	return getCache(ctx, m.rcClient, m.getMeetingInfoKey(meetingID), m.expireTime, func(ctx context.Context) (*model.MeetingInfo, error) {
+		return m.meetingDB.Take(ctx, meetingID)
+	})
 }
