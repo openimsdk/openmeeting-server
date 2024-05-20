@@ -73,8 +73,8 @@ The OpenIM system is a comprehensive suite of services tailored to address a wid
    If you wish to start or stop any specific service, you can do so with `systemctl start` or `systemctl stop` followed by the service name:
 
    ```bash
-   systemctl start openim-api.service
-   systemctl stop openim-api.service
+   systemctl start openmeeting-api.service
+   systemctl stop openmeeting-api.service
    ```
 
 3. **Uninstalling OpenIM**:
@@ -132,7 +132,7 @@ The OpenIM system is a comprehensive suite of services tailored to address a wid
    For example, to see the logs for the `openim-api.service`, you would use:
 
    ```bash
-   journalctl -u openim-api.service
+   journalctl -u openmeeting-api.service
    ```
 
 2. **Filtering Logs**:
@@ -142,7 +142,7 @@ The OpenIM system is a comprehensive suite of services tailored to address a wid
      : If you wish to see logs since a specific time:
 
      ```bash
-     journalctl -u openim-api.service --since "2023-10-28 12:00:00"
+     journalctl -u openmeeting-api.service --since "2023-10-28 12:00:00"
      ```
 
    + Most Recent Logs
@@ -151,7 +151,7 @@ The OpenIM system is a comprehensive suite of services tailored to address a wid
 `tail` functionality with `journalctl`:
 
      ```bash
-     journalctl -u openim-api.service -n 100
+     journalctl -u openmeeting-api.service -n 100
      ```
 
 3. **Continuous Monitoring of Logs**:
@@ -159,7 +159,7 @@ The OpenIM system is a comprehensive suite of services tailored to address a wid
    To see new log messages in real-time, you can use the `-f` flag, which mimics the behavior of `tail -f`:
 
    ```bash
-   journalctl -u openim-api.service -f
+   journalctl -u openmeeting-api.service -f
    ```
 
 ### Continued Maintenance:
@@ -169,7 +169,7 @@ The OpenIM system is a comprehensive suite of services tailored to address a wid
    It's good practice to routinely verify that all services are active and running. This can be done with:
 
    ```bash
-   systemctl status openim-api.service openim-push.service openim-rpc-group.service openim-crontask.service openim-rpc-auth.service openim-rpc-msg.service openim-msggateway.service openim-rpc-conversation.service openim-rpc-third.service openim-msgtransfer.service openim-rpc-friend.service openim-rpc-user.service
+   systemctl status openmeeting-api.service openim-push.service openmeeting-rpc-group.service openim-crontask.service openmeeting-rpc-auth.service openmeeting-rpc-msg.service openim-msggateway.service openmeeting-rpc-conversation.service openmeeting-rpc-third.service openim-msgtransfer.service openmeeting-rpc-friend.service openmeeting-rpc-user.service
    ```
 
 2. **Update Services**:
@@ -178,7 +178,7 @@ The OpenIM system is a comprehensive suite of services tailored to address a wid
 
    ```bash
    systemctl daemon-reload
-   systemctl restart openim-api.service
+   systemctl restart openmeeting-api.service
    ```
 
 3. **Backup Important Data**:
@@ -248,7 +248,7 @@ In short, systemd is the current mainstream way to manage backend services on Li
 2. Create a data directory:
 
 ```bash
-mkdir -p ${OPENIM_DATA_DIR}/{openim-api,openim-crontask}
+mkdir -p ${OPENIM_DATA_DIR}/{openmeeting-api,openim-crontask}
 ```
 
 3. Create a bin directory and copy `openim-api` and `openim-crontask` executable files:
@@ -256,14 +256,14 @@ mkdir -p ${OPENIM_DATA_DIR}/{openim-api,openim-crontask}
 ```bash
 source ./environment.sh
 mkdir -p ${OPENIM_INSTALL_DIR}/bin
-cp openim-api openim-crontask ${OPENIM_INSTALL_DIR}/bin
+cp openmeeting-api openim-crontask ${OPENIM_INSTALL_DIR}/bin
 ```
 
 4. Copy the configuration files of `openim-api` and `openim-crontask` to the `${OPENIM_CONFIG_DIR}` directory:
 
 ```bash
 mkdir -p ${OPENIM_CONFIG_DIR}
-cp openim-api.yaml openim-crontask.yaml ${OPENIM_CONFIG_DIR}
+cp openmeeting-api.yaml openim-crontask.yaml ${OPENIM_CONFIG_DIR}
 ```
 
 ##  3. <a name='Createopenim-apisystemdunittemplatefile'></a> Create `openim-api` systemd unit template file
@@ -274,7 +274,7 @@ Run the following shell script to generate the `openim-api.service.template`:
 
 ```bash
 source ./environment.sh
-cat > openim-api.service.template <<EOF
+cat > openmeeting-api.service.template <<EOF
 [Unit]
 Description=OpenIM Server API
 Documentation=https://github.com/oepnimsdk/open-im-server/blob/master/init/README.md

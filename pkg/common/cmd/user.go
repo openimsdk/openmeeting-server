@@ -36,11 +36,11 @@ func NewUserRpcCmd() *UserRpcCmd {
 	var userConfig user.Config
 	ret := &UserRpcCmd{userConfig: &userConfig}
 	ret.configMap = map[string]any{
-		OpenIMRPCUserCfgFileName: &userConfig.Rpc,
-		RedisConfigFileName:      &userConfig.Redis,
-		MongodbConfigFileName:    &userConfig.Mongo,
-		ShareFileName:            &userConfig.Share,
-		DiscoveryConfigFilename:  &userConfig.Discovery,
+		OpenMeetingRPCUserCfgFileName: &userConfig.Rpc,
+		RedisConfigFileName:           &userConfig.Redis,
+		MongodbConfigFileName:         &userConfig.Mongo,
+		ShareFileName:                 &userConfig.Share,
+		DiscoveryConfigFilename:       &userConfig.Discovery,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

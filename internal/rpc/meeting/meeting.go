@@ -2,6 +2,7 @@ package meeting
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/openmeeting-server/internal/rpc/meeting/rtc"
 	"github.com/openimsdk/openmeeting-server/internal/rpc/meeting/rtc/livekit"
 	"github.com/openimsdk/openmeeting-server/pkg/common/config"
@@ -36,6 +37,8 @@ type Config struct {
 }
 
 func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
+	fmt.Println("meeting start#############")
+
 	mgoCli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
 	if err != nil {
 		return err

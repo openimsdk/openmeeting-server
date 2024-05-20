@@ -45,9 +45,9 @@ report_sizes: true
 #   mod_timestamp: "{{ .CommitTimestamp }}"
 
 builds:
-  - binary: openim-api
-    id: openim-api
-    main: ./cmd/openim-api/main.go
+  - binary: openmeeting-api
+    id: openmeeting-api
+    main: ./cmd/openmeeting-api/main.go
     goos:
       - darwin
       - windows
@@ -153,9 +153,9 @@ builds:
       - "6"
       - "7"
 
-  - binary: openim-rpc-auth
-    id: openim-rpc-auth
-    main: ./cmd/openim-rpc/openim-rpc-auth/main.go
+  - binary: openmeeting-rpc-auth
+    id: openmeeting-rpc-auth
+    main: ./cmd/openmeeting-rpc/openmeeting-rpc-auth/main.go
     goos:
       - darwin
       - windows
@@ -171,9 +171,9 @@ builds:
       - "6"
       - "7"
 
-  - binary: openim-rpc-conversation
-    id: openim-rpc-conversation
-    main: ./cmd/openim-rpc/openim-rpc-conversation/main.go
+  - binary: openmeeting-rpc-conversation
+    id: openmeeting-rpc-conversation
+    main: ./cmd/openmeeting-rpc/openmeeting-rpc-conversation/main.go
     goos:
       - darwin
       - windows
@@ -189,9 +189,9 @@ builds:
       - "6"
       - "7"
 
-  - binary: openim-rpc-friend
-    id: openim-rpc-friend
-    main: ./cmd/openim-rpc/openim-rpc-friend/main.go
+  - binary: openmeeting-rpc-friend
+    id: openmeeting-rpc-friend
+    main: ./cmd/openmeeting-rpc/openmeeting-rpc-friend/main.go
     goos:
       - darwin
       - windows
@@ -207,9 +207,9 @@ builds:
       - "6"
       - "7"
 
-  - binary: openim-rpc-group
-    id: openim-rpc-group
-    main: ./cmd/openim-rpc/openim-rpc-group/main.go
+  - binary: openmeeting-rpc-group
+    id: openmeeting-rpc-group
+    main: ./cmd/openmeeting-rpc/openmeeting-rpc-group/main.go
     goos:
       - darwin
       - windows
@@ -225,9 +225,9 @@ builds:
       - "6"
       - "7"
 
-  - binary: openim-rpc-msg
-    id: openim-rpc-msg
-    main: ./cmd/openim-rpc/openim-rpc-msg/main.go
+  - binary: openmeeting-rpc-msg
+    id: openmeeting-rpc-msg
+    main: ./cmd/openmeeting-rpc/openmeeting-rpc-msg/main.go
     goos:
       - darwin
       - windows
@@ -243,9 +243,9 @@ builds:
       - "6"
       - "7"
 
-  - binary: openim-rpc-third
-    id: openim-rpc-third
-    main: ./cmd/openim-rpc/openim-rpc-third/main.go
+  - binary: openmeeting-rpc-third
+    id: openmeeting-rpc-third
+    main: ./cmd/openmeeting-rpc/openmeeting-rpc-third/main.go
     goos:
       - darwin
       - windows
@@ -261,9 +261,9 @@ builds:
       - "6"
       - "7"
 
-  - binary: openim-rpc-user
-    id: openim-rpc-user
-    main: ./cmd/openim-rpc/openim-rpc-user/main.go
+  - binary: openmeeting-rpc-user
+    id: openmeeting-rpc-user
+    main: ./cmd/openmeeting-rpc/openmeeting-rpc-user/main.go
     goos:
       - darwin
       - windows
@@ -377,9 +377,9 @@ changelog:
 #   - image_templates:
 #       - "openimsdk/open-im-server:{{ .Tag }}-amd64"
 #       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-amd64"
-#     dockerfile: build/images/openim-api/Dockerfile.release
+#     dockerfile: build/images/openmeeting-api/Dockerfile.release
 #     ids: 
-#       - openim-api
+#       - openmeeting-api
 #     use: buildx
 #     build_flag_templates:
 #       - "--pull"
@@ -399,7 +399,7 @@ changelog:
 #   - image_templates:
 #       - "goreleaser/goreleaser:{{ .Tag }}-arm64"
 #       - "ghcr.io/goreleaser/goreleaser:{{ .Tag }}-arm64"
-#     dockerfile: build/images/openim-api/Dockerfile.release
+#     dockerfile: build/images/openmeeting-api/Dockerfile.release
 #     use: buildx
 #     build_flag_templates:
 #       - "--pull"
@@ -439,19 +439,19 @@ changelog:
 nfpms:
   - id: packages
     builds:
-      - openim-api
+      - openmeeting-api
       - openim-cmdutils
       - openim-crontask
       - openim-msggateway
       - openim-msgtransfer
       - openim-push
-      - openim-rpc-auth
-      - openim-rpc-conversation
-      - openim-rpc-friend
-      - openim-rpc-group
-      - openim-rpc-msg
-      - openim-rpc-third
-      - openim-rpc-user
+      - openmeeting-rpc-auth
+      - openmeeting-rpc-conversation
+      - openmeeting-rpc-friend
+      - openmeeting-rpc-group
+      - openmeeting-rpc-msg
+      - openmeeting-rpc-third
+      - openmeeting-rpc-user
     # Your app's vendor.
     vendor: OpenIMSDK
     homepage: https://github.com/openimsdk/open-im-server

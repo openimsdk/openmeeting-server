@@ -1,6 +1,7 @@
 serviceBinaries:
-  openim-api: 1
-  openim-rpc-user: 1
+  openmeeting-api: 1
+  openmeeting-rpc-user: 1
+  openmeeting-rpc-meeting: 1
 toolBinaries:
   - check-free-memory
   - check-component

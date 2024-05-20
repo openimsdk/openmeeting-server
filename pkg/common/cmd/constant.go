@@ -19,13 +19,15 @@ import (
 )
 
 var (
-	OpenIMRPCUserCfgFileName string
-	RedisConfigFileName      string
-	MongodbConfigFileName    string
-	DiscoveryConfigFilename  string
-	OpenIMAPICfgFileName     string
-	LogConfigFileName        string
-	ShareFileName            string
+	OpenMeetingRPCUserCfgFileName    string
+	OpenMeetingRPCMeetingCfgFileName string
+	RedisConfigFileName              string
+	MongodbConfigFileName            string
+	DiscoveryConfigFilename          string
+	OpenMeetingAPICfgFileName        string
+	LogConfigFileName                string
+	ShareFileName                    string
+	LiveKitConfigFilename            string
 )
 
 const envPrefix = "IMENV_"
@@ -36,19 +38,22 @@ func init() {
 
 	RedisConfigFileName = "redis.yml"
 	MongodbConfigFileName = "mongodb.yml"
-	OpenIMAPICfgFileName = "openim-api.yml"
-	OpenIMRPCUserCfgFileName = "openim-rpc-user.yml"
+	OpenMeetingAPICfgFileName = "openmeeting-api.yml"
+	OpenMeetingRPCUserCfgFileName = "openmeeting-rpc-user.yml"
+	OpenMeetingRPCMeetingCfgFileName = "openmeeting-rpc-meeting.yml"
 	DiscoveryConfigFilename = "discovery.yml"
 	LogConfigFileName = "log.yml"
 	ShareFileName = "share.yml"
+	LiveKitConfigFilename = "livekit.yml"
 
 	ConfigEnvPrefixMap = make(map[string]string)
 	fileNames := []string{
 		RedisConfigFileName,
 		MongodbConfigFileName,
-		OpenIMRPCUserCfgFileName,
+		OpenMeetingRPCUserCfgFileName,
+		OpenMeetingRPCMeetingCfgFileName,
 		DiscoveryConfigFilename,
-		OpenIMAPICfgFileName,
+		OpenMeetingAPICfgFileName,
 		LogConfigFileName,
 		ShareFileName,
 	}

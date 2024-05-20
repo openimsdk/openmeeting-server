@@ -2,7 +2,7 @@
 FROM golang:1.21-alpine as builder
 
 # Define the base directory for the application as an environment variable
-ENV SERVER_DIR=/openim-server
+ENV SERVER_DIR=/openmeeting-server
 
 # Set the working directory inside the container based on the environment variable
 WORKDIR $SERVER_DIR
@@ -28,7 +28,7 @@ FROM golang:1.21-alpine
 RUN apk add --no-cache bash
 
 # Set the environment and work directory
-ENV SERVER_DIR=/openim-server
+ENV SERVER_DIR=/openmeeting-server
 WORKDIR $SERVER_DIR
 
 

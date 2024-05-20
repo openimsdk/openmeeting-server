@@ -30,9 +30,9 @@ RUN go mod download
 
 COPY . .
 
-RUN make build BINS=openim-api
+RUN make build BINS=openmeeting-api
 
-RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-api /usr/bin/openim-api
+RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openmeeting-api /usr/bin/openmeeting-api
 
 # FROM ghcr.io/openim-sigs/openim-bash-image:latest
 FROM ghcr.io/openim-sigs/openim-bash-image:latest

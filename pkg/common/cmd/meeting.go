@@ -22,11 +22,12 @@ func NewMeetingRpcCmd() *MeetingRpcCmd {
 	var meetingConfig meeting.Config
 	ret := &MeetingRpcCmd{meetingConfig: &meetingConfig}
 	ret.configMap = map[string]any{
-		OpenIMRPCUserCfgFileName: &meetingConfig.Rpc,
-		RedisConfigFileName:      &meetingConfig.Redis,
-		MongodbConfigFileName:    &meetingConfig.Mongo,
-		ShareFileName:            &meetingConfig.Share,
-		DiscoveryConfigFilename:  &meetingConfig.Discovery,
+		OpenMeetingRPCMeetingCfgFileName: &meetingConfig.Rpc,
+		RedisConfigFileName:              &meetingConfig.Redis,
+		MongodbConfigFileName:            &meetingConfig.Mongo,
+		ShareFileName:                    &meetingConfig.Share,
+		DiscoveryConfigFilename:          &meetingConfig.Discovery,
+		LiveKitConfigFilename:            &meetingConfig.Rtc,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)
@@ -43,5 +44,5 @@ func (a *MeetingRpcCmd) Exec() error {
 func (a *MeetingRpcCmd) runE() error {
 	return startrpc.Start(a.ctx, &a.meetingConfig.Discovery, &a.meetingConfig.Rpc.Prometheus, a.meetingConfig.Rpc.RPC.ListenIP,
 		a.meetingConfig.Rpc.RPC.RegisterIP, a.meetingConfig.Rpc.RPC.Ports,
-		a.Index(), a.meetingConfig.Share.RpcRegisterName.User, a.meetingConfig, meeting.Start, []prometheus.Collector{prommetrics.MeetingCreatedCounter})
+		a.Index(), a.meetingConfig.Share.RpcRegisterName.Meeting, a.meetingConfig, meeting.Start, []prometheus.Collector{prommetrics.MeetingCreatedCounter})
 }

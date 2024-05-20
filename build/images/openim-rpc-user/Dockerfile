@@ -30,9 +30,9 @@ RUN go mod download
 
 COPY . .
 
-RUN make build BINS=openim-rpc-user
+RUN make build BINS=openmeeting-rpc-user
 
-RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openim-rpc-user /usr/bin/openim-rpc-user
+RUN cp /openim/openim-server/_output/bin/platforms/$(go env GOOS)/$(go env GOARCH)/openmeeting-rpc-user /usr/bin/openmeeting-rpc-user
 
 # FROM ghcr.io/openim-sigs/openim-bash-image:latest
 FROM ghcr.io/openim-sigs/openim-bash-image:latest

@@ -48,13 +48,13 @@ Ensuring that OpenIM operates smoothly requires clear direction on the configura
    + **For Configuration Path**: When initializing OpenIM, you can specify the path to the configuration file directly using the `-c` or `--config_folder_path` option.
 
      ```bash
-     ❯ _output/bin/platforms/linux/amd64/openim-api --config_folder_path="/your/config/folder/path"
+     ❯ _output/bin/platforms/linux/amd64/openmeeting-api --config_folder_path="/your/config/folder/path"
      ```
 
    + **For Port Specification**: Similarly, if you wish to designate a particular port, utilize the `-p` option followed by the desired port number.
 
      ```bash
-     ❯ _output/bin/platforms/linux/amd64/openim-api -p 1234
+     ❯ _output/bin/platforms/linux/amd64/openmeeting-api -p 1234
      ```
 
      Note: If the port is not specified here, OpenIM will fetch it from the configuration file. Setting the port via environment variables isn't supported. We recommend consolidating settings in the configuration file for a more consistent and streamlined setup.
