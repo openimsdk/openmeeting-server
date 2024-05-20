@@ -34,12 +34,6 @@ func (u *MeetingStorageManager) TakeWithError(ctx context.Context, meetingID str
 	if err != nil {
 		return
 	}
-
-	meeting, err = u.db.Take(ctx, meetingID)
-	if err != nil {
-		return meeting, errs.WrapMsg(err, "get record from mongo failed, meetingID: ", meetingID)
-	}
-	err = errs.ErrRecordNotFound.WrapMsg("meetingID not found")
 	return
 }
 
