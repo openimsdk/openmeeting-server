@@ -55,3 +55,14 @@ func (m *Meeting) GetMeetingByID(ctx context.Context, meetingID string) (*model.
 		return m.meetingDB.Take(ctx, meetingID)
 	})
 }
+
+func (m *Meeting) DelMeeting(meetingIDs ...string) cache.Meeting {
+	keys := make([]string, 0, len(meetingIDs))
+	for _, meetingID := range meetingIDs {
+		keys = append(keys, m.getMeetingInfoKey(meetingID))
+	}
+	newMeetingCache := m.NewCache()
+	newMeetingCache.AddKeys(keys...)
+
+	return newMeetingCache
+}

@@ -7,6 +7,7 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/tools/db/tx"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/datautil"
 )
 
 type Meeting interface {
@@ -43,7 +44,9 @@ func (u *MeetingStorageManager) Create(ctx context.Context, meetings []*model.Me
 		if err = u.db.Create(ctx, meetings); err != nil {
 			return errs.WrapMsg(err, "create meeting data failed")
 		}
-		return nil
+		return u.cache.DelMeeting(datautil.Slice(meetings, func(e *model.MeetingInfo) string {
+			return e.MeetingID
+		})...).ExecDel(ctx)
 	})
 }
 
@@ -52,7 +55,7 @@ func (u *MeetingStorageManager) Update(ctx context.Context, meetingID string, up
 		if err = u.db.Update(ctx, meetingID, updateData); err != nil {
 			return errs.WrapMsg(err, "update meeting info failed, meetingID:", meetingID)
 		}
-		return nil
+		return u.cache.DelMeeting(meetingID).ExecDel(ctx)
 	})
 }
 
