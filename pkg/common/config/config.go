@@ -50,6 +50,7 @@ type Share struct {
 
 type API struct {
 	Secret string `mapstructure:"secret"`
+	Expire int    `mapstructure:"expire"`
 	Api    struct {
 		ListenIP string `mapstructure:"listenIP"`
 		Ports    []int  `mapstructure:"ports"`
@@ -72,6 +73,10 @@ type User struct {
 		ListenIP   string `mapstructure:"listenIP"`
 		Ports      []int  `mapstructure:"ports"`
 	} `mapstructure:"rpc"`
+	Token struct {
+		Secret  string `mapstructure:"secret"`
+		Expires int    `mapstructure:"expire"`
+	} `mapstructure:"token"`
 	Prometheus Prometheus `mapstructure:"prometheus"`
 }
 

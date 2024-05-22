@@ -31,6 +31,10 @@ func (u *UserApi) UserRegister(c *gin.Context) {
 	a2r.Call(user.UserClient.UserRegister, u.Client, c)
 }
 
+func (u *UserApi) UserLogin(c *gin.Context) {
+	a2r.Call(user.UserClient.UserLogin, u.Client, c)
+}
+
 func (u *UserApi) GetUsersPublicInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.GetDesignateUsers, u.Client, c)
 }

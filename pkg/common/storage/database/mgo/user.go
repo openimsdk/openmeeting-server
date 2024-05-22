@@ -50,3 +50,7 @@ func (u *UserMgo) Create(ctx context.Context, users []*model.User) error {
 func (u *UserMgo) Take(ctx context.Context, userID string) (user *model.User, err error) {
 	return mongoutil.FindOne[*model.User](ctx, u.coll, bson.M{"user_id": userID})
 }
+
+func (u *UserMgo) TakeByAccount(ctx context.Context, account string) (user *model.User, err error) {
+	return mongoutil.FindOne[*model.User](ctx, u.coll, bson.M{"account": account})
+}

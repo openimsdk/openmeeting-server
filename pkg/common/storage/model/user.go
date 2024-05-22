@@ -16,5 +16,7 @@ package model
 
 type User struct {
 	UserID   string `bson:"user_id"`
+	Account  string `bson:"account"`
 	Nickname string `bson:"nickname"`
+	Password string `bson:"password"`
 }

@@ -38,14 +38,39 @@ message userRegisterReq {
 message userRegisterResp {
 }
 
+message userLoginReq {
+  string areaCode = 1;
+  string phoneNumber = 2;
+  string verifyCode = 3;
+  string account = 4;
+  string password = 5;
+  int32 platform = 6;
+  string deviceID = 7;
+  string email = 8;
+}
 
+message userLoginResp {
+  string Token = 2;
+  string userID = 3;
+}
 
+message getUserTokenReq{
+  string userID = 1;
+}
+
+message getUserTokenResp{
+  string token = 1;
+}
 
 service user {
   //Get the specified user information full field
   rpc getDesignateUsers(getDesignateUsersReq) returns(getDesignateUsersResp);
   //user registration
   rpc userRegister(userRegisterReq) returns (userRegisterResp);
+  //user login
+  rpc userLogin(userLoginReq) returns (userLoginResp);
+  // get user token
+  rpc getUserToken(getUserTokenReq) returns (getUserTokenResp);
 }
 
 

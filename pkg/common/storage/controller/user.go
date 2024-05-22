@@ -30,7 +30,14 @@ type User interface {
 	FindWithError(ctx context.Context, userIDs []string) (users []*model.User, err error) //1
 	// Create Insert multiple external guarantees that the userID is not repeated and does not exist in the storage
 	Create(ctx context.Context, users []*model.User) (err error) //1
+	// GetByAccount Get user by account
+	GetByAccount(ctx context.Context, account string) (*model.User, error)
 
+	// StoreToken cache in storage
+	StoreToken(ctx context.Context, userID, userToken string) error
+
+	// GetToken get cache from storage
+	GetToken(ctx context.Context, userID string) (string, error)
 }
 
 type UserStorageManager struct {
@@ -65,4 +72,27 @@ func (u *UserStorageManager) Create(ctx context.Context, users []*model.User) (e
 			return e.UserID
 		})...).ExecDel(ctx)
 	})
+}
+
+func (u *UserStorageManager) GetByAccount(ctx context.Context, account string) (user *model.User, err error) {
+	user, err = u.cache.GetUserByAccount(ctx, account)
+	if err != nil {
+		return
+	}
+	if user == nil {
+		err = errs.ErrRecordNotFound.WrapMsg("account not found: ", account)
+	}
+	return
+}
+
+func (u *UserStorageManager) StoreToken(ctx context.Context, userID, userToken string) error {
+	return u.cache.CacheUserToken(ctx, userID, userToken)
+}
+
+func (u *UserStorageManager) GetToken(ctx context.Context, userID string) (string, error) {
+	token, err := u.cache.GetUserToken(ctx, userID)
+	if err != nil {
+		return "", errs.Wrap(err)
+	}
+	return token, nil
 }

@@ -24,4 +24,7 @@ type User interface {
 	NewCache() User
 	GetUsersInfo(ctx context.Context, userIDs []string) ([]*model.User, error)
 	DelUsersInfo(userIDs ...string) User
+	GetUserByAccount(ctx context.Context, account string) (*model.User, error)
+	CacheUserToken(ctx context.Context, userID, userToken string) error
+	GetUserToken(ctx context.Context, userID string) (string, error)
 }

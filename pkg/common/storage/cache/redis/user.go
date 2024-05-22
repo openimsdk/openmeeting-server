@@ -18,6 +18,7 @@ import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
+	"github.com/openimsdk/tools/errs"
 	"time"
 
 	"github.com/dtm-labs/rockscache"
@@ -91,6 +92,24 @@ func (u *User) DelUsersInfo(userIDs ...string) cache.User {
 	cache.AddKeys(keys...)
 
 	return cache
+}
+
+func (u *User) GetUserByAccount(ctx context.Context, account string) (*model.User, error) {
+	return getCache(ctx, u.rcClient, u.getUserInfoKey(account), u.expireTime, func(ctx context.Context) (*model.User, error) {
+		return u.userDB.TakeByAccount(ctx, account)
+	})
+}
+
+func (u *User) CacheUserToken(ctx context.Context, userID, userToken string) error {
+	return errs.Wrap(u.rdb.Set(ctx, userID, userToken, u.expireTime).Err())
+}
+
+func (u *User) GetUserToken(ctx context.Context, userID string) (string, error) {
+	token, err := u.rdb.Get(ctx, userID).Result()
+	if err != nil {
+		return "", errs.Wrap(err)
+	}
+	return token, nil
 }
 
 type Comparable interface {

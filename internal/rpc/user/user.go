@@ -19,7 +19,9 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/config"
 	"github.com/openimsdk/openmeeting-server/pkg/common/prommetrics"
 	mgo2 "github.com/openimsdk/openmeeting-server/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/openmeeting-server/pkg/common/token"
 	"github.com/openimsdk/tools/db/redisutil"
+	"github.com/openimsdk/tools/utils/encrypt"
 
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 
@@ -39,6 +41,7 @@ type userServer struct {
 	userStorageHandler controller.User
 	RegisterCenter     registry.SvcDiscoveryRegistry
 	config             *Config
+	tokenVerify        *token.Token
 }
 
 type Config struct {
@@ -65,10 +68,12 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	}
 	userCache := redis.NewUser(rdb, userDB, redis.GetDefaultOpt())
 	database := controller.NewUser(userDB, userCache, mgoCli.GetTx())
+	tokenVerify := token.New(config.Rpc.Token.Expires, config.Rpc.Token.Secret)
 	u := &userServer{
 		userStorageHandler: database,
 		RegisterCenter:     client,
 		config:             config,
+		tokenVerify:        tokenVerify,
 	}
 	pbuser.RegisterUserServer(server, u)
 	return nil
@@ -117,5 +122,37 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 
 	prommetrics.UserRegisterCounter.Inc()
 
+	return resp, nil
+}
+
+func (s *userServer) UserLogin(ctx context.Context, req *pbuser.UserLoginReq) (*pbuser.UserLoginResp, error) {
+	resp := &pbuser.UserLoginResp{}
+	user, err := s.userStorageHandler.GetByAccount(ctx, req.Account)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "login failed, not found account, please check")
+	}
+	saltPasswd := encrypt.Md5(req.Password)
+	if saltPasswd != user.Password {
+		return resp, errs.ErrRecordNotFound.WrapMsg("wrong password or user account")
+	}
+	userToken, err := s.tokenVerify.CreateToken(user.UserID)
+	if err != nil {
+		return resp, err
+	}
+	if err := s.userStorageHandler.StoreToken(ctx, user.UserID, userToken); err != nil {
+		return resp, err
+	}
+	resp.UserID = user.UserID
+	resp.Token = userToken
+	return resp, nil
+}
+
+func (s *userServer) GetUserToken(ctx context.Context, req *pbuser.GetUserTokenReq) (*pbuser.GetUserTokenResp, error) {
+	resp := &pbuser.GetUserTokenResp{}
+	userToken, err := s.userStorageHandler.GetToken(ctx, req.UserID)
+	if err != nil {
+		return resp, err
+	}
+	resp.Token = userToken
 	return resp, nil
 }
