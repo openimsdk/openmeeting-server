@@ -16,7 +16,7 @@
 #Currently, only the configuration with ingressName as nginx is provided.
 #If it is another gateway such as istio or treafik, please modify the corresponding gateway requirements
 image:
-  repository: ${IMAGE_REGISTRY}/openim-api
+  repository: ${IMAGE_REGISTRY}/openmeeting-api
   pullPolicy: Always
   tag: "${SERVER_IMAGE_TAG}"
 ingress:
@@ -68,36 +68,36 @@ openim-push:
     pullPolicy: Always
 openim-rpc-auth:
   image:
-    repository: ${IMAGE_REGISTRY}/openim-rpc-auth
+    repository: ${IMAGE_REGISTRY}/openmeeting-rpc-auth
     tag: "${SERVER_IMAGE_TAG}"
     pullPolicy: Always
 openim-rpc-conversation:
   image:
-    repository: ${IMAGE_REGISTRY}/openim-rpc-conversation
+    repository: ${IMAGE_REGISTRY}/openmeeting-rpc-conversation
     tag: "${SERVER_IMAGE_TAG}"
     pullPolicy: Always
 openim-rpc-friend:
   image:
-    repository: ${IMAGE_REGISTRY}/openim-rpc-friend
+    repository: ${IMAGE_REGISTRY}/openmeeting-rpc-friend
     tag: "${SERVER_IMAGE_TAG}"
     pullPolicy: Always
 openim-rpc-group:
   image:
-    repository: ${IMAGE_REGISTRY}/openim-rpc-group
+    repository: ${IMAGE_REGISTRY}/openmeeting-rpc-group
     tag: "${SERVER_IMAGE_TAG}"
     pullPolicy: Always
 openim-rpc-msg:
   image:
-    repository: ${IMAGE_REGISTRY}/openim-rpc-msg
+    repository: ${IMAGE_REGISTRY}/openmeeting-rpc-msg
     tag: "${SERVER_IMAGE_TAG}"
     pullPolicy: Always
 openim-rpc-third:
   image:
-    repository: ${IMAGE_REGISTRY}/openim-rpc-third
+    repository: ${IMAGE_REGISTRY}/openmeeting-rpc-third
     tag: "${SERVER_IMAGE_TAG}"
     pullPolicy: Always
 openim-rpc-user:
   image:
-    repository: ${IMAGE_REGISTRY}/openim-rpc-user
+    repository: ${IMAGE_REGISTRY}/openmeeting-rpc-user
     tag: "${SERVER_IMAGE_TAG}"
     pullPolicy: Always

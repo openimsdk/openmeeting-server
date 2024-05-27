@@ -45,5 +45,5 @@ func (u *MeetingMgo) Update(ctx context.Context, meetingID string, updateData ma
 }
 
 func (u *MeetingMgo) FindByStatus(ctx context.Context, status string) ([]*model.MeetingInfo, error) {
-	return mongoutil.Find[*model.MeetingInfo](ctx, u.coll, bson.M{"sid": bson.M{"status": status}})
+	return mongoutil.Find[*model.MeetingInfo](ctx, u.coll, bson.M{"status": status})
 }

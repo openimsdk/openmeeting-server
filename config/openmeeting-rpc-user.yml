@@ -6,6 +6,10 @@ rpc:
   # Listening ports; if multiple are configured, multiple instances will be launched, and must be consistent with the number of prometheus.ports
   ports: [ 10110 ]
 
+token:
+  expire: 1
+  secret: "sdASD@#(231"
+
 prometheus:
   # Whether to enable prometheus
   enable: true

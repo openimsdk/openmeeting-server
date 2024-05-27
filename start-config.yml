@@ -1,5 +1,6 @@
 serviceBinaries:
   openmeeting-api: 1
+  openmeeting-admin-api: 1
   openmeeting-rpc-user: 1
   openmeeting-rpc-meeting: 1
 toolBinaries:

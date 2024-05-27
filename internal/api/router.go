@@ -39,8 +39,8 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	u := NewUserApi(*userRpc)
 	userRouterGroup := r.Group("/user")
 	{
-		userRouterGroup.POST("/user_register", u.UserRegister)
-		userRouterGroup.POST("/user_login", u.UserLogin)
+		userRouterGroup.POST("/register", u.UserRegister)
+		userRouterGroup.POST("/login", u.UserLogin)
 		userRouterGroup.POST("/get_users_info", mwApi.CheckToken, u.GetUsersPublicInfo)
 	}
 

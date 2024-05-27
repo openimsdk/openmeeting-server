@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: openim-api
-description: "This is a description for openim-api"
+name: openmeeting-api
+description: "This is a description for openmeeting-api"
 type: "service"

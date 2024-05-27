@@ -38,12 +38,12 @@ func (o *MW) CheckToken(c *gin.Context) {
 	userID, userToken, err := o.parseToken(c)
 	if err != nil {
 		c.Abort()
-		apiresp.GinError(c, err)
+		apiresp.GinError(c, errs.WrapMsg(err, "parse token failed, invalid token"))
 		return
 	}
 	if err := o.isValidToken(c, userID, userToken); err != nil {
 		c.Abort()
-		apiresp.GinError(c, err)
+		apiresp.GinError(c, errs.WrapMsg(err, "not valid token"))
 		return
 	}
 	o.setToken(c, userID)

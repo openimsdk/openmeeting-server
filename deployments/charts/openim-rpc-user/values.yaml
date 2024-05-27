@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Default values for openim-rpc-user.
+# Default values for openmeeting-rpc-user.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 image:
-  repository: ghcr.io/openimsdk/openim-rpc-user
+  repository: ghcr.io/openimsdk/openmeeting-rpc-user
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""

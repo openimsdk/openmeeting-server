@@ -12,12 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+syntax = "proto3";
+package openmeeting.admin;
 
-type User struct {
-	UserID    string `bson:"user_id"`
-	Account   string `bson:"account"`
-	Nickname  string `bson:"nickname"`
-	Password  string `bson:"password"`
-	SaltValue string `bson:"salt_value"`
+option go_package = "github.com/openimsdk/openmeeting-server/pkg/protocol/admin";
+
+message userLoginReq {
+  string account = 4;
+  string password = 5;
 }
+
+message userLoginResp {
+  string token = 2;
+  string userID = 3;
+}
+
+message userRegisterReq {
+  string userID = 1;
+  string nickname = 2;
+  string account = 3;
+  string password = 4;
+}
+
+message userRegisterResp {
+}
+

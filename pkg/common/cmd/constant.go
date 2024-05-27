@@ -25,6 +25,7 @@ var (
 	MongodbConfigFileName            string
 	DiscoveryConfigFilename          string
 	OpenMeetingAPICfgFileName        string
+	OpenMeetingAdminAPICfgFileName   string
 	LogConfigFileName                string
 	ShareFileName                    string
 	LiveKitConfigFilename            string
@@ -39,6 +40,7 @@ func init() {
 	RedisConfigFileName = "redis.yml"
 	MongodbConfigFileName = "mongodb.yml"
 	OpenMeetingAPICfgFileName = "openmeeting-api.yml"
+	OpenMeetingAdminAPICfgFileName = "openmeeting-admin-api.yml"
 	OpenMeetingRPCUserCfgFileName = "openmeeting-rpc-user.yml"
 	OpenMeetingRPCMeetingCfgFileName = "openmeeting-rpc-meeting.yml"
 	DiscoveryConfigFilename = "discovery.yml"
@@ -54,6 +56,7 @@ func init() {
 		OpenMeetingRPCMeetingCfgFileName,
 		DiscoveryConfigFilename,
 		OpenMeetingAPICfgFileName,
+		OpenMeetingAdminAPICfgFileName,
 		LogConfigFileName,
 		ShareFileName,
 	}

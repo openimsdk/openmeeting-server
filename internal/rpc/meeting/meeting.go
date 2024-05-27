@@ -2,7 +2,6 @@ package meeting
 
 import (
 	"context"
-	"fmt"
 	"github.com/openimsdk/openmeeting-server/internal/rpc/meeting/rtc"
 	"github.com/openimsdk/openmeeting-server/internal/rpc/meeting/rtc/livekit"
 	"github.com/openimsdk/openmeeting-server/pkg/common/config"
@@ -37,8 +36,6 @@ type Config struct {
 }
 
 func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
-	fmt.Println("meeting start#############")
-
 	mgoCli, err := mongoutil.NewMongoDB(ctx, config.Mongo.Build())
 	if err != nil {
 		return err
@@ -108,19 +105,27 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 	if err != nil {
 		return resp, err
 	}
-	resp.Detail = s.generateRespSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
+
+	metaData := &pbmeeting.MeetingMetadata{}
+	meetingDetail := s.generateRespSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
+	metaData.Detail = meetingDetail
+	// create meeting meta data
+	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
+		return resp, err
+	}
+
+	resp.Detail = meetingDetail
 	resp.LiveKit = &pbmeeting.LiveKit{
 		Token: token,
 		Url:   liveUrl,
 	}
-
 	return resp, nil
 }
 
 func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeetingReq) (*pbmeeting.JoinMeetingResp, error) {
 	resp := &pbmeeting.JoinMeetingResp{}
 
-	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	_, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
 		return resp, err
 	}
@@ -131,15 +136,15 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 	}
 
 	// todo update meta data to liveKit
-	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
-		return resp, err
-	}
+	//if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
+	//	return resp, err
+	//}
 
 	resp.LiveKit = &pbmeeting.LiveKit{
 		Token: token,
 		Url:   liveUrl,
 	}
-	return &pbmeeting.JoinMeetingResp{}, nil
+	return resp, nil
 }
 
 func (s *meetingServer) LeaveMeeting(ctx context.Context, req *pbmeeting.LeaveMeetingReq) (*pbmeeting.LeaveMeetingResp, error) {
@@ -166,7 +171,7 @@ func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetin
 
 	// change status to completed
 	updateData := map[string]any{
-		"Status": constant.Completed,
+		"status": constant.Completed,
 	}
 
 	if err := s.meetingRtc.CloseRoom(ctx, req.MeetingID); err != nil {
@@ -303,6 +308,10 @@ func (s *meetingServer) SetPersonalMeetingSettings(ctx context.Context, req *pbm
 		metaData.PersonalData = append(metaData.PersonalData, personalData)
 	}
 
+	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
+		return resp, errs.WrapMsg(err, "update meta data failed")
+	}
+
 	return resp, nil
 }
 
@@ -335,11 +344,6 @@ func (s *meetingServer) checkAuthPermission(hostUserID, requestUserID string) bo
 }
 
 func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model.MeetingInfo) (*pbmeeting.MeetingInfoSetting, error) {
-	metaData, err := s.meetingRtc.GetRoomData(ctx, info.MeetingID)
-	if err != nil {
-		return nil, err
-	}
-
 	// Fill in response data
 	systemInfo := &pbmeeting.SystemGeneratedMeetingInfo{
 		CreatorUserID: info.CreatorUserID,
@@ -358,8 +362,12 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 		CreatorDefinedMeeting: creatorInfo,
 	}
 	meetingInfoSetting := &pbmeeting.MeetingInfoSetting{
-		Info:    meetingInfo,
-		Setting: metaData.Detail.Setting,
+		Info: meetingInfo,
 	}
+	metaData, err := s.meetingRtc.GetRoomData(ctx, info.MeetingID)
+	if err == nil {
+		meetingInfoSetting.Setting = metaData.Detail.Setting
+	}
+
 	return meetingInfoSetting, nil
 }

@@ -30,10 +30,12 @@ message getDesignateUsersResp{
 message UserInfo{
   string userID = 1;
   string nickname = 2;
+  string account = 3;
+  string password = 4;
 }
 
 message userRegisterReq {
-  repeated UserInfo users = 2;
+  repeated UserInfo users = 1;
 }
 message userRegisterResp {
 }
@@ -50,7 +52,7 @@ message userLoginReq {
 }
 
 message userLoginResp {
-  string Token = 2;
+  string token = 2;
   string userID = 3;
 }
 

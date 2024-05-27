@@ -18,12 +18,11 @@ import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common/config"
 	"github.com/openimsdk/openmeeting-server/pkg/common/prommetrics"
+	"github.com/openimsdk/openmeeting-server/pkg/common/securetools"
 	mgo2 "github.com/openimsdk/openmeeting-server/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/openmeeting-server/pkg/common/token"
 	"github.com/openimsdk/tools/db/redisutil"
-	"github.com/openimsdk/tools/utils/encrypt"
-
-	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 
 	"github.com/openimsdk/openmeeting-server/pkg/common/convert"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/cache/redis"
@@ -131,7 +130,7 @@ func (s *userServer) UserLogin(ctx context.Context, req *pbuser.UserLoginReq) (*
 	if err != nil {
 		return resp, errs.WrapMsg(err, "login failed, not found account, please check")
 	}
-	saltPasswd := encrypt.Md5(req.Password)
+	saltPasswd := securetools.VerifyPassword(req.Password, user.SaltValue)
 	if saltPasswd != user.Password {
 		return resp, errs.ErrRecordNotFound.WrapMsg("wrong password or user account")
 	}

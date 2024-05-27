@@ -15,9 +15,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "openim-rpc-user.fullname" . }}
+  name: {{ include "openmeeting-rpc-user.fullname" . }}
   labels:
-    {{- include "openim-rpc-user.labels" . | nindent 4 }}
+    {{- include "openmeeting-rpc-user.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -26,4 +26,4 @@ spec:
       protocol: TCP
       name: webhook
   selector:
-    {{- include "openim-rpc-user.selectorLabels" . | nindent 4 }}
+    {{- include "openmeeting-rpc-user.selectorLabels" . | nindent 4 }}

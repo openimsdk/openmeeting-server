@@ -1,4 +1,4 @@
-address: [ localhost:16379 ]
+address: [ localhost:6379 ]
 username: ''
 password: openIM123
 enablePipeline: false

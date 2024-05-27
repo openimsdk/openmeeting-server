@@ -1,14 +1,15 @@
+expire: 1
 secret: "sdASD@#(231"
 api:
   # Listening IP; 0.0.0.0 means both internal and external IPs are listened to, default is recommended
   listenIP: 0.0.0.0
   # Listening ports; if multiple are configured, multiple instances will be launched, must be consistent with the number of prometheus.ports
-  ports: [ 10002 ]
+  ports: [ 10022 ]
 
 prometheus:
   # Whether to enable prometheus
   enable: true
   # Prometheus listening ports, must match the number of api.ports
-  ports: [ 20113 ]
+  ports: [ 20114 ]
   # This address can be accessed via a browser
-  grafanaURL: http://127.0.0.1:13000/
+  grafanaURL: http://127.0.0.1:13002/

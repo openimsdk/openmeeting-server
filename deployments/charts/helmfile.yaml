@@ -27,7 +27,7 @@ values:
 {{- end -}}
 
 releases:
-{{- $apps := list "openim-api" "openim-msggateway" "openim-msgtransfer" "openim-push" "openim-rpc-auth" "openim-rpc-conversation" "openim-rpc-friend" "openim-rpc-group" "openim-rpc-msg" "openim-rpc-third" "openim-rpc-user" }}
+{{- $apps := list "openmeeting-api" "openim-msggateway" "openim-msgtransfer" "openim-push" "openmeeting-rpc-auth" "openmeeting-rpc-conversation" "openmeeting-rpc-friend" "openmeeting-rpc-group" "openmeeting-rpc-msg" "openmeeting-rpc-third" "openmeeting-rpc-user" }}
 {{- range $app := $apps }}
   - name: {{ $app }}
     {{- template "defaultRelease" dict "name" $app }}

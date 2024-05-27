@@ -23,7 +23,7 @@ global:
 
 openim-api:
   image:
-    repository: ghcr.io/openimsdk/openim-api
+    repository: ghcr.io/openimsdk/openmeeting-api
     pullPolicy: Always
     tag: "latest"
   ingress:
@@ -75,36 +75,36 @@ openim-push:
     pullPolicy: Always
 openim-rpc-auth:
   image:
-    repository: ghcr.io/openimsdk/openim-rpc-auth
+    repository: ghcr.io/openimsdk/openmeeting-rpc-auth
     tag: "latest"
     pullPolicy: Always
 openim-rpc-conversation:
   image:
-    repository: ghcr.io/openimsdk/openim-rpc-conversation
+    repository: ghcr.io/openimsdk/openmeeting-rpc-conversation
     tag: "latest"
     pullPolicy: Always
 openim-rpc-friend:
   image:
-    repository: ghcr.io/openimsdk/openim-rpc-friend
+    repository: ghcr.io/openimsdk/openmeeting-rpc-friend
     tag: "latest"
     pullPolicy: Always
 openim-rpc-group:
   image:
-    repository: ghcr.io/openimsdk/openim-rpc-group
+    repository: ghcr.io/openimsdk/openmeeting-rpc-group
     tag: "latest"
     pullPolicy: Always
 openim-rpc-msg:
   image:
-    repository: ghcr.io/openimsdk/openim-rpc-msg
+    repository: ghcr.io/openimsdk/openmeeting-rpc-msg
     tag: "latest"
     pullPolicy: Always
 openim-rpc-third:
   image:
-    repository: ghcr.io/openimsdk/openim-rpc-third
+    repository: ghcr.io/openimsdk/openmeeting-rpc-third
     tag: "latest"
     pullPolicy: Always
 openim-rpc-user:
   image:
-    repository: ghcr.io/openimsdk/openim-rpc-user
+    repository: ghcr.io/openimsdk/openmeeting-rpc-user
     tag: "latest"
     pullPolicy: Always
