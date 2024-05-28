@@ -147,6 +147,23 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 	return resp, nil
 }
 
+func (s *meetingServer) GetMeetingToken(ctx context.Context, req *pbmeeting.GetMeetingTokenReq) (*pbmeeting.GetMeetingTokenResp, error) {
+	resp := &pbmeeting.GetMeetingTokenResp{}
+
+	// todo check user auth
+
+	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.MeetingID)
+	if err != nil {
+		return resp, err
+	}
+
+	resp.LiveKit = &pbmeeting.LiveKit{
+		Token: token,
+		Url:   liveUrl,
+	}
+	return resp, nil
+}
+
 func (s *meetingServer) LeaveMeeting(ctx context.Context, req *pbmeeting.LeaveMeetingReq) (*pbmeeting.LeaveMeetingResp, error) {
 	resp := &pbmeeting.LeaveMeetingResp{}
 

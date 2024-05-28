@@ -25,6 +25,10 @@ func (m *MeetingApi) JoinMeeting(c *gin.Context) {
 	a2r.Call(meeting.MeetingServiceClient.JoinMeeting, m.Client, c)
 }
 
+func (m *MeetingApi) GetMeetingToken(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.GetMeetingToken, m.Client, c)
+}
+
 func (m *MeetingApi) LeaveMeeting(c *gin.Context) {
 	a2r.Call(meeting.MeetingServiceClient.LeaveMeeting, m.Client, c)
 }

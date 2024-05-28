@@ -50,6 +50,8 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		meetingRouterGroup.POST("/book_meeting", mwApi.CheckToken, m.BookMeeting)
 		meetingRouterGroup.POST("/create_immediate_meeting", mwApi.CheckToken, m.CreateImmediateMeeting)
 		meetingRouterGroup.POST("/join_meeting", mwApi.CheckToken, m.JoinMeeting)
+		meetingRouterGroup.POST("/get_meeting_token", mwApi.CheckToken, m.GetMeetingToken)
+
 		meetingRouterGroup.POST("/update_meeting", mwApi.CheckToken, m.UpdateMeeting)
 		meetingRouterGroup.POST("/get_meeting", mwApi.CheckToken, m.GetMeeting)
 		meetingRouterGroup.POST("/get_meetings", mwApi.CheckToken, m.GetMeetings)

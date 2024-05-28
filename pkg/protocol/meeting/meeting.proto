@@ -85,6 +85,17 @@ message JoinMeetingResp {
   LiveKit liveKit = 1;
 }
 
+// Request to get a specific meeting token.
+message GetMeetingTokenReq {
+  string meetingID = 1;
+  string userID = 2; // User who joins the meeting.
+}
+
+// Response after getting a specific meeting.
+message GetMeetingTokenResp {
+  LiveKit liveKit = 1;
+}
+
 // Request to leave a meeting.
 message LeaveMeetingReq {
   string meetingID = 1;
@@ -196,6 +207,8 @@ service MeetingService {
   rpc CreateImmediateMeeting(CreateImmediateMeetingReq) returns (CreateImmediateMeetingResp);
   // Joins a meeting.
   rpc JoinMeeting(JoinMeetingReq) returns (JoinMeetingResp);
+  // get a specific meeting token
+  rpc GetMeetingToken(GetMeetingTokenReq) returns (GetMeetingTokenResp);
   // Leaves a meeting.
   rpc LeaveMeeting(LeaveMeetingReq) returns (LeaveMeetingResp);
   // Ends a meeting.
