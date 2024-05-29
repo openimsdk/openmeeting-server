@@ -52,7 +52,8 @@ message userLoginReq {
 }
 
 message userLoginResp {
-  string token = 2;
+  string token = 1;
+  string nickname = 2;
   string userID = 3;
 }
 

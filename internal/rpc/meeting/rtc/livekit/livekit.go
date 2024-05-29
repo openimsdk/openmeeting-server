@@ -13,6 +13,7 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/twitchtv/twirp"
+	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -167,4 +168,31 @@ func (x *LiveKit) IsNotFound(err error) bool {
 	}
 	errCode, ok := err.(interface{ Code() twirp.ErrorCode })
 	return ok && errCode.Code() == twirp.NotFound
+}
+
+func (x *LiveKit) ToggleMimeStream(ctx context.Context, roomID, userID, mineType string, mute bool) error {
+	participant, err := x.roomClient.GetParticipant(ctx, &livekit.RoomParticipantIdentity{Room: roomID, Identity: userID})
+	if err != nil {
+		return errs.WrapMsg(err, "get room participant failed")
+	}
+	var sid string
+	for _, track := range participant.Tracks {
+		if strings.Contains(track.MimeType, mineType) {
+			sid = track.Sid
+			break
+		}
+		if sid == "" {
+			return errs.New("mine type not found", mineType)
+		}
+	}
+	_, err = x.roomClient.MutePublishedTrack(ctx, &livekit.MuteRoomTrackRequest{
+		Room:     roomID,
+		Identity: userID,
+		TrackSid: sid,
+		Muted:    mute,
+	})
+	if err != nil {
+		return errs.WrapMsg(err, "mute published track failed")
+	}
+	return nil
 }

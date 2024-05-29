@@ -13,4 +13,5 @@ type MeetingRtc interface {
 	UpdateMetaData(ctx context.Context, info *meeting.MeetingMetadata) error
 	CloseRoom(ctx context.Context, roomID string) error
 	RemoveParticipant(ctx context.Context, roomID, userID string) error
+	ToggleMimeStream(ctx context.Context, roomID, userID, mineType string, mute bool) error
 }

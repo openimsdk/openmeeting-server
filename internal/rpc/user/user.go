@@ -17,18 +17,17 @@ package user
 import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common/config"
+	"github.com/openimsdk/openmeeting-server/pkg/common/convert"
 	"github.com/openimsdk/openmeeting-server/pkg/common/prommetrics"
 	"github.com/openimsdk/openmeeting-server/pkg/common/securetools"
-	mgo2 "github.com/openimsdk/openmeeting-server/pkg/common/storage/database/mgo"
-	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
-	"github.com/openimsdk/openmeeting-server/pkg/common/token"
-	"github.com/openimsdk/tools/db/redisutil"
-
-	"github.com/openimsdk/openmeeting-server/pkg/common/convert"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/controller"
+	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database/mgo"
+	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
+	"github.com/openimsdk/openmeeting-server/pkg/common/token"
 	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	"github.com/openimsdk/tools/db/mongoutil"
+	"github.com/openimsdk/tools/db/redisutil"
 	registry "github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/datautil"
@@ -61,7 +60,7 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 		return err
 	}
 
-	userDB, err := mgo2.NewUserMongo(mgoCli.GetDB())
+	userDB, err := mgo.NewUserMongo(mgoCli.GetDB())
 	if err != nil {
 		return err
 	}
@@ -143,6 +142,7 @@ func (s *userServer) UserLogin(ctx context.Context, req *pbuser.UserLoginReq) (*
 	}
 	resp.UserID = user.UserID
 	resp.Token = userToken
+	resp.Nickname = user.Nickname
 	return resp, nil
 }
 
