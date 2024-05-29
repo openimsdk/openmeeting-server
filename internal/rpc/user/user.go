@@ -155,3 +155,15 @@ func (s *userServer) GetUserToken(ctx context.Context, req *pbuser.GetUserTokenR
 	resp.Token = userToken
 	return resp, nil
 }
+
+func (s *userServer) GetUserInfo(ctx context.Context, req *pbuser.GetUserInfoReq) (*pbuser.GetUserInfoResp, error) {
+	resp := &pbuser.GetUserInfoResp{}
+	userInfo, err := s.userStorageHandler.FindWithError(ctx, []string{req.UserID})
+	if err != nil {
+		return resp, errs.WrapMsg(err, "not found user info")
+	}
+	resp.Account = userInfo[0].Account
+	resp.Nickname = userInfo[0].Nickname
+	resp.UserID = userInfo[0].UserID
+	return resp, nil
+}

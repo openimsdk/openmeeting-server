@@ -44,6 +44,7 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 	metaData, err := s.meetingRtc.GetRoomData(ctx, info.MeetingID)
 	if err == nil {
 		meetingInfoSetting.Setting = metaData.Detail.Setting
+		meetingInfoSetting.Info.SystemGenerated.CreatorNickname = metaData.Detail.Info.SystemGenerated.CreatorNickname
 	}
 
 	return meetingInfoSetting, nil

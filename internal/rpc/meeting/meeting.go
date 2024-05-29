@@ -6,6 +6,7 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
+	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	sysConstant "github.com/openimsdk/protocol/constant"
 
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
@@ -37,6 +38,12 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 
 func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeting.CreateImmediateMeetingReq) (*pbmeeting.CreateImmediateMeetingResp, error) {
 	resp := &pbmeeting.CreateImmediateMeetingResp{}
+
+	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.CreatorUserID})
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get user info failed")
+	}
+
 	meetingDBInfo := &model.MeetingInfo{
 		MeetingID:       idutil.OperationIDGenerator(),
 		Title:           req.CreatorDefinedMeetingInfo.Title,
@@ -58,6 +65,7 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 
 	metaData := &pbmeeting.MeetingMetadata{}
 	meetingDetail := s.generateRespSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
+	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
 	metaData.Detail = meetingDetail
 	metaData.PersonalData = []*pbmeeting.PersonalData{s.getDefaultPersonalData(req.CreatorUserID)}
 	// create meeting meta data

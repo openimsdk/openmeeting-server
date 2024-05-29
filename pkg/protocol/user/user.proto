@@ -65,6 +65,17 @@ message getUserTokenResp{
   string token = 1;
 }
 
+message getUserInfoReq{
+  string userID = 1;
+}
+
+message getUserInfoResp{
+  string userID = 1;
+  string nickname = 2;
+  string account = 3;
+}
+
+
 service user {
   //Get the specified user information full field
   rpc getDesignateUsers(getDesignateUsersReq) returns(getDesignateUsersResp);
@@ -74,6 +85,8 @@ service user {
   rpc userLogin(userLoginReq) returns (userLoginResp);
   // get user token
   rpc getUserToken(getUserTokenReq) returns (getUserTokenResp);
+  // get user info
+  rpc getUserInfo(getUserInfoReq) returns (getUserInfoResp);
 }
 
 

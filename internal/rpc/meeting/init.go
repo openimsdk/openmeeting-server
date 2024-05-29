@@ -9,6 +9,7 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/controller"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database/mgo"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
+	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	registry "github.com/openimsdk/tools/discovery"
@@ -20,6 +21,7 @@ type meetingServer struct {
 	RegisterCenter        registry.SvcDiscoveryRegistry
 	meetingRtc            rtc.MeetingRtc
 	config                *Config
+	userRpc               *rpcclient.User
 }
 
 type Config struct {
@@ -49,11 +51,15 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	database := controller.NewMeeting(meetingDB, meetingCache, mgoCli.GetTx())
 	meetingRtc := livekit.NewLiveKit(&config.Rtc)
 
+	// init rpc client here
+	userRpc := rpcclient.NewUser(client, config.Share.RpcRegisterName.User)
+
 	u := &meetingServer{
 		meetingStorageHandler: database,
 		RegisterCenter:        client,
 		config:                config,
 		meetingRtc:            meetingRtc,
+		userRpc:               userRpc,
 	}
 	pbmeeting.RegisterMeetingServiceServer(server, u)
 	return nil

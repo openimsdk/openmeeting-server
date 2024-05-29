@@ -14,9 +14,10 @@ message LiveKit {
 // Information about a specific meeting that cannot be changed once set.
 message SystemGeneratedMeetingInfo {
   string creatorUserID = 1; // The user ID of the meeting creator.
-  string status = 2; // The current status of the meeting, e.g., scheduled, in-progress, completed.
-  int64 startTime = 3; // The actual start time of the meeting (as a timestamp).
-  string meetingID = 4; // Unique identifier for the meeting.
+  string creatorNickname = 2; // The user name of the meeting creator.
+  string status = 3; // The current status of the meeting, e.g., scheduled, in-progress, completed.
+  int64 startTime = 4; // The actual start time of the meeting (as a timestamp).
+  string meetingID = 5; // Unique identifier for the meeting.
 }
 
 // Information about a specific meeting that can be modified.

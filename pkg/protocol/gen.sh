@@ -13,7 +13,8 @@
 # limitations under the License.
 
 PROTO_NAMES=(
-    "admin"
+    "meeting"
+    "user"
 )
 
 for name in "${PROTO_NAMES[@]}"; do
