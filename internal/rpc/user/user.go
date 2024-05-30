@@ -150,7 +150,7 @@ func (s *userServer) GetUserToken(ctx context.Context, req *pbuser.GetUserTokenR
 	resp := &pbuser.GetUserTokenResp{}
 	userToken, err := s.userStorageHandler.GetToken(ctx, req.UserID)
 	if err != nil {
-		return resp, err
+		return resp, errs.WrapMsg(err, "get user token failed")
 	}
 	resp.Token = userToken
 	return resp, nil
