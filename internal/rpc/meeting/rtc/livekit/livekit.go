@@ -62,7 +62,7 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string) (st
 func (x *LiveKit) CreateRoom(ctx context.Context, meetingID string) (sID, token, liveUrl string, err error) {
 	room, err := x.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{
 		Name:            meetingID,
-		EmptyTimeout:    3,
+		EmptyTimeout:    86400,
 		MaxParticipants: 10000,
 	})
 	if err != nil {

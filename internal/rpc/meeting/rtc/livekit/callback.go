@@ -14,7 +14,7 @@ func NewRTC(ctx context.Context) rtc.CallbackInterface {
 }
 
 func (r *CallbackLiveKit) OnRoomParticipantConnected(ctx context.Context) {
-	log.ZWarn(ctx, "OnRoomParticipantConnected", nil)
+	log.ZDebug(ctx, "OnRoomParticipantConnected", nil)
 }
 
 func (r *CallbackLiveKit) OnRoomParticipantDisconnected(ctx context.Context) {
@@ -27,11 +27,8 @@ func (r *CallbackLiveKit) OnRoomDisconnected(ctx context.Context, roomID string,
 
 func (r *CallbackLiveKit) OnMeetingDisconnected(ctx context.Context, roomID string) {
 	log.ZWarn(ctx, "OnMeetingDisconnected", nil, roomID)
-
 }
 
 func (r *CallbackLiveKit) OnMeetingUnmute(ctx context.Context, roomID string, streamType string, mute bool, userIDs []string) {
-
 	log.ZWarn(ctx, "OnMeetingUnmute", nil, roomID)
-
 }

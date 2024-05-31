@@ -8,6 +8,7 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
 	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	sysConstant "github.com/openimsdk/protocol/constant"
+	"github.com/openimsdk/tools/log"
 
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	"github.com/openimsdk/tools/errs"
@@ -17,6 +18,11 @@ import (
 // BookMeeting Implement the MeetingServiceServer interface
 func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeetingReq) (*pbmeeting.BookMeetingResp, error) {
 	resp := &pbmeeting.BookMeetingResp{}
+	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.CreatorUserID})
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get user info failed")
+	}
+
 	meetingDBInfo := &model.MeetingInfo{
 		MeetingID:       idutil.OperationIDGenerator(),
 		Title:           req.CreatorDefinedMeetingInfo.Title,
@@ -27,10 +33,25 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 		CreatorUserID:   req.CreatorUserID,
 	}
 
-	err := s.meetingStorageHandler.Create(ctx, []*model.MeetingInfo{meetingDBInfo})
+	_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID)
 	if err != nil {
 		return resp, err
 	}
+
+	err = s.meetingStorageHandler.Create(ctx, []*model.MeetingInfo{meetingDBInfo})
+	if err != nil {
+		return resp, err
+	}
+	metaData := &pbmeeting.MeetingMetadata{}
+	meetingDetail := s.generateRespSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
+	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
+	metaData.Detail = meetingDetail
+	metaData.PersonalData = []*pbmeeting.PersonalData{s.getDefaultPersonalData(req.CreatorUserID)}
+	// create meeting meta data
+	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
+		return resp, err
+	}
+
 	// fill in response data
 	resp.Detail = s.generateRespSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
 	return resp, nil
@@ -38,7 +59,7 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 
 func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeting.CreateImmediateMeetingReq) (*pbmeeting.CreateImmediateMeetingResp, error) {
 	resp := &pbmeeting.CreateImmediateMeetingResp{}
-
+	log.ZDebug(ctx, "into CreateImmediateMeeting", nil)
 	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.CreatorUserID})
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get user info failed")
