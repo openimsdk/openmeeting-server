@@ -6,8 +6,8 @@ import (
 )
 
 type MeetingRtc interface {
-	GetJoinToken(ctx context.Context, roomID, identity string) (string, string, error)
-	CreateRoom(ctx context.Context, roomID string) (sID, token, liveUrl string, err error)
+	GetJoinToken(ctx context.Context, roomID, identity string, metadata *meeting.ParticipantMetaData) (string, string, error)
+	CreateRoom(ctx context.Context, roomID string, metaData *meeting.ParticipantMetaData) (sID, token, liveUrl string, err error)
 	GetRoomData(ctx context.Context, roomID string) (*meeting.MeetingMetadata, error)
 	RoomIsExist(ctx context.Context, roomID string) (string, error)
 	UpdateMetaData(ctx context.Context, info *meeting.MeetingMetadata) error

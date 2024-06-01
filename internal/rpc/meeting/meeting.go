@@ -33,7 +33,7 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 		CreatorUserID:   req.CreatorUserID,
 	}
 
-	_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID)
+	_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, nil)
 	if err != nil {
 		return resp, err
 	}
@@ -74,7 +74,16 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 		Status:          constant.InProgress,
 		CreatorUserID:   req.CreatorUserID,
 	}
-	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID)
+
+	participantMetaData := &pbmeeting.ParticipantMetaData{
+		UserInfo: &pbmeeting.UserInfo{
+			UserID:   userInfo.UserID,
+			Nickname: userInfo.Nickname,
+			Account:  userInfo.Account,
+		},
+	}
+
+	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, participantMetaData)
 	if err != nil {
 		return resp, err
 	}
@@ -104,6 +113,10 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 
 func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeetingReq) (*pbmeeting.JoinMeetingResp, error) {
 	resp := &pbmeeting.JoinMeetingResp{}
+	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.UserID})
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get user info failed")
+	}
 
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
@@ -114,7 +127,15 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		return resp, errs.New("meeting password not match, please check and try again!")
 	}
 
-	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.MeetingID)
+	participantMetaData := &pbmeeting.ParticipantMetaData{
+		UserInfo: &pbmeeting.UserInfo{
+			UserID:   userInfo.UserID,
+			Nickname: userInfo.Nickname,
+			Account:  userInfo.Account,
+		},
+	}
+
+	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.MeetingID, participantMetaData)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get join token failed")
 	}
@@ -143,9 +164,21 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 
 func (s *meetingServer) GetMeetingToken(ctx context.Context, req *pbmeeting.GetMeetingTokenReq) (*pbmeeting.GetMeetingTokenResp, error) {
 	resp := &pbmeeting.GetMeetingTokenResp{}
+	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.UserID})
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get user info failed")
+	}
+
+	participantMetaData := &pbmeeting.ParticipantMetaData{
+		UserInfo: &pbmeeting.UserInfo{
+			UserID:   userInfo.UserID,
+			Nickname: userInfo.Nickname,
+			Account:  userInfo.Account,
+		},
+	}
 
 	// todo check user auth
-	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.MeetingID)
+	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.MeetingID, participantMetaData)
 	if err != nil {
 		return resp, err
 	}

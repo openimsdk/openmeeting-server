@@ -49,6 +49,18 @@ message MeetingInfoSetting {
   MeetingSetting setting = 2;
 }
 
+message UserInfo {
+  string userID = 1;
+  string nickname = 2;
+  string account = 3;
+}
+
+// participant meta data
+message ParticipantMetaData{
+  UserInfo userInfo = 1;
+}
+
+
 // Request to book a future meeting.
 message BookMeetingReq {
   string creatorUserID = 1;

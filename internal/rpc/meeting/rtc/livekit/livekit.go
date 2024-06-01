@@ -32,7 +32,7 @@ func NewLiveKit(conf *config.RTC) rtc.MeetingRtc {
 	}
 }
 
-func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string) (string, string, error) {
+func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, metadata *meeting.ParticipantMetaData) (string, string, error) {
 	log.ZDebug(ctx, "getJoinToken", "roomID", roomID, "identity", identity)
 	canPublish := true
 	canSubscribe := true
@@ -45,6 +45,24 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string) (st
 		CanPublish:     &canPublish,
 		CanSubscribe:   &canSubscribe,
 		CanPublishData: &canPublishData,
+	}
+	if metadata != nil {
+		bytes, err := json.Marshal(metadata)
+		if err != nil {
+			log.ZError(ctx, "json.Marshal failed", err)
+			return "", "", errs.WrapMsg(err, "json marshall failed")
+		}
+		// 生成邀请者房间的jwt
+		at.AddGrant(grant).
+			SetIdentity(identity).
+			SetName("participant-name").
+			SetValidFor(time.Hour).SetMetadata(string(bytes))
+		jwt, err := at.ToJWT()
+		if err != nil {
+			return "", "", errs.WrapMsg(err, "at.ToJWT failed")
+		}
+		log.ZDebug(ctx, "getJoinToken", "jwt", jwt)
+		return jwt, x.getLiveURL(), nil
 	}
 	// 生成邀请者房间的jwt
 	at.AddGrant(grant).
@@ -59,7 +77,7 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string) (st
 	return jwt, x.getLiveURL(), nil
 }
 
-func (x *LiveKit) CreateRoom(ctx context.Context, meetingID string) (sID, token, liveUrl string, err error) {
+func (x *LiveKit) CreateRoom(ctx context.Context, meetingID string, metaData *meeting.ParticipantMetaData) (sID, token, liveUrl string, err error) {
 	room, err := x.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{
 		Name:            meetingID,
 		EmptyTimeout:    86400,
@@ -79,7 +97,7 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID string) (sID, token,
 		OnReconnected:             callback.OnReconnected,
 		OnReconnecting:            callback.OnReconnecting,
 	}
-	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, meetingID)
+	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, meetingID, metaData)
 	if err != nil {
 		return "", "", "", errs.WrapMsg(err, "get join token failed, meetingID:", meetingID)
 	}
