@@ -77,7 +77,7 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, met
 	return jwt, x.getLiveURL(), nil
 }
 
-func (x *LiveKit) CreateRoom(ctx context.Context, meetingID string, metaData *meeting.ParticipantMetaData) (sID, token, liveUrl string, err error) {
+func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, metaData *meeting.ParticipantMetaData) (sID, token, liveUrl string, err error) {
 	room, err := x.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{
 		Name:            meetingID,
 		EmptyTimeout:    86400,
@@ -97,7 +97,7 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID string, metaData *me
 		OnReconnected:             callback.OnReconnected,
 		OnReconnecting:            callback.OnReconnecting,
 	}
-	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, meetingID, metaData)
+	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, identify, metaData)
 	if err != nil {
 		return "", "", "", errs.WrapMsg(err, "get join token failed, meetingID:", meetingID)
 	}

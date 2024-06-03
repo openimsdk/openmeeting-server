@@ -4,7 +4,6 @@ package openmeeting.meeting;
 option go_package = "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting";
 
 
-
 // Defines LiveKit access information.
 message LiveKit {
   string token = 1;  // Access token for authentication.

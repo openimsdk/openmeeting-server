@@ -33,7 +33,7 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 		CreatorUserID:   req.CreatorUserID,
 	}
 
-	_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, nil)
+	_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, nil)
 	if err != nil {
 		return resp, err
 	}
@@ -83,7 +83,7 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 		},
 	}
 
-	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, participantMetaData)
+	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, participantMetaData)
 	if err != nil {
 		return resp, err
 	}
@@ -135,7 +135,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		},
 	}
 
-	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.MeetingID, participantMetaData)
+	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.UserID, participantMetaData)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get join token failed")
 	}
@@ -178,7 +178,7 @@ func (s *meetingServer) GetMeetingToken(ctx context.Context, req *pbmeeting.GetM
 	}
 
 	// todo check user auth
-	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.MeetingID, participantMetaData)
+	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.UserID, participantMetaData)
 	if err != nil {
 		return resp, err
 	}
