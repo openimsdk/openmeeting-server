@@ -156,6 +156,10 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 		needUpdate = false
 	}
 
+	if !found {
+		personalData = s.getDefaultPersonalData(req.UserID)
+		personalData.LimitSetting = req.Setting
+	}
 	personalData.LimitSetting = req.Setting
 	if !s.checkUserEnableCamera(metaData.Detail.Setting, personalData) {
 		// no need to care the scene that turning on the camera
