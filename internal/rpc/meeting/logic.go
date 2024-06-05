@@ -103,7 +103,9 @@ func (s *meetingServer) setSelfPersonalSetting(ctx context.Context, metaData *pb
 		personalData.PersonalSetting.MicrophoneOnEntry == req.Setting.MicrophoneOnEntry {
 		needUpdate = false
 	}
-
+	if !found {
+		personalData = s.getDefaultPersonalData(req.UserID)
+	}
 	personalData.PersonalSetting = req.Setting
 	toggle := s.checkUserEnableCamera(metaData.Detail.Setting, personalData)
 	if err := s.meetingRtc.ToggleMimeStream(ctx, req.MeetingID, req.UserID, video, !toggle); err != nil {
@@ -158,7 +160,6 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 
 	if !found {
 		personalData = s.getDefaultPersonalData(req.UserID)
-		personalData.LimitSetting = req.Setting
 	}
 	personalData.LimitSetting = req.Setting
 	if !s.checkUserEnableCamera(metaData.Detail.Setting, personalData) {
