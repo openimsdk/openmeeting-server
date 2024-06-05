@@ -204,14 +204,14 @@ func (x *LiveKit) ToggleMimeStream(ctx context.Context, roomID, userID, mineType
 			return errs.New("mine type not found", mineType)
 		}
 	}
-	_, err = x.roomClient.MutePublishedTrack(ctx, &livekit.MuteRoomTrackRequest{
-		Room:     roomID,
-		Identity: userID,
-		TrackSid: sid,
-		Muted:    mute,
-	})
-	if err != nil {
-		return errs.WrapMsg(err, "mute published track failed")
-	}
+	//_, err = x.roomClient.MutePublishedTrack(ctx, &livekit.MuteRoomTrackRequest{
+	//	Room:     roomID,
+	//	Identity: userID,
+	//	TrackSid: sid,
+	//	Muted:    mute,
+	//})
+	//if err != nil {
+	//	return errs.WrapMsg(err, "mute published track failed")
+	//}
 	return nil
 }
