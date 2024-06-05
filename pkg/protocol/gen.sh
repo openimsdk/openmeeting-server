@@ -15,6 +15,7 @@
 PROTO_NAMES=(
     "meeting"
     "user"
+    "pbwrapper"
 )
 
 for name in "${PROTO_NAMES[@]}"; do

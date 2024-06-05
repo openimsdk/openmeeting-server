@@ -196,6 +196,7 @@ func (x *LiveKit) ToggleMimeStream(ctx context.Context, roomID, userID, mineType
 	}
 	var sid string
 	for _, track := range participant.Tracks {
+		log.ZDebug(ctx, "participant tracks:", track.MimeType, track.Sid, track.Type)
 		if strings.Contains(track.MimeType, mineType) {
 			sid = track.Sid
 			break

@@ -10,4 +10,5 @@ type Meeting interface {
 	NewCache() Meeting
 	GetMeetingByID(ctx context.Context, meetingID string) (*model.MeetingInfo, error)
 	DelMeeting(meetingIDs ...string) Meeting
+	GenerateMeetingID(ctx context.Context) (string, error)
 }

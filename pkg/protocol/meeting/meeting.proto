@@ -1,6 +1,8 @@
 syntax = "proto3";
 package openmeeting.meeting;
 
+import "pbwrapper/pbwrapper.proto";
+
 option go_package = "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting";
 
 
@@ -155,15 +157,15 @@ message GetMeetingResp {
 message UpdateMeetingRequest {
   string meetingID = 1;
   string updatingUserID = 2;
-  string title = 3;
-  int64 scheduledTime = 4;
-  int64 meetingDuration = 5;
-  string password = 6;
-  bool canParticipantsEnableCamera = 7;
-  bool canParticipantsUnmuteMicrophone = 8;
-  bool canParticipantsShareScreen = 9;
-  bool disableCameraOnJoin = 10;
-  bool disableMicrophoneOnJoin = 11;
+  pbwrapper.StringValue title = 3;
+  pbwrapper.Int64Value scheduledTime = 4;
+  pbwrapper.Int64Value meetingDuration = 5;
+  pbwrapper.StringValue password = 6;
+  pbwrapper.BoolValue canParticipantsEnableCamera = 7;
+  pbwrapper.BoolValue canParticipantsUnmuteMicrophone = 8;
+  pbwrapper.BoolValue canParticipantsShareScreen = 9;
+  pbwrapper.BoolValue disableCameraOnJoin = 10;
+  pbwrapper.BoolValue disableMicrophoneOnJoin = 11;
 }
 
 // Response after updating meeting settings.

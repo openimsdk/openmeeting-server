@@ -12,7 +12,6 @@ import (
 
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	"github.com/openimsdk/tools/errs"
-	"github.com/openimsdk/tools/utils/idutil"
 )
 
 // BookMeeting Implement the MeetingServiceServer interface
@@ -23,8 +22,13 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 		return resp, errs.WrapMsg(err, "get user info failed")
 	}
 
+	meetingID, err := s.meetingStorageHandler.GenerateMeetingID(ctx)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "generate meeting id failed")
+	}
+
 	meetingDBInfo := &model.MeetingInfo{
-		MeetingID:       idutil.OperationIDGenerator(),
+		MeetingID:       meetingID,
 		Title:           req.CreatorDefinedMeetingInfo.Title,
 		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
 		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
@@ -65,8 +69,13 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 		return resp, errs.WrapMsg(err, "get user info failed")
 	}
 
+	meetingID, err := s.meetingStorageHandler.GenerateMeetingID(ctx)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "generate meeting id failed")
+	}
+
 	meetingDBInfo := &model.MeetingInfo{
-		MeetingID:       idutil.OperationIDGenerator(),
+		MeetingID:       meetingID,
 		Title:           req.CreatorDefinedMeetingInfo.Title,
 		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
 		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
@@ -276,24 +285,58 @@ func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.Update
 	}
 
 	// Update the specific field based on the request
-	updateData := map[string]any{
-		"Title":           req.Title,
-		"ScheduledTime":   req.ScheduledTime,
-		"MeetingDuration": req.MeetingDuration,
-		"Password":        req.Password,
-	}
-	metaData.Detail.Setting.CanParticipantsEnableCamera = req.CanParticipantsEnableCamera
-	metaData.Detail.Setting.CanParticipantsUnmuteMicrophone = req.CanParticipantsUnmuteMicrophone
-	metaData.Detail.Setting.CanParticipantsShareScreen = req.CanParticipantsShareScreen
-	metaData.Detail.Setting.DisableCameraOnJoin = req.DisableCameraOnJoin
-	metaData.Detail.Setting.DisableMicrophoneOnJoin = req.DisableMicrophoneOnJoin
+	dbUpdate := false
+	livekitUpdate := false
+	updateData := map[string]any{}
 
-	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
-		return resp, err
+	if req.Title != nil {
+		dbUpdate = true
+		updateData["Title"] = req.Title.Value
+	}
+	if req.ScheduledTime != nil {
+		dbUpdate = true
+		updateData["ScheduledTime"] = req.ScheduledTime.Value
+	}
+	if req.MeetingDuration != nil {
+		dbUpdate = true
+		updateData["MeetingDuration"] = req.MeetingDuration.Value
+	}
+	if req.Password != nil {
+		dbUpdate = true
+		updateData["Password"] = req.Password.Value
 	}
 
-	if err := s.meetingStorageHandler.Update(ctx, req.MeetingID, updateData); err != nil {
-		return resp, err
+	if req.CanParticipantsEnableCamera != nil {
+		livekitUpdate = true
+		metaData.Detail.Setting.CanParticipantsEnableCamera = req.CanParticipantsEnableCamera.Value
+	}
+	if req.CanParticipantsUnmuteMicrophone != nil {
+		livekitUpdate = true
+		metaData.Detail.Setting.CanParticipantsUnmuteMicrophone = req.CanParticipantsUnmuteMicrophone.Value
+	}
+	if req.CanParticipantsShareScreen != nil {
+		livekitUpdate = true
+		metaData.Detail.Setting.CanParticipantsShareScreen = req.CanParticipantsShareScreen.Value
+	}
+	if req.DisableCameraOnJoin != nil {
+		livekitUpdate = true
+		metaData.Detail.Setting.DisableCameraOnJoin = req.DisableCameraOnJoin.Value
+	}
+	if req.DisableMicrophoneOnJoin != nil {
+		livekitUpdate = true
+		metaData.Detail.Setting.DisableMicrophoneOnJoin = req.DisableMicrophoneOnJoin.Value
+	}
+
+	if livekitUpdate {
+		if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
+			return resp, err
+		}
+	}
+
+	if dbUpdate {
+		if err := s.meetingStorageHandler.Update(ctx, req.MeetingID, updateData); err != nil {
+			return resp, err
+		}
 	}
 
 	return resp, nil
