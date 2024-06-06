@@ -144,7 +144,7 @@ message EndMeetingResp {
 // Request to get a list of meetings both created and joined by a user.
 message GetMeetingsReq {
   string userID = 1; // The unique identifier of the user.
-  string status = 2; // The status filter for meetings, e.g., "scheduled", "in-progress", "completed".
+  repeated string status = 2; // The status filter for meetings, e.g., "scheduled", "in-progress", "completed".
 }
 
 // Response with a list of meetings that the user has created or joined.

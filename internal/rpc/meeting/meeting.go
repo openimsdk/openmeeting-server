@@ -290,18 +290,22 @@ func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.Update
 
 	if req.Title != nil {
 		dbUpdate = true
+		metaData.Detail.Info.CreatorDefinedMeeting.Title = req.Title.Value
 		updateData["Title"] = req.Title.Value
 	}
 	if req.ScheduledTime != nil {
 		dbUpdate = true
+		metaData.Detail.Info.CreatorDefinedMeeting.ScheduledTime = req.ScheduledTime.Value
 		updateData["ScheduledTime"] = req.ScheduledTime.Value
 	}
 	if req.MeetingDuration != nil {
 		dbUpdate = true
+		metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration = req.ScheduledTime.Value
 		updateData["MeetingDuration"] = req.MeetingDuration.Value
 	}
 	if req.Password != nil {
 		dbUpdate = true
+		metaData.Detail.Info.CreatorDefinedMeeting.Password = req.Password.Value
 		updateData["Password"] = req.Password.Value
 	}
 
@@ -326,12 +330,9 @@ func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.Update
 		metaData.Detail.Setting.DisableMicrophoneOnJoin = req.DisableMicrophoneOnJoin.Value
 	}
 
-	if livekitUpdate {
+	if livekitUpdate || dbUpdate {
 		if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 			return resp, err
-		}
-		if err := s.meetingRtc.SendRoomData(ctx, req.MeetingID, nil, metaData); err != nil {
-			return resp, errs.WrapMsg(err, "send room data failed")
 		}
 	}
 

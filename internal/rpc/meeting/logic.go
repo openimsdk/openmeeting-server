@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
+	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -24,11 +25,17 @@ func (s *meetingServer) checkAuthPermission(hostUserID, requestUserID string) bo
 
 func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model.MeetingInfo) (*pbmeeting.MeetingInfoSetting, error) {
 	// Fill in response data
+	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
+	if err != nil {
+		return nil, errs.WrapMsg(err, "get user info failed")
+	}
+
 	systemInfo := &pbmeeting.SystemGeneratedMeetingInfo{
-		CreatorUserID: info.CreatorUserID,
-		Status:        info.Status,
-		StartTime:     info.StartTime,
-		MeetingID:     info.MeetingID,
+		CreatorUserID:   info.CreatorUserID,
+		Status:          info.Status,
+		StartTime:       info.StartTime,
+		MeetingID:       info.MeetingID,
+		CreatorNickname: userInfo.Nickname,
 	}
 	creatorInfo := &pbmeeting.CreatorDefinedMeetingInfo{
 		Title:           info.Title,
@@ -187,7 +194,7 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 		return errs.WrapMsg(err, "update meta data failed")
 	}
 
-	if err := s.sendData(ctx, req.MeetingID, req.UserID, cameraOn, microphoneOn); err != nil {
+	if err := s.sendData(ctx, req.MeetingID, req.UserID, req.Setting.CameraOnEntry, req.Setting.MicrophoneOnEntry); err != nil {
 		return errs.WrapMsg(err, "send data failed")
 	}
 

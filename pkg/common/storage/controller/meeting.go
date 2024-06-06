@@ -16,7 +16,7 @@ type Meeting interface {
 	// Create Insert multiple external guarantees that the meetingID is not repeated and does not exist in the storage
 	Create(ctx context.Context, meetings []*model.MeetingInfo) (err error) //1
 	Update(ctx context.Context, meetingID string, updateData map[string]any) (err error)
-	FindByStatus(ctx context.Context, status string) ([]*model.MeetingInfo, error)
+	FindByStatus(ctx context.Context, status []string) ([]*model.MeetingInfo, error)
 	GenerateMeetingID(ctx context.Context) (string, error)
 }
 
@@ -60,7 +60,7 @@ func (u *MeetingStorageManager) Update(ctx context.Context, meetingID string, up
 	})
 }
 
-func (u *MeetingStorageManager) FindByStatus(ctx context.Context, status string) ([]*model.MeetingInfo, error) {
+func (u *MeetingStorageManager) FindByStatus(ctx context.Context, status []string) ([]*model.MeetingInfo, error) {
 	return u.db.FindByStatus(ctx, status)
 }
 
