@@ -223,6 +223,20 @@ message MeetingMetadata {
   repeated PersonalData personalData = 2;
 }
 
+// operate room all stream related to video and audio on entry.
+message OperateRoomAllStreamReq {
+  string meetingID = 1;
+  string operatorUserID = 2;
+  pbwrapper.BoolValue cameraOnEntry = 3; // Whether the camera should be enabled by default when joining the meeting.
+  pbwrapper.BoolValue microphoneOnEntry = 4; // Whether the microphone should be enabled by default when joining the meeting.
+}
+
+// Response with operate room all stream.
+message OperateRoomAllStreamResp {
+  repeated string streamNotExistUserIDList = 1;
+  repeated string failedUserIDList = 2;
+}
+
 
 // Defines services related to meeting management.
 service MeetingService {
@@ -248,4 +262,6 @@ service MeetingService {
   rpc GetPersonalMeetingSettings(GetPersonalMeetingSettingsReq) returns (GetPersonalMeetingSettingsResp);
   // Sets personal meeting settings.
   rpc SetPersonalMeetingSettings(SetPersonalMeetingSettingsReq) returns (SetPersonalMeetingSettingsResp);
+  // operate room all stream.
+  rpc OperateRoomAllStream(OperateRoomAllStreamReq) returns (OperateRoomAllStreamResp);
 }

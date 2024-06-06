@@ -2,6 +2,7 @@ package rtc
 
 import (
 	"context"
+	"github.com/livekit/protocol/livekit"
 	"github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 )
 
@@ -15,4 +16,5 @@ type MeetingRtc interface {
 	RemoveParticipant(ctx context.Context, roomID, userID string) error
 	ToggleMimeStream(ctx context.Context, roomID, userID, mineType string, mute bool) error
 	SendRoomData(ctx context.Context, roomID string, userIDList *[]string, sendData interface{}) error
+	ListParticipants(ctx context.Context, roomID string) ([]*livekit.ParticipantInfo, error)
 }

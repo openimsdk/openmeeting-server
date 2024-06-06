@@ -13,3 +13,10 @@ type UpdateMeetingReq struct {
 	DisableCameraOnJoin             *bool   `json:"disableCameraOnJoin"`
 	DisableMicrophoneOnJoin         *bool   `json:"disableMicrophoneOnJoin"`
 }
+
+type OperateMeetingAllStreamReq struct {
+	MeetingID         string `json:"meetingID"`
+	OperatorUserID    string `json:"operatorUserID"`
+	MicrophoneOnEntry *bool  `json:"canParticipantsEnableCamera"`
+	CameraOnEntry     *bool  `json:"canParticipantsUnmuteMicrophone"`
+}

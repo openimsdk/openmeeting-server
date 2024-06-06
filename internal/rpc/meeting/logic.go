@@ -5,6 +5,7 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 )
 
@@ -209,4 +210,23 @@ func (s *meetingServer) sendData(ctx context.Context, roomID, userID string, cam
 		return errs.WrapMsg(err, "send room data failed")
 	}
 	return nil
+}
+
+func (s *meetingServer) MuteAllStream(ctx context.Context, roomID, streamType string, mute bool) (streamNotExistUserIDList []string, failedUserIDList []string, err error) {
+	participants, err := s.meetingRtc.ListParticipants(ctx, roomID)
+	if err != nil {
+		return nil, nil, errs.WrapMsg(err, "get participant list failed")
+	}
+	for _, v := range participants {
+		err := s.meetingRtc.ToggleMimeStream(ctx, roomID, v.Identity, streamType, mute)
+		if err != nil {
+			log.ZError(ctx, "MuteAllStream failed", err)
+			if errs.ErrRecordNotFound.Is(err) {
+				streamNotExistUserIDList = append(streamNotExistUserIDList, v.Identity)
+			} else {
+				failedUserIDList = append(failedUserIDList, v.Identity)
+			}
+		}
+	}
+	return
 }

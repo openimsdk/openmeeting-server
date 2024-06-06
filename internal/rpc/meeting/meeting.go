@@ -2,7 +2,6 @@ package meeting
 
 import (
 	"context"
-	"fmt"
 	"github.com/openimsdk/openmeeting-server/pkg/common"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
@@ -364,7 +363,6 @@ func (s *meetingServer) GetPersonalMeetingSettings(ctx context.Context, req *pbm
 func (s *meetingServer) SetPersonalMeetingSettings(ctx context.Context, req *pbmeeting.SetPersonalMeetingSettingsReq) (*pbmeeting.SetPersonalMeetingSettingsResp, error) {
 	resp := &pbmeeting.SetPersonalMeetingSettingsResp{}
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
-	fmt.Println(metaData)
 	if err != nil {
 		return resp, err
 	}
@@ -391,5 +389,33 @@ func (s *meetingServer) SetPersonalMeetingSettings(ctx context.Context, req *pbm
 	if err := s.setParticipantPersonalSetting(ctx, metaData, req); err != nil {
 		return resp, errs.WrapMsg(err, "set participant personal setting failed")
 	}
+	return resp, nil
+}
+
+func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting.OperateRoomAllStreamReq) (*pbmeeting.OperateRoomAllStreamResp, error) {
+	resp := &pbmeeting.OperateRoomAllStreamResp{}
+
+	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	if err != nil {
+		return resp, err
+	}
+	hostUser := s.getHostUserID(metaData)
+	if hostUser != req.OperatorUserID {
+		return resp, errs.ErrNoPermission.WrapMsg("do not have the permission")
+	}
+	if req.MicrophoneOnEntry != nil {
+		resp.StreamNotExistUserIDList, resp.FailedUserIDList, err = s.MuteAllStream(ctx, req.MeetingID, audio, !req.MicrophoneOnEntry.Value)
+		if err != nil {
+			return resp, errs.WrapMsg(err, "operate room all microphone stream failed")
+		}
+	}
+
+	if req.CameraOnEntry != nil {
+		resp.StreamNotExistUserIDList, resp.StreamNotExistUserIDList, err = s.MuteAllStream(ctx, req.MeetingID, video, !req.CameraOnEntry.Value)
+		if err != nil {
+			return resp, errs.WrapMsg(err, "operate room all camera stream failed")
+		}
+	}
+
 	return resp, nil
 }

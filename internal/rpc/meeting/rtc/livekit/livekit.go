@@ -237,3 +237,11 @@ func (x *LiveKit) SendRoomData(ctx context.Context, roomID string, userIDList *[
 	}
 	return nil
 }
+
+func (x *LiveKit) ListParticipants(ctx context.Context, roomID string) ([]*livekit.ParticipantInfo, error) {
+	respListParticipants, err := x.roomClient.ListParticipants(ctx, &livekit.ListParticipantsRequest{Room: roomID})
+	if err != nil {
+		return nil, errs.WrapMsg(err, "list participants failed")
+	}
+	return respListParticipants.GetParticipants(), nil
+}

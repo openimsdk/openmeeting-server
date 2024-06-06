@@ -105,3 +105,28 @@ func (m *MeetingApi) UpdateMeeting(c *gin.Context) {
 	}
 	apiresp.GinSuccess(c, resp) // rpc call success
 }
+
+func (m *MeetingApi) OperateMeetingAllStream(c *gin.Context) {
+	var req apistruct.OperateMeetingAllStreamReq
+
+	if err := c.BindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	rpcReq := &meeting.OperateRoomAllStreamReq{
+		MeetingID:      req.MeetingID,
+		OperatorUserID: req.OperatorUserID,
+	}
+	if req.CameraOnEntry != nil {
+		rpcReq.CameraOnEntry = &pbwrapper.BoolValue{Value: *req.CameraOnEntry}
+	}
+	if req.MicrophoneOnEntry != nil {
+		rpcReq.MicrophoneOnEntry = &pbwrapper.BoolValue{Value: *req.MicrophoneOnEntry}
+	}
+	resp, err := m.Client.OperateRoomAllStream(c, rpcReq)
+	if err != nil {
+		apiresp.GinError(c, err) // rpc call failed
+		return
+	}
+	apiresp.GinSuccess(c, resp) // rpc call success
+}
