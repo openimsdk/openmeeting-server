@@ -57,8 +57,18 @@ message UserInfo {
 }
 
 // participant meta data
-message ParticipantMetaData{
+message ParticipantMetaData {
   UserInfo userInfo = 1;
+}
+
+message StreamOperateData {
+  string operatorUserID = 1;
+  repeated UserOperationData operation = 2;
+}
+
+message UserOperationData {
+  string userID = 1;
+  PersonalMeetingSetting operation = 2;
 }
 
 

@@ -5,6 +5,7 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/mcontext"
 )
 
 const (
@@ -119,14 +120,7 @@ func (s *meetingServer) setSelfPersonalSetting(ctx context.Context, metaData *pb
 
 	// judge whether user need to change or not
 	if !found {
-		metaData.PersonalData = append(metaData.PersonalData, &pbmeeting.PersonalData{
-			UserID:          req.UserID,
-			PersonalSetting: req.Setting,
-			LimitSetting: &pbmeeting.PersonalMeetingSetting{
-				CameraOnEntry:     true,
-				MicrophoneOnEntry: true,
-			},
-		})
+		metaData.PersonalData = append(metaData.PersonalData, personalData)
 	}
 	if !needUpdate {
 		// no need update
@@ -162,14 +156,19 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 		personalData = s.getDefaultPersonalData(req.UserID)
 	}
 	personalData.LimitSetting = req.Setting
-	if !s.checkUserEnableCamera(metaData.Detail.Setting, personalData) {
+
+	var (
+		cameraOn     = false
+		microphoneOn = false
+	)
+	if cameraOn = s.checkUserEnableCamera(metaData.Detail.Setting, personalData); !cameraOn {
 		// no need to care the scene that turning on the camera
 		if err := s.meetingRtc.ToggleMimeStream(ctx, req.MeetingID, req.UserID, video, true); err != nil {
 			return errs.WrapMsg(err, "toggle camera stream failed")
 		}
 	}
 
-	if !s.checkUserEnableMicrophone(metaData.Detail.Setting, personalData) {
+	if microphoneOn = s.checkUserEnableMicrophone(metaData.Detail.Setting, personalData); !microphoneOn {
 		// no need to care the scene that turning on the microphone
 		if err := s.meetingRtc.ToggleMimeStream(ctx, req.MeetingID, req.UserID, audio, true); err != nil {
 			return errs.WrapMsg(err, "toggle microphone stream failed")
@@ -177,10 +176,7 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 	}
 
 	if !found {
-		metaData.PersonalData = append(metaData.PersonalData, &pbmeeting.PersonalData{
-			UserID:          req.UserID,
-			PersonalSetting: req.Setting,
-		})
+		metaData.PersonalData = append(metaData.PersonalData, personalData)
 	}
 	if !needUpdate {
 		// no need to update
@@ -188,6 +184,29 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 	}
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 		return errs.WrapMsg(err, "update meta data failed")
+	}
+
+	if err := s.sendData(ctx, req.MeetingID, req.UserID, cameraOn, microphoneOn); err != nil {
+		return errs.WrapMsg(err, "send data failed")
+	}
+
+	return nil
+}
+
+func (s *meetingServer) sendData(ctx context.Context, roomID, userID string, cameraOn, microphoneOn bool) error {
+	sendData := &pbmeeting.StreamOperateData{
+		OperatorUserID: mcontext.GetOpUserID(ctx),
+		Operation: []*pbmeeting.UserOperationData{&pbmeeting.UserOperationData{
+			UserID: userID,
+			Operation: &pbmeeting.PersonalMeetingSetting{
+				CameraOnEntry:     cameraOn,
+				MicrophoneOnEntry: microphoneOn,
+			},
+		}},
+	}
+
+	if err := s.meetingRtc.SendRoomData(ctx, roomID, &[]string{userID}, sendData); err != nil {
+		return errs.WrapMsg(err, "send room data failed")
 	}
 	return nil
 }

@@ -331,6 +331,9 @@ func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.Update
 		if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 			return resp, err
 		}
+		if err := s.meetingRtc.SendRoomData(ctx, req.MeetingID, nil, metaData); err != nil {
+			return resp, errs.WrapMsg(err, "send room data failed")
+		}
 	}
 
 	if dbUpdate {
@@ -384,6 +387,7 @@ func (s *meetingServer) SetPersonalMeetingSettings(ctx context.Context, req *pbm
 		}
 		return resp, nil
 	}
+	// admin set participant setting
 	if err := s.setParticipantPersonalSetting(ctx, metaData, req); err != nil {
 		return resp, errs.WrapMsg(err, "set participant personal setting failed")
 	}

@@ -13,7 +13,6 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/twitchtv/twirp"
-	"strings"
 	"sync/atomic"
 	"time"
 )
@@ -190,21 +189,21 @@ func (x *LiveKit) IsNotFound(err error) bool {
 }
 
 func (x *LiveKit) ToggleMimeStream(ctx context.Context, roomID, userID, mineType string, mute bool) error {
-	participant, err := x.roomClient.GetParticipant(ctx, &livekit.RoomParticipantIdentity{Room: roomID, Identity: userID})
-	if err != nil {
-		return errs.WrapMsg(err, "get room participant failed")
-	}
-	var sid string
-	for _, track := range participant.Tracks {
-		log.ZDebug(ctx, "participant tracks:", track.MimeType, track.Sid, track.Type)
-		if strings.Contains(track.MimeType, mineType) {
-			sid = track.Sid
-			break
-		}
-		if sid == "" {
-			return errs.New("mine type not found", mineType)
-		}
-	}
+	//participant, err := x.roomClient.GetParticipant(ctx, &livekit.RoomParticipantIdentity{Room: roomID, Identity: userID})
+	//if err != nil {
+	//	return errs.WrapMsg(err, "get room participant failed")
+	//}
+	//var sid string
+	//for _, track := range participant.Tracks {
+	//	log.ZDebug(ctx, "participant tracks:", track.MimeType, track.Sid, track.Type)
+	//	if strings.Contains(track.MimeType, mineType) {
+	//		sid = track.Sid
+	//		break
+	//	}
+	//	if sid == "" {
+	//		return errs.New("mine type not found", mineType)
+	//	}
+	//}
 	//_, err = x.roomClient.MutePublishedTrack(ctx, &livekit.MuteRoomTrackRequest{
 	//	Room:     roomID,
 	//	Identity: userID,
@@ -214,5 +213,27 @@ func (x *LiveKit) ToggleMimeStream(ctx context.Context, roomID, userID, mineType
 	//if err != nil {
 	//	return errs.WrapMsg(err, "mute published track failed")
 	//}
+	return nil
+}
+
+func (x *LiveKit) SendRoomData(ctx context.Context, roomID string, userIDList *[]string, sendData interface{}) error {
+	bytes, err := json.Marshal(&sendData)
+	if err != nil {
+		return errs.WrapMsg(err, "marshal send data failed")
+	}
+
+	topic := "system"
+	req := &livekit.SendDataRequest{
+		Room:  roomID,
+		Data:  bytes,
+		Topic: &topic,
+	}
+	if userIDList != nil {
+		req.DestinationIdentities = *userIDList
+	}
+
+	if _, err := x.roomClient.SendData(ctx, req); err != nil {
+		return errs.WrapMsg(err, "send room data failed")
+	}
 	return nil
 }

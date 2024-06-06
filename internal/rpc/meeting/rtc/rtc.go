@@ -14,4 +14,5 @@ type MeetingRtc interface {
 	CloseRoom(ctx context.Context, roomID string) error
 	RemoveParticipant(ctx context.Context, roomID, userID string) error
 	ToggleMimeStream(ctx context.Context, roomID, userID, mineType string, mute bool) error
+	SendRoomData(ctx context.Context, roomID string, userIDList *[]string, sendData interface{}) error
 }
