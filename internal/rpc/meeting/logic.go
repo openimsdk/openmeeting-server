@@ -2,9 +2,7 @@ package meeting
 
 import (
 	"context"
-	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
-	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -14,88 +12,6 @@ const (
 	video = "video"
 	audio = "audio"
 )
-
-func (s *meetingServer) getHostUserID(metadata *pbmeeting.MeetingMetadata) string {
-	return metadata.Detail.Info.SystemGenerated.CreatorUserID
-}
-
-func (s *meetingServer) checkAuthPermission(hostUserID, requestUserID string) bool {
-	return hostUserID == requestUserID
-}
-
-func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model.MeetingInfo) (*pbmeeting.MeetingInfoSetting, error) {
-	// Fill in response data
-	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
-	if err != nil {
-		return nil, errs.WrapMsg(err, "get user info failed")
-	}
-
-	systemInfo := &pbmeeting.SystemGeneratedMeetingInfo{
-		CreatorUserID:   info.CreatorUserID,
-		Status:          info.Status,
-		StartTime:       info.StartTime,
-		MeetingID:       info.MeetingID,
-		CreatorNickname: userInfo.Nickname,
-	}
-	creatorInfo := &pbmeeting.CreatorDefinedMeetingInfo{
-		Title:           info.Title,
-		ScheduledTime:   info.ScheduledTime,
-		MeetingDuration: info.MeetingDuration,
-		Password:        info.Password,
-	}
-	meetingInfo := &pbmeeting.MeetingInfo{
-		SystemGenerated:       systemInfo,
-		CreatorDefinedMeeting: creatorInfo,
-	}
-	meetingInfoSetting := &pbmeeting.MeetingInfoSetting{
-		Info: meetingInfo,
-	}
-	metaData, err := s.meetingRtc.GetRoomData(ctx, info.MeetingID)
-	if err == nil {
-		meetingInfoSetting.Setting = metaData.Detail.Setting
-		meetingInfoSetting.Info.SystemGenerated.CreatorNickname = metaData.Detail.Info.SystemGenerated.CreatorNickname
-	}
-
-	return meetingInfoSetting, nil
-}
-
-// generateMeetingInfoSetting generates MeetingInfoSetting from the given request and meeting ID.
-func (s *meetingServer) generateRespSetting(
-	meetingSetting *pbmeeting.MeetingSetting,
-	defineMeetingInfo *pbmeeting.CreatorDefinedMeetingInfo, meeting *model.MeetingInfo) *pbmeeting.MeetingInfoSetting {
-	// Fill in response data
-	systemInfo := &pbmeeting.SystemGeneratedMeetingInfo{
-		CreatorUserID: meeting.CreatorUserID,
-		Status:        meeting.Status,
-		StartTime:     meeting.ScheduledTime, // Scheduled start time as the actual start time
-		MeetingID:     meeting.MeetingID,
-	}
-	// Combine system-generated and creator-defined info
-	meetingInfo := &pbmeeting.MeetingInfo{
-		SystemGenerated:       systemInfo,
-		CreatorDefinedMeeting: defineMeetingInfo,
-	}
-	// Create MeetingInfoSetting
-	meetingInfoSetting := &pbmeeting.MeetingInfoSetting{
-		Info:    meetingInfo,
-		Setting: meetingSetting,
-	}
-	return meetingInfoSetting
-}
-
-func (s *meetingServer) getDefaultPersonalData(userID string) *pbmeeting.PersonalData {
-	return &pbmeeting.PersonalData{
-		UserID: userID,
-		PersonalSetting: &pbmeeting.PersonalMeetingSetting{
-			CameraOnEntry:     false,
-			MicrophoneOnEntry: false,
-		},
-		LimitSetting: &pbmeeting.PersonalMeetingSetting{
-			CameraOnEntry:     true,
-			MicrophoneOnEntry: true,
-		},
-	}
-}
 
 func (s *meetingServer) setSelfPersonalSetting(ctx context.Context, metaData *pbmeeting.MeetingMetadata, req *pbmeeting.SetPersonalMeetingSettingsReq) error {
 	found := false
@@ -113,7 +29,7 @@ func (s *meetingServer) setSelfPersonalSetting(ctx context.Context, metaData *pb
 		needUpdate = false
 	}
 	if !found {
-		personalData = s.getDefaultPersonalData(req.UserID)
+		personalData = s.generateDefaultPersonalData(req.UserID)
 	}
 	personalData.PersonalSetting = req.Setting
 	toggle := s.checkUserEnableCamera(metaData.Detail.Setting, personalData)
@@ -161,7 +77,7 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 	}
 
 	if !found {
-		personalData = s.getDefaultPersonalData(req.UserID)
+		personalData = s.generateDefaultPersonalData(req.UserID)
 	}
 	personalData.LimitSetting = req.Setting
 
@@ -219,7 +135,7 @@ func (s *meetingServer) sendData(ctx context.Context, roomID, userID string, cam
 	return nil
 }
 
-func (s *meetingServer) MuteAllStream(ctx context.Context, roomID, streamType string, mute bool) (streamNotExistUserIDList []string, failedUserIDList []string, err error) {
+func (s *meetingServer) muteAllStream(ctx context.Context, roomID, streamType string, mute bool) (streamNotExistUserIDList []string, failedUserIDList []string, err error) {
 	participants, err := s.meetingRtc.ListParticipants(ctx, roomID)
 	if err != nil {
 		return nil, nil, errs.WrapMsg(err, "get participant list failed")
@@ -227,7 +143,7 @@ func (s *meetingServer) MuteAllStream(ctx context.Context, roomID, streamType st
 	for _, v := range participants {
 		err := s.meetingRtc.ToggleMimeStream(ctx, roomID, v.Identity, streamType, mute)
 		if err != nil {
-			log.ZError(ctx, "MuteAllStream failed", err)
+			log.ZError(ctx, "muteAllStream failed", err)
 			if errs.ErrRecordNotFound.Is(err) {
 				streamNotExistUserIDList = append(streamNotExistUserIDList, v.Identity)
 			} else {

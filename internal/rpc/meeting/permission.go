@@ -2,6 +2,10 @@ package meeting
 
 import pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 
+func (s *meetingServer) checkAuthPermission(hostUserID, requestUserID string) bool {
+	return hostUserID == requestUserID
+}
+
 func (s *meetingServer) checkUserEnableCamera(setting *pbmeeting.MeetingSetting, personalData *pbmeeting.PersonalData) bool {
 	if setting.CanParticipantsEnableCamera && personalData.PersonalSetting.CameraOnEntry && personalData.LimitSetting.CameraOnEntry {
 		return true

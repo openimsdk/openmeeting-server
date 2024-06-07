@@ -5,11 +5,9 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
+	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	sysConstant "github.com/openimsdk/protocol/constant"
-	"github.com/openimsdk/tools/log"
-
-	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	"github.com/openimsdk/tools/errs"
 )
 
@@ -21,19 +19,9 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 		return resp, errs.WrapMsg(err, "get user info failed")
 	}
 
-	meetingID, err := s.meetingStorageHandler.GenerateMeetingID(ctx)
+	meetingDBInfo, err := s.generateMeetingDBData4Booking(ctx, req)
 	if err != nil {
-		return resp, errs.WrapMsg(err, "generate meeting id failed")
-	}
-
-	meetingDBInfo := &model.MeetingInfo{
-		MeetingID:       meetingID,
-		Title:           req.CreatorDefinedMeetingInfo.Title,
-		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
-		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
-		Password:        req.CreatorDefinedMeetingInfo.Password,
-		Status:          constant.Scheduled,
-		CreatorUserID:   req.CreatorUserID,
+		return resp, errs.WrapMsg(err, "generate meeting data failed")
 	}
 
 	_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, nil)
@@ -46,50 +34,33 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 		return resp, err
 	}
 	metaData := &pbmeeting.MeetingMetadata{}
-	meetingDetail := s.generateRespSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
+	meetingDetail := s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
 	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
 	metaData.Detail = meetingDetail
-	metaData.PersonalData = []*pbmeeting.PersonalData{s.getDefaultPersonalData(req.CreatorUserID)}
+	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
 	// create meeting meta data
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 		return resp, err
 	}
 
 	// fill in response data
-	resp.Detail = s.generateRespSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
+	resp.Detail = s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
 	return resp, nil
 }
 
 func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeting.CreateImmediateMeetingReq) (*pbmeeting.CreateImmediateMeetingResp, error) {
 	resp := &pbmeeting.CreateImmediateMeetingResp{}
-	log.ZDebug(ctx, "into CreateImmediateMeeting", nil)
 	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.CreatorUserID})
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get user info failed")
 	}
 
-	meetingID, err := s.meetingStorageHandler.GenerateMeetingID(ctx)
+	meetingDBInfo, err := s.generateMeetingDBData4Create(ctx, req)
 	if err != nil {
-		return resp, errs.WrapMsg(err, "generate meeting id failed")
+		return resp, errs.WrapMsg(err, "generate meeting data failed")
 	}
 
-	meetingDBInfo := &model.MeetingInfo{
-		MeetingID:       meetingID,
-		Title:           req.CreatorDefinedMeetingInfo.Title,
-		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
-		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
-		Password:        req.CreatorDefinedMeetingInfo.Password,
-		Status:          constant.InProgress,
-		CreatorUserID:   req.CreatorUserID,
-	}
-
-	participantMetaData := &pbmeeting.ParticipantMetaData{
-		UserInfo: &pbmeeting.UserInfo{
-			UserID:   userInfo.UserID,
-			Nickname: userInfo.Nickname,
-			Account:  userInfo.Account,
-		},
-	}
+	participantMetaData := s.generateParticipantMetaData(userInfo)
 
 	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, participantMetaData)
 	if err != nil {
@@ -102,10 +73,10 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 	}
 
 	metaData := &pbmeeting.MeetingMetadata{}
-	meetingDetail := s.generateRespSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
+	meetingDetail := s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
 	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
 	metaData.Detail = meetingDetail
-	metaData.PersonalData = []*pbmeeting.PersonalData{s.getDefaultPersonalData(req.CreatorUserID)}
+	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
 	// create meeting meta data
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 		return resp, err
@@ -135,13 +106,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		return resp, errs.New("meeting password not match, please check and try again!")
 	}
 
-	participantMetaData := &pbmeeting.ParticipantMetaData{
-		UserInfo: &pbmeeting.UserInfo{
-			UserID:   userInfo.UserID,
-			Nickname: userInfo.Nickname,
-			Account:  userInfo.Account,
-		},
-	}
+	participantMetaData := s.generateParticipantMetaData(userInfo)
 
 	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.UserID, participantMetaData)
 	if err != nil {
@@ -157,7 +122,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		}
 	}
 	if !found {
-		personalData := s.getDefaultPersonalData(req.UserID)
+		personalData := s.generateDefaultPersonalData(req.UserID)
 		metaData.PersonalData = append(metaData.PersonalData, personalData)
 	}
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
@@ -177,15 +142,8 @@ func (s *meetingServer) GetMeetingToken(ctx context.Context, req *pbmeeting.GetM
 		return resp, errs.WrapMsg(err, "get user info failed")
 	}
 
-	participantMetaData := &pbmeeting.ParticipantMetaData{
-		UserInfo: &pbmeeting.UserInfo{
-			UserID:   userInfo.UserID,
-			Nickname: userInfo.Nickname,
-			Account:  userInfo.Account,
-		},
-	}
+	participantMetaData := s.generateParticipantMetaData(userInfo)
 
-	// todo check user auth
 	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.UserID, participantMetaData)
 	if err != nil {
 		return resp, err
@@ -211,16 +169,13 @@ func (s *meetingServer) LeaveMeeting(ctx context.Context, req *pbmeeting.LeaveMe
 
 func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetingReq) (*pbmeeting.EndMeetingResp, error) {
 	resp := &pbmeeting.EndMeetingResp{}
-
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
 		return nil, err
 	}
-
 	if !s.checkAuthPermission(metaData.Detail.Info.SystemGenerated.CreatorUserID, req.UserID) {
 		return resp, errs.ErrArgs.WrapMsg("user did not have permission to end somebody's meeting")
 	}
-
 	// change status to completed
 	updateData := map[string]any{
 		"status": constant.Completed,
@@ -283,61 +238,16 @@ func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.Update
 		return resp, err
 	}
 
-	// Update the specific field based on the request
-	dbUpdate := false
-	livekitUpdate := false
-	updateData := map[string]any{}
+	updateData, liveKitUpdate := s.getUpdateData(metaData, req)
 
-	if req.Title != nil {
-		dbUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.Title = req.Title.Value
-		updateData["Title"] = req.Title.Value
-	}
-	if req.ScheduledTime != nil {
-		dbUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.ScheduledTime = req.ScheduledTime.Value
-		updateData["ScheduledTime"] = req.ScheduledTime.Value
-	}
-	if req.MeetingDuration != nil {
-		dbUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration = req.ScheduledTime.Value
-		updateData["MeetingDuration"] = req.MeetingDuration.Value
-	}
-	if req.Password != nil {
-		dbUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.Password = req.Password.Value
-		updateData["Password"] = req.Password.Value
-	}
-
-	if req.CanParticipantsEnableCamera != nil {
-		livekitUpdate = true
-		metaData.Detail.Setting.CanParticipantsEnableCamera = req.CanParticipantsEnableCamera.Value
-	}
-	if req.CanParticipantsUnmuteMicrophone != nil {
-		livekitUpdate = true
-		metaData.Detail.Setting.CanParticipantsUnmuteMicrophone = req.CanParticipantsUnmuteMicrophone.Value
-	}
-	if req.CanParticipantsShareScreen != nil {
-		livekitUpdate = true
-		metaData.Detail.Setting.CanParticipantsShareScreen = req.CanParticipantsShareScreen.Value
-	}
-	if req.DisableCameraOnJoin != nil {
-		livekitUpdate = true
-		metaData.Detail.Setting.DisableCameraOnJoin = req.DisableCameraOnJoin.Value
-	}
-	if req.DisableMicrophoneOnJoin != nil {
-		livekitUpdate = true
-		metaData.Detail.Setting.DisableMicrophoneOnJoin = req.DisableMicrophoneOnJoin.Value
-	}
-
-	if livekitUpdate || dbUpdate {
+	if liveKitUpdate {
 		if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 			return resp, err
 		}
 	}
 
-	if dbUpdate {
-		if err := s.meetingStorageHandler.Update(ctx, req.MeetingID, updateData); err != nil {
+	if len(*updateData) > 0 {
+		if err := s.meetingStorageHandler.Update(ctx, req.MeetingID, *updateData); err != nil {
 			return resp, err
 		}
 	}
@@ -357,7 +267,6 @@ func (s *meetingServer) GetPersonalMeetingSettings(ctx context.Context, req *pbm
 			break
 		}
 	}
-
 	return resp, nil
 }
 
@@ -395,24 +304,24 @@ func (s *meetingServer) SetPersonalMeetingSettings(ctx context.Context, req *pbm
 
 func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting.OperateRoomAllStreamReq) (*pbmeeting.OperateRoomAllStreamResp, error) {
 	resp := &pbmeeting.OperateRoomAllStreamResp{}
-
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
 		return resp, err
 	}
+
 	hostUser := s.getHostUserID(metaData)
-	if hostUser != req.OperatorUserID {
+	if s.checkAuthPermission(hostUser, req.OperatorUserID) {
 		return resp, errs.ErrNoPermission.WrapMsg("do not have the permission")
 	}
 	if req.MicrophoneOnEntry != nil {
-		resp.StreamNotExistUserIDList, resp.FailedUserIDList, err = s.MuteAllStream(ctx, req.MeetingID, audio, !req.MicrophoneOnEntry.Value)
+		resp.StreamNotExistUserIDList, resp.FailedUserIDList, err = s.muteAllStream(ctx, req.MeetingID, audio, !req.MicrophoneOnEntry.Value)
 		if err != nil {
 			return resp, errs.WrapMsg(err, "operate room all microphone stream failed")
 		}
 	}
 
 	if req.CameraOnEntry != nil {
-		resp.StreamNotExistUserIDList, resp.StreamNotExistUserIDList, err = s.MuteAllStream(ctx, req.MeetingID, video, !req.CameraOnEntry.Value)
+		resp.StreamNotExistUserIDList, resp.StreamNotExistUserIDList, err = s.muteAllStream(ctx, req.MeetingID, video, !req.CameraOnEntry.Value)
 		if err != nil {
 			return resp, errs.WrapMsg(err, "operate room all camera stream failed")
 		}
