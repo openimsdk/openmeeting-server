@@ -2,7 +2,6 @@ package redis
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"github.com/dtm-labs/rockscache"
 	"github.com/openimsdk/openmeeting-server/pkg/common/cachekey"
@@ -11,7 +10,6 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/tools/errs"
 	"github.com/redis/go-redis/v9"
-	"strconv"
 	"time"
 )
 
@@ -72,21 +70,9 @@ func (m *Meeting) DelMeeting(meetingIDs ...string) cache.Meeting {
 }
 
 func (m *Meeting) GenerateMeetingID(ctx context.Context) (string, error) {
-	value, err := m.rdb.Get(ctx, cachekey.GenerateMeetingIDKey).Result()
-	var meetingID int
+	index, err := m.rdb.Incr(ctx, cachekey.GenerateMeetingIDKey).Result()
 	if err != nil {
-		if errors.Is(err, redis.Nil) {
-			value = "1"
-		} else {
-			return "", errs.WrapMsg(err, "get key failed", cachekey.GenerateMeetingIDKey)
-		}
+		return "", errs.WrapMsg(err, "incr key failed from redis")
 	}
-	meetingID, err = strconv.Atoi(value)
-	if err != nil {
-		return "", errs.WrapMsg(err, "string to integer failed")
-	}
-	meetingID += 1
-	strMeetingID := fmt.Sprintf("%09d", meetingID)
-	_ = m.rdb.Set(ctx, cachekey.GenerateMeetingIDKey, strMeetingID, 0)
-	return strMeetingID, nil
+	return fmt.Sprintf("%09d", index), nil
 }
