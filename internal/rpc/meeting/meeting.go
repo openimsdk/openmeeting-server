@@ -328,7 +328,7 @@ func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting
 	}
 
 	if err := s.send2AllParticipant(ctx, req, resp.StreamNotExistUserIDList, resp.FailedUserIDList); err != nil {
-
+		return resp, errs.WrapMsg(err, "send notification to all participant failed")
 	}
 
 	return resp, nil
