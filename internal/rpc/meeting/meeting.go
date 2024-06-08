@@ -310,7 +310,7 @@ func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting
 	}
 
 	hostUser := s.getHostUserID(metaData)
-	if s.checkAuthPermission(hostUser, req.OperatorUserID) {
+	if !s.checkAuthPermission(hostUser, req.OperatorUserID) {
 		return resp, errs.ErrNoPermission.WrapMsg("do not have the permission")
 	}
 	if req.MicrophoneOnEntry != nil {
@@ -325,6 +325,10 @@ func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting
 		if err != nil {
 			return resp, errs.WrapMsg(err, "operate room all camera stream failed")
 		}
+	}
+
+	if err := s.send2AllParticipant(ctx, req, resp.StreamNotExistUserIDList, resp.FailedUserIDList); err != nil {
+
 	}
 
 	return resp, nil

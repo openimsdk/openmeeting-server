@@ -17,4 +17,5 @@ type MeetingRtc interface {
 	ToggleMimeStream(ctx context.Context, roomID, userID, mineType string, mute bool) error
 	SendRoomData(ctx context.Context, roomID string, userIDList *[]string, sendData interface{}) error
 	ListParticipants(ctx context.Context, roomID string) ([]*livekit.ParticipantInfo, error)
+	GetParticipantUserIDs(ctx context.Context, roomID string) ([]string, error)
 }

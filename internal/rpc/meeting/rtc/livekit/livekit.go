@@ -245,3 +245,15 @@ func (x *LiveKit) ListParticipants(ctx context.Context, roomID string) ([]*livek
 	}
 	return respListParticipants.GetParticipants(), nil
 }
+
+func (x *LiveKit) GetParticipantUserIDs(ctx context.Context, roomID string) ([]string, error) {
+	resp, err := x.roomClient.ListParticipants(ctx, &livekit.ListParticipantsRequest{Room: roomID})
+	if err != nil {
+		return nil, errs.WrapMsg(err, "list participants failed")
+	}
+	userIDs := make([]string, 0, len(resp.Participants))
+	for _, v := range resp.Participants {
+		userIDs = append(userIDs, v.Identity)
+	}
+	return userIDs, nil
+}

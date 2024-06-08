@@ -68,7 +68,8 @@ message StreamOperateData {
 
 message UserOperationData {
   string userID = 1;
-  PersonalMeetingSetting operation = 2;
+  pbwrapper.BoolValue cameraOnEntry = 2;
+  pbwrapper.BoolValue microphoneOnEntry = 3;
 }
 
 

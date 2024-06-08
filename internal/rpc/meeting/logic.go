@@ -3,6 +3,7 @@ package meeting
 import (
 	"context"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
+	"github.com/openimsdk/openmeeting-server/pkg/protocol/pbwrapper"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -121,11 +122,9 @@ func (s *meetingServer) sendData(ctx context.Context, roomID, userID string, cam
 	sendData := &pbmeeting.StreamOperateData{
 		OperatorUserID: mcontext.GetOpUserID(ctx),
 		Operation: []*pbmeeting.UserOperationData{&pbmeeting.UserOperationData{
-			UserID: userID,
-			Operation: &pbmeeting.PersonalMeetingSetting{
-				CameraOnEntry:     cameraOn,
-				MicrophoneOnEntry: microphoneOn,
-			},
+			UserID:            userID,
+			CameraOnEntry:     &pbwrapper.BoolValue{Value: cameraOn},
+			MicrophoneOnEntry: &pbwrapper.BoolValue{Value: microphoneOn},
 		}},
 	}
 
@@ -152,4 +151,48 @@ func (s *meetingServer) muteAllStream(ctx context.Context, roomID, streamType st
 		}
 	}
 	return
+}
+
+func (s *meetingServer) send2AllParticipant(ctx context.Context, req *pbmeeting.OperateRoomAllStreamReq, StreamNotExistUserIDList, FailedUserIDList []string) error {
+	userIDs, err := s.meetingRtc.GetParticipantUserIDs(ctx, req.MeetingID)
+	if err != nil {
+		return err
+	}
+	userMap := make(map[string]bool)
+	var setUserIDs []string
+	for _, v := range userIDs {
+		userMap[v] = true
+	}
+	for _, v := range StreamNotExistUserIDList {
+		if _, ok := userMap[v]; !ok {
+			delete(userMap, v)
+		}
+	}
+	for _, v := range FailedUserIDList {
+		if _, ok := userMap[v]; !ok {
+			delete(userMap, v)
+		}
+	}
+	for k, _ := range userMap {
+		setUserIDs = append(setUserIDs, k)
+	}
+
+	var operationList []*pbmeeting.UserOperationData
+	for _, v := range setUserIDs {
+		operationList = append(operationList, &pbmeeting.UserOperationData{
+			UserID:            v,
+			CameraOnEntry:     req.CameraOnEntry,
+			MicrophoneOnEntry: req.MicrophoneOnEntry,
+		})
+	}
+	sendData := &pbmeeting.StreamOperateData{
+		OperatorUserID: mcontext.GetOpUserID(ctx),
+		Operation:      operationList,
+	}
+
+	if err := s.meetingRtc.SendRoomData(ctx, req.MeetingID, nil, sendData); err != nil {
+		return errs.WrapMsg(err, "send room data failed")
+	}
+
+	return nil
 }
