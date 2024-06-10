@@ -1,64 +1,75 @@
+<p align="center">
+    <a href="https://openim.io">
+        <img src="./assets/openim-logo.gif" width="60%" height="30%"/>
+    </a>
+</p>
 
-# 快速实现 API/RPC 教程
+<div align="center">
 
-本教程将指导您以 `user` 为例，逐步解释初始化到 API 和 RPC 的实现过程进行。
 
-## 1. 初始化模块
+</div>
 
-首先，初始化您的 Go 模块：
 
-```bash
-go mod init github.com/your-account/your-project
-```
+## :busts_in_silhouette: 加入我们的社区
 
-## 2. 定义 Protobuf
 
-在 `pkg/protocol` 目录下定义您的协议。通常，我们按照一个 RPC 一个目录的原则操作。创建 `user` 目录及 `user.proto` 协议文件：
+## Ⓜ️ 关于 OpenMeeting
 
-```plaintext
-pkg/protocol/user/user.proto
-```
+与zoom，腾讯会议，飞书会议等独立会议应用不同，OpenMeeting提供了专为开发者设计的开源实时音视频通讯解决方案，而不是直接安装使用的独立聊天应用。OpenMeeting为开发者提供了一整套实时音视频会议的工具和服务，包括会议音视频收发、共享屏幕通信、用户管理等。总体来说，OpenMeeting旨在为开发者提供必要的工具和框架，帮助他们在自己的应用中实现高效的实时音视频通信的解决方案。
 
-## 3. 生成 Protobuf 代码
+![App-OpenIM 关系](./assets/open-meeting-design.png)
 
-在项目根目录执行以下命令，以生成 `user.pb.go` 代码：
+👉 **[探索 GO SDK](https://github.com/openimsdk/openim-sdk-core)**
 
-```bash
-mage protocol
-```
+## 🌐 OpenMeetingServer 介绍
 
-**注意：** 如果是首次使用 `mage`，在 Linux/Mac 平台下执行 `bash bootstrap.sh`，在 Windows 执行 `bootstrap.bat`。
++ **OpenMeetingServer** 的特点包括：
+    - 🌐 微服务架构：支持集群模式，包括网关(gateway)和多个rpc服务。
+    - 🚀 多样的部署方式：支持源代码、Kubernetes或Docker部署。
+    - 海量用户支持：支持十万级超大群组，千万级用户和百亿级消息。
 
-## 4. 实现存储逻辑
+### 增强的业务功能：
 
-存储逻辑位于 `pkg/common/storage`，其中包含 `cache`, `controller`, `database`, `model` 目录：
++ **REST API**：为业务系统提供REST API，提供给客户端接口接入。
 
-- **Model**: 在 `model` 目录定义结构体。
-- **Controller**: 在 `controller` 目录定义接口。
-- **Cache/Database**: 在 `cache` 和 `database` 目录定义接口，并在 `redis` 和 `mgo` 目录下实现这些接口，以完成具体的业务逻辑。
++ **RPC API**：通过grpc为API提供相应的服务，包括user和meeting，扩展更多的业务形态。
 
-## 5. 实现 RPC
-
-在 `internal/rpc/user/user.go` 中实现 `Start` 函数及具体的 RPC 函数。
-
-## 6. 实现 API
-
-- 在 `internal/api/router.go` 增加路由。对于 whitelist 的路由不验证 token，其他 API 请求会进行 token 验证。
-- 在 `internal/api/user.go` 完成 API 调用 RPC 的逻辑。
-
-## 7. 入口函数
-
-- **API 入口**: 在 `pkg/cmd/api.go`，具体的 `start` 函数在 `internal/api/init.go`。
-- **RPC 入口**: 在 `pkg/cmd/user.go`，具体的 `start` 函数在 `pkg/startrpc/start.go`。
-
-## 8. 关于鉴权、日志、OperationID、Token 和 Context
-
-- **OperationID**: 在 RPC 中从 `context` 获取 `OperationID` 使用 `mcontext.GetOperationID(ctx)`。
-- **UserID 和 PlatformID**: 在 RPC 中从 `context` 获取登录用户 `userID` 和平台 `platformID` 使用 `mcontext.GetOpUserID(ctx)` 和 `mcontext.GetOpUserPlatform(ctx)`。
-- **API 调用者**: 需要将 token 和 operationID 设置在 HTTP header 中。
-- **日志打印**: 统一使用"github.com/openimsdk/tools/log" 
+  ![整体架构](./assets/architecture-layers.png)
 
 
 
+## :rocket: 快速入门
 
+为了便于用户体验，我们提供了多种部署解决方案，您可以根据以下列表选择适合您的部署方式：
 
++ **[源代码部署指南](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
++ **[Docker 部署指南](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
+
+## 系统支持
+
+支持 Linux、Windows、Mac 系统以及 ARM 和 AMD CPU 架构。
+
+## :link: 相关链接
+
++ **[开发手册](https://docs.openim.io/)**
++ **[更新日志](https://github.com/openimsdk/open-im-server/blob/main/CHANGELOG.md)**
+
+## :writing_hand: 如何贡献
+
+我们欢迎任何形式的贡献！在提交 Pull Request 之前，请确保阅读我们的[贡献者文档](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md)
+
++ **[报告 Bug](https://github.com/openimsdk/open-im-server/issues/new?assignees=&labels=bug&template=bug_report.md&title=)**
++ **[提出新特性](https://github.com/openimsdk/open-im-server/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=)**
++ **[提交 Pull Request](https://github.com/openimsdk/open-im-server/pulls)**
+
+感谢您的贡献，一起来打造强大的即时通讯解决方案！
+
+## :closed_book: 许可证
+
+OpenMeeting 在 GNU AFFERO GENERAL PUBLIC LICENSE 3.0 许可下可用。查看[LICENSE 文件](https://github.com/openimsdk/openmeeting-server/blob/main/LICENSE)了解更多信息。
+
+## 🔮 Thanks to our contributors!
+
+<a href="https://github.com/openimsdk/open-im-server/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=openimsdk/open-im-server" />
+</a>

@@ -42,7 +42,7 @@ func (s *meetingServer) generateMeetingDBData4Create(ctx context.Context, req *p
 		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
 		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
 		Password:        req.CreatorDefinedMeetingInfo.Password,
-		Status:          constant.Scheduled,
+		Status:          constant.InProgress,
 		CreatorUserID:   req.CreatorUserID,
 	}, nil
 }
