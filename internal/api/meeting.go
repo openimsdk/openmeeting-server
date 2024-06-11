@@ -54,7 +54,29 @@ func (m *MeetingApi) GetPersonalMeetingSettings(c *gin.Context) {
 }
 
 func (m *MeetingApi) SetPersonalMeetingSettings(c *gin.Context) {
-	a2r.Call(meeting.MeetingServiceClient.SetPersonalMeetingSettings, m.Client, c)
+	//a2r.Call(meeting.MeetingServiceClient.SetPersonalMeetingSettings, m.Client, c)
+
+	var req apistruct.SetPersonalSettingReq
+	if err := c.BindJSON(&req); err != nil {
+		apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
+		return
+	}
+	rpcReq := &meeting.SetPersonalMeetingSettingsReq{
+		MeetingID: req.MeetingID,
+		UserID:    req.UserID,
+	}
+	if req.Setting.CameraOnEntry != nil {
+		rpcReq.CameraOnEntry = &pbwrapper.BoolValue{Value: *req.Setting.CameraOnEntry}
+	}
+	if req.Setting.MicrophoneOnEntry != nil {
+		rpcReq.MicrophoneOnEntry = &pbwrapper.BoolValue{Value: *req.Setting.MicrophoneOnEntry}
+	}
+	resp, err := m.Client.SetPersonalMeetingSettings(c, rpcReq)
+	if err != nil {
+		apiresp.GinError(c, err) // rpc call failed
+		return
+	}
+	apiresp.GinSuccess(c, resp) // rpc call success}
 }
 
 func (m *MeetingApi) UpdateMeeting(c *gin.Context) {
