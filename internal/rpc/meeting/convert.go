@@ -7,6 +7,7 @@ import (
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func (s *meetingServer) getHostUserID(metadata *pbmeeting.MeetingMetadata) string {
@@ -39,6 +40,7 @@ func (s *meetingServer) generateMeetingDBData4Create(ctx context.Context, req *p
 	return &model.MeetingInfo{
 		MeetingID:       meetingID,
 		Title:           req.CreatorDefinedMeetingInfo.Title,
+		StartTime:       timeutil.GetCurrentTimestampByMill(),
 		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
 		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
 		Password:        req.CreatorDefinedMeetingInfo.Password,

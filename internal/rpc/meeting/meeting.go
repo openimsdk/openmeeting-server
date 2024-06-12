@@ -23,8 +23,12 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 	if err != nil {
 		return resp, errs.WrapMsg(err, "generate meeting data failed")
 	}
-
-	_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, nil)
+	metaData := &pbmeeting.MeetingMetadata{}
+	meetingDetail := s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
+	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
+	metaData.Detail = meetingDetail
+	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
+	_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, metaData, nil)
 	if err != nil {
 		return resp, err
 	}
@@ -33,11 +37,6 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 	if err != nil {
 		return resp, err
 	}
-	metaData := &pbmeeting.MeetingMetadata{}
-	meetingDetail := s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
-	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
-	metaData.Detail = meetingDetail
-	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
 	// create meeting meta data
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 		return resp, err
@@ -61,8 +60,13 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 	}
 
 	participantMetaData := s.generateParticipantMetaData(userInfo)
+	metaData := &pbmeeting.MeetingMetadata{}
+	meetingDetail := s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
+	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
+	metaData.Detail = meetingDetail
+	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
 
-	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, participantMetaData)
+	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, metaData, participantMetaData)
 	if err != nil {
 		return resp, err
 	}
@@ -72,11 +76,6 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 		return resp, err
 	}
 
-	metaData := &pbmeeting.MeetingMetadata{}
-	meetingDetail := s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
-	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
-	metaData.Detail = meetingDetail
-	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
 	// create meeting meta data
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 		return resp, err
@@ -106,6 +105,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		return resp, errs.New("meeting password not match, please check and try again!")
 	}
 
+	metaData.Detail.Info.SystemGenerated.MeetingID = req.MeetingID
 	participantMetaData := s.generateParticipantMetaData(userInfo)
 
 	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.UserID, participantMetaData)
@@ -238,6 +238,7 @@ func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.Update
 		return resp, err
 	}
 
+	metaData.Detail.Info.SystemGenerated.MeetingID = req.MeetingID
 	updateData, liveKitUpdate := s.getUpdateData(metaData, req)
 
 	if liveKitUpdate {
