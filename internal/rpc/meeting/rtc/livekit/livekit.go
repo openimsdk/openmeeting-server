@@ -139,6 +139,8 @@ func (x *LiveKit) GetRoomData(ctx context.Context, roomID string) (*meeting.Meet
 		log.ZError(ctx, "list room error", err)
 		return nil, errs.WrapMsg(err, "list room error")
 	}
+	log.CInfo(ctx, "get room data", resp)
+
 	if len(resp.Rooms) == 0 {
 		log.ZError(ctx, "not found room", errs.ErrRecordNotFound.WrapMsg("roomIsNotExist"))
 		return nil, errs.ErrRecordNotFound.WrapMsg("roomIsNotExist")
