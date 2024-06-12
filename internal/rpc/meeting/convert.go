@@ -40,7 +40,7 @@ func (s *meetingServer) generateMeetingDBData4Create(ctx context.Context, req *p
 	return &model.MeetingInfo{
 		MeetingID:       meetingID,
 		Title:           req.CreatorDefinedMeetingInfo.Title,
-		StartTime:       timeutil.GetCurrentTimestampByMill(),
+		StartTime:       timeutil.GetCurrentTimestampBySecond(),
 		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
 		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
 		Password:        req.CreatorDefinedMeetingInfo.Password,

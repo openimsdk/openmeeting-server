@@ -2,11 +2,13 @@ package meeting
 
 import (
 	"context"
+	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	"github.com/openimsdk/openmeeting-server/pkg/protocol/pbwrapper"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 const (
@@ -225,4 +227,33 @@ func (s *meetingServer) send2AllParticipant(ctx context.Context, req *pbmeeting.
 	}
 
 	return nil
+}
+
+func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
+	meetings, err := s.meetingStorageHandler.FindByStatus(ctx, []string{constant.InProgress, constant.Scheduled})
+	if err != nil {
+		log.ZError(ctx, "find meetings failed", err)
+		return
+	}
+	nowTimestamp := timeutil.GetCurrentTimestampBySecond()
+	for _, one := range meetings {
+		if one.StartTime+one.MeetingDuration < nowTimestamp {
+			updateData := map[string]any{
+				"Status": constant.Completed,
+			}
+			if err := s.meetingStorageHandler.Update(ctx, one.MeetingID, updateData); err != nil {
+				log.ZError(ctx, "update meeting status failed", err)
+			}
+		} else if one.StartTime+one.MeetingDuration < nowTimestamp && one.StartTime > nowTimestamp {
+			if one.Status == constant.InProgress {
+				continue
+			}
+			updateData := map[string]any{
+				"Status": constant.InProgress,
+			}
+			if err := s.meetingStorageHandler.Update(ctx, one.MeetingID, updateData); err != nil {
+				log.ZError(ctx, "update meeting status failed", err)
+			}
+		}
+	}
 }
