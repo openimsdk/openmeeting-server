@@ -136,17 +136,21 @@ func (x *LiveKit) RoomIsExist(ctx context.Context, meetingID string) (string, er
 func (x *LiveKit) GetRoomData(ctx context.Context, roomID string) (*meeting.MeetingMetadata, error) {
 	resp, err := x.roomClient.ListRooms(ctx, &livekit.ListRoomsRequest{Names: []string{roomID}})
 	if err != nil {
+		log.ZError(ctx, "list room error", err)
 		return nil, errs.WrapMsg(err, "list room error")
 	}
 	if len(resp.Rooms) == 0 {
+		log.ZError(ctx, "not found room", errs.ErrRecordNotFound.WrapMsg("roomIsNotExist"))
 		return nil, errs.ErrRecordNotFound.WrapMsg("roomIsNotExist")
 	}
 	var metaData meeting.MeetingMetadata
 	if resp.Rooms[0].Metadata == "" {
+		log.ZError(ctx, "meta data not init", errs.ErrRecordNotFound.WrapMsg("meta data not init"))
 		return nil, errs.ErrRecordNotFound.WrapMsg("meta data not init")
 	}
 
 	if err := json.Unmarshal([]byte(resp.Rooms[0].Metadata), &metaData); err != nil {
+		log.ZError(ctx, "Unmarshal failed roomId:", err)
 		return nil, errs.WrapMsg(err, "Unmarshal failed roomId:", roomID)
 	}
 	return &metaData, nil
