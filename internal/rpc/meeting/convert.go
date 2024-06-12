@@ -23,6 +23,7 @@ func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *
 	return &model.MeetingInfo{
 		MeetingID:       meetingID,
 		Title:           req.CreatorDefinedMeetingInfo.Title,
+		StartTime:       req.CreatorDefinedMeetingInfo.ScheduledTime,
 		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
 		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
 		Password:        req.CreatorDefinedMeetingInfo.Password,
