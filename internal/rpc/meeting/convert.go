@@ -105,6 +105,7 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 	if err == nil {
 		meetingInfoSetting.Setting = metaData.Detail.Setting
 		meetingInfoSetting.Info.SystemGenerated.CreatorNickname = metaData.Detail.Info.SystemGenerated.CreatorNickname
+		meetingInfoSetting.Info.CreatorDefinedMeeting.MeetingDuration = metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration
 	}
 
 	return meetingInfoSetting, nil
