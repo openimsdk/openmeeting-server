@@ -150,7 +150,7 @@ func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *
 	}
 	if req.MeetingDuration != nil {
 		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration = req.ScheduledTime.Value
+		metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration = req.MeetingDuration.Value
 		updateData["MeetingDuration"] = req.MeetingDuration.Value
 	}
 	if req.Password != nil {

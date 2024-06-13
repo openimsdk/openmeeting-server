@@ -101,7 +101,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		return resp, errs.WrapMsg(err, "get room data failed")
 	}
 
-	if req.Password != metaData.Detail.Info.CreatorDefinedMeeting.Password {
+	if req.UserID != s.getHostUserID(metaData) && req.Password != metaData.Detail.Info.CreatorDefinedMeeting.Password {
 		return resp, errs.New("meeting password not match, please check and try again!")
 	}
 
