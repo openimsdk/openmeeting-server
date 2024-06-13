@@ -141,22 +141,22 @@ func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *
 	if req.Title != nil {
 		liveKitUpdate = true
 		metaData.Detail.Info.CreatorDefinedMeeting.Title = req.Title.Value
-		updateData["Title"] = req.Title.Value
+		updateData["title"] = req.Title.Value
 	}
 	if req.ScheduledTime != nil {
 		liveKitUpdate = true
 		metaData.Detail.Info.CreatorDefinedMeeting.ScheduledTime = req.ScheduledTime.Value
-		updateData["ScheduledTime"] = req.ScheduledTime.Value
+		updateData["scheduled_time"] = req.ScheduledTime.Value
 	}
 	if req.MeetingDuration != nil {
 		liveKitUpdate = true
 		metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration = req.MeetingDuration.Value
-		updateData["MeetingDuration"] = req.MeetingDuration.Value
+		updateData["meeting_duration"] = req.MeetingDuration.Value
 	}
 	if req.Password != nil {
 		liveKitUpdate = true
 		metaData.Detail.Info.CreatorDefinedMeeting.Password = req.Password.Value
-		updateData["Password"] = req.Password.Value
+		updateData["password"] = req.Password.Value
 	}
 
 	if req.CanParticipantsEnableCamera != nil {
