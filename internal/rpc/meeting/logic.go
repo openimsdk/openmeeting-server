@@ -2,11 +2,13 @@ package meeting
 
 import (
 	"context"
+	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	"github.com/openimsdk/openmeeting-server/pkg/protocol/pbwrapper"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 const (
@@ -25,14 +27,24 @@ func (s *meetingServer) setSelfPersonalSetting(ctx context.Context, metaData *pb
 		}
 	}
 	needUpdate := true
-	if found && personalData.PersonalSetting.CameraOnEntry == req.Setting.CameraOnEntry &&
-		personalData.PersonalSetting.MicrophoneOnEntry == req.Setting.MicrophoneOnEntry {
-		needUpdate = false
+	if found {
+		if req.CameraOnEntry == nil && req.MicrophoneOnEntry == nil {
+			needUpdate = false
+		}
 	}
+	//if found && personalData.PersonalSetting.CameraOnEntry == req.CameraOnEntry &&
+	//	personalData.PersonalSetting.MicrophoneOnEntry == req.MicrophoneOnEntry {
+	//	needUpdate = false
+	//}
 	if !found {
 		personalData = s.generateDefaultPersonalData(req.UserID)
 	}
-	personalData.PersonalSetting = req.Setting
+	if req.CameraOnEntry != nil {
+		personalData.PersonalSetting.CameraOnEntry = req.CameraOnEntry.Value
+	}
+	if req.MicrophoneOnEntry != nil {
+		personalData.PersonalSetting.MicrophoneOnEntry = req.MicrophoneOnEntry.Value
+	}
 	toggle := s.checkUserEnableCamera(metaData.Detail.Setting, personalData)
 	if err := s.meetingRtc.ToggleMimeStream(ctx, req.MeetingID, req.UserID, video, !toggle); err != nil {
 		return errs.WrapMsg(err, "toggle camera stream failed")
@@ -72,16 +84,25 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 
 	// judge whether user need to change or not
 	needUpdate := true
-	if found && personalData.LimitSetting.MicrophoneOnEntry == req.Setting.MicrophoneOnEntry &&
-		personalData.LimitSetting.CameraOnEntry == req.Setting.CameraOnEntry {
-		needUpdate = false
+	//if found && personalData.LimitSetting.MicrophoneOnEntry == req.Setting.MicrophoneOnEntry &&
+	//	personalData.LimitSetting.CameraOnEntry == req.Setting.CameraOnEntry {
+	//	needUpdate = false
+	//}
+	if found {
+		if req.CameraOnEntry == nil && req.MicrophoneOnEntry == nil {
+			needUpdate = false
+		}
 	}
 
 	if !found {
 		personalData = s.generateDefaultPersonalData(req.UserID)
 	}
-	personalData.LimitSetting = req.Setting
-
+	if req.CameraOnEntry != nil {
+		personalData.LimitSetting.CameraOnEntry = req.CameraOnEntry.Value
+	}
+	if req.MicrophoneOnEntry != nil {
+		personalData.LimitSetting.MicrophoneOnEntry = req.MicrophoneOnEntry.Value
+	}
 	var (
 		cameraOn     = false
 		microphoneOn = false
@@ -111,21 +132,27 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 		return errs.WrapMsg(err, "update meta data failed")
 	}
 
-	if err := s.sendData(ctx, req.MeetingID, req.UserID, req.Setting.CameraOnEntry, req.Setting.MicrophoneOnEntry); err != nil {
+	if err := s.sendData(ctx, req.MeetingID, req.UserID, req.CameraOnEntry, req.MicrophoneOnEntry); err != nil {
 		return errs.WrapMsg(err, "send data failed")
 	}
 
 	return nil
 }
 
-func (s *meetingServer) sendData(ctx context.Context, roomID, userID string, cameraOn, microphoneOn bool) error {
+func (s *meetingServer) sendData(ctx context.Context, roomID, userID string, cameraOn, microphoneOn *pbwrapper.BoolValue) error {
+	operationData := &pbmeeting.UserOperationData{
+		UserID: userID,
+	}
+	if cameraOn != nil {
+		operationData.CameraOnEntry = cameraOn.Value
+	}
+	if microphoneOn != nil {
+		operationData.MicrophoneOnEntry = microphoneOn.Value
+	}
+
 	sendData := &pbmeeting.StreamOperateData{
 		OperatorUserID: mcontext.GetOpUserID(ctx),
-		Operation: []*pbmeeting.UserOperationData{&pbmeeting.UserOperationData{
-			UserID:            userID,
-			CameraOnEntry:     &pbwrapper.BoolValue{Value: cameraOn},
-			MicrophoneOnEntry: &pbwrapper.BoolValue{Value: microphoneOn},
-		}},
+		Operation:      []*pbmeeting.UserOperationData{operationData},
 	}
 
 	if err := s.meetingRtc.SendRoomData(ctx, roomID, &[]string{userID}, sendData); err != nil {
@@ -179,11 +206,16 @@ func (s *meetingServer) send2AllParticipant(ctx context.Context, req *pbmeeting.
 
 	var operationList []*pbmeeting.UserOperationData
 	for _, v := range setUserIDs {
-		operationList = append(operationList, &pbmeeting.UserOperationData{
-			UserID:            v,
-			CameraOnEntry:     req.CameraOnEntry,
-			MicrophoneOnEntry: req.MicrophoneOnEntry,
-		})
+		operationData := &pbmeeting.UserOperationData{
+			UserID: v,
+		}
+		if req.CameraOnEntry != nil {
+			operationData.CameraOnEntry = req.CameraOnEntry.Value
+		}
+		if req.MicrophoneOnEntry != nil {
+			operationData.MicrophoneOnEntry = req.MicrophoneOnEntry.Value
+		}
+		operationList = append(operationList, operationData)
 	}
 	sendData := &pbmeeting.StreamOperateData{
 		OperatorUserID: mcontext.GetOpUserID(ctx),
@@ -195,4 +227,33 @@ func (s *meetingServer) send2AllParticipant(ctx context.Context, req *pbmeeting.
 	}
 
 	return nil
+}
+
+func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
+	meetings, err := s.meetingStorageHandler.FindByStatus(ctx, []string{constant.InProgress, constant.Scheduled})
+	if err != nil {
+		log.ZError(ctx, "find meetings failed", err)
+		return
+	}
+	nowTimestamp := timeutil.GetCurrentTimestampBySecond()
+	for _, one := range meetings {
+		if one.StartTime+one.MeetingDuration < nowTimestamp {
+			updateData := map[string]any{
+				"Status": constant.Completed,
+			}
+			if err := s.meetingStorageHandler.Update(ctx, one.MeetingID, updateData); err != nil {
+				log.ZError(ctx, "update meeting status failed", err)
+			}
+		} else if one.StartTime+one.MeetingDuration < nowTimestamp && one.StartTime > nowTimestamp {
+			if one.Status == constant.InProgress {
+				continue
+			}
+			updateData := map[string]any{
+				"Status": constant.InProgress,
+			}
+			if err := s.meetingStorageHandler.Update(ctx, one.MeetingID, updateData); err != nil {
+				log.ZError(ctx, "update meeting status failed", err)
+			}
+		}
+	}
 }

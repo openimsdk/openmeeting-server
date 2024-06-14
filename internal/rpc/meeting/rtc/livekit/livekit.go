@@ -3,6 +3,7 @@ package livekit
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/livekit/protocol/auth"
 	"github.com/livekit/protocol/livekit"
 	lksdk "github.com/livekit/server-sdk-go"
@@ -76,12 +77,20 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, met
 	return jwt, x.getLiveURL(), nil
 }
 
-func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, metaData *meeting.ParticipantMetaData) (sID, token, liveUrl string, err error) {
-	room, err := x.roomClient.CreateRoom(ctx, &livekit.CreateRoomRequest{
+func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, roomMetaData *meeting.MeetingMetadata, participantMetaData *meeting.ParticipantMetaData) (sID, token, liveUrl string, err error) {
+	req := &livekit.CreateRoomRequest{
 		Name:            meetingID,
 		EmptyTimeout:    86400,
 		MaxParticipants: 10000,
-	})
+	}
+	if roomMetaData != nil {
+		bytes, err := json.Marshal(&roomMetaData)
+		if err != nil {
+			return "", "", "", errs.Wrap(err)
+		}
+		req.Metadata = string(bytes)
+	}
+	room, err := x.roomClient.CreateRoom(ctx, req)
 	if err != nil {
 		log.ZError(ctx, "Marshal failed", err)
 		return "", "", "", errs.WrapMsg(err, "create livekit room failed, meetingID", meetingID)
@@ -96,7 +105,7 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, me
 		OnReconnected:             callback.OnReconnected,
 		OnReconnecting:            callback.OnReconnecting,
 	}
-	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, identify, metaData)
+	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, identify, participantMetaData)
 	if err != nil {
 		return "", "", "", errs.WrapMsg(err, "get join token failed, meetingID:", meetingID)
 	}
@@ -127,17 +136,23 @@ func (x *LiveKit) RoomIsExist(ctx context.Context, meetingID string) (string, er
 func (x *LiveKit) GetRoomData(ctx context.Context, roomID string) (*meeting.MeetingMetadata, error) {
 	resp, err := x.roomClient.ListRooms(ctx, &livekit.ListRoomsRequest{Names: []string{roomID}})
 	if err != nil {
+		log.ZError(ctx, "list room error", err)
 		return nil, errs.WrapMsg(err, "list room error")
 	}
+	log.CInfo(ctx, "get room data", resp)
+
 	if len(resp.Rooms) == 0 {
+		log.ZError(ctx, "not found room", errs.ErrRecordNotFound.WrapMsg("roomIsNotExist"))
 		return nil, errs.ErrRecordNotFound.WrapMsg("roomIsNotExist")
 	}
 	var metaData meeting.MeetingMetadata
 	if resp.Rooms[0].Metadata == "" {
+		log.ZError(ctx, "meta data not init", errs.ErrRecordNotFound.WrapMsg("meta data not init"))
 		return nil, errs.ErrRecordNotFound.WrapMsg("meta data not init")
 	}
 
 	if err := json.Unmarshal([]byte(resp.Rooms[0].Metadata), &metaData); err != nil {
+		log.ZError(ctx, "Unmarshal failed roomId:", err)
 		return nil, errs.WrapMsg(err, "Unmarshal failed roomId:", roomID)
 	}
 	return &metaData, nil
@@ -149,7 +164,7 @@ func (x *LiveKit) UpdateMetaData(ctx context.Context, updateData *meeting.Meetin
 	if err != nil {
 		return errs.Wrap(err)
 	}
-	_, err = x.roomClient.UpdateRoomMetadata(ctx, &livekit.UpdateRoomMetadataRequest{
+	room, err := x.roomClient.UpdateRoomMetadata(ctx, &livekit.UpdateRoomMetadataRequest{
 		Room:     meetingID,
 		Metadata: string(bytes),
 	})
@@ -157,7 +172,7 @@ func (x *LiveKit) UpdateMetaData(ctx context.Context, updateData *meeting.Meetin
 	if err != nil {
 		return errs.WrapMsg(err, "update room meta data failed, meetingID: ", meetingID)
 	}
-
+	fmt.Println(room)
 	return nil
 }
 

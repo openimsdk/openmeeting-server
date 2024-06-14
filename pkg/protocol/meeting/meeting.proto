@@ -68,8 +68,10 @@ message StreamOperateData {
 
 message UserOperationData {
   string userID = 1;
-  pbwrapper.BoolValue cameraOnEntry = 2;
-  pbwrapper.BoolValue microphoneOnEntry = 3;
+//  pbwrapper.BoolValue cameraOnEntry = 2;
+//  pbwrapper.BoolValue microphoneOnEntry = 3;
+  bool cameraOnEntry = 2;
+  bool microphoneOnEntry = 3;
 }
 
 
@@ -204,7 +206,8 @@ message GetPersonalMeetingSettingsResp {
 message SetPersonalMeetingSettingsReq {
   string meetingID = 1;
   string userID = 2;
-  PersonalMeetingSetting setting = 3;
+  pbwrapper.BoolValue cameraOnEntry = 3; // Whether the camera should be enabled by default when joining the meeting.
+  pbwrapper.BoolValue microphoneOnEntry = 4; // Whether the microphone should be enabled by default when joining the meeting.
 }
 
 // Response after setting personal meeting settings.

@@ -7,6 +7,7 @@ import (
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func (s *meetingServer) getHostUserID(metadata *pbmeeting.MeetingMetadata) string {
@@ -22,6 +23,7 @@ func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *
 	return &model.MeetingInfo{
 		MeetingID:       meetingID,
 		Title:           req.CreatorDefinedMeetingInfo.Title,
+		StartTime:       req.CreatorDefinedMeetingInfo.ScheduledTime,
 		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
 		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
 		Password:        req.CreatorDefinedMeetingInfo.Password,
@@ -39,6 +41,7 @@ func (s *meetingServer) generateMeetingDBData4Create(ctx context.Context, req *p
 	return &model.MeetingInfo{
 		MeetingID:       meetingID,
 		Title:           req.CreatorDefinedMeetingInfo.Title,
+		StartTime:       timeutil.GetCurrentTimestampBySecond(),
 		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
 		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
 		Password:        req.CreatorDefinedMeetingInfo.Password,
@@ -102,6 +105,7 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 	if err == nil {
 		meetingInfoSetting.Setting = metaData.Detail.Setting
 		meetingInfoSetting.Info.SystemGenerated.CreatorNickname = metaData.Detail.Info.SystemGenerated.CreatorNickname
+		meetingInfoSetting.Info.CreatorDefinedMeeting.MeetingDuration = metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration
 	}
 
 	return meetingInfoSetting, nil
@@ -138,22 +142,22 @@ func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *
 	if req.Title != nil {
 		liveKitUpdate = true
 		metaData.Detail.Info.CreatorDefinedMeeting.Title = req.Title.Value
-		updateData["Title"] = req.Title.Value
+		updateData["title"] = req.Title.Value
 	}
 	if req.ScheduledTime != nil {
 		liveKitUpdate = true
 		metaData.Detail.Info.CreatorDefinedMeeting.ScheduledTime = req.ScheduledTime.Value
-		updateData["ScheduledTime"] = req.ScheduledTime.Value
+		updateData["scheduled_time"] = req.ScheduledTime.Value
 	}
 	if req.MeetingDuration != nil {
 		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration = req.ScheduledTime.Value
-		updateData["MeetingDuration"] = req.MeetingDuration.Value
+		metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration = req.MeetingDuration.Value
+		updateData["meeting_duration"] = req.MeetingDuration.Value
 	}
 	if req.Password != nil {
 		liveKitUpdate = true
 		metaData.Detail.Info.CreatorDefinedMeeting.Password = req.Password.Value
-		updateData["Password"] = req.Password.Value
+		updateData["password"] = req.Password.Value
 	}
 
 	if req.CanParticipantsEnableCamera != nil {

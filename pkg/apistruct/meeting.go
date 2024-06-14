@@ -1,5 +1,16 @@
 package apistruct
 
+type PersonalSetting struct {
+	MicrophoneOnEntry *bool `json:"microphoneOnEntry"`
+	CameraOnEntry     *bool `json:"cameraOnEntry"`
+}
+
+type SetPersonalSettingReq struct {
+	MeetingID string          `json:"meetingID"`
+	UserID    string          `json:"userID"`
+	Setting   PersonalSetting `json:"setting"`
+}
+
 type UpdateMeetingReq struct {
 	MeetingID                       string  `json:"meetingID"`
 	UpdatingUserID                  string  `json:"updatingUserID"`
@@ -17,6 +28,6 @@ type UpdateMeetingReq struct {
 type OperateMeetingAllStreamReq struct {
 	MeetingID         string `json:"meetingID"`
 	OperatorUserID    string `json:"operatorUserID"`
-	MicrophoneOnEntry *bool  `json:"canParticipantsEnableCamera"`
-	CameraOnEntry     *bool  `json:"canParticipantsUnmuteMicrophone"`
+	MicrophoneOnEntry *bool  `json:"microphoneOnEntry"`
+	CameraOnEntry     *bool  `json:"cameraOnEntry"`
 }
