@@ -90,7 +90,6 @@ func (s *meetingServer) generateMeetingMetaData(ctx context.Context, req *pbmeet
 	}
 
 	metaData := &pbmeeting.MeetingMetadata{}
-	metaData.RepeatInfo = req.RepeatInfo
 	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
 	systemInfo := &pbmeeting.SystemGeneratedMeetingInfo{
 		CreatorUserID:   info.CreatorUserID,
@@ -112,8 +111,9 @@ func (s *meetingServer) generateMeetingMetaData(ctx context.Context, req *pbmeet
 		CreatorDefinedMeeting: creatorInfo,
 	}
 	metaData.Detail = &pbmeeting.MeetingInfoSetting{
-		Setting: req.Setting,
-		Info:    meetingInfo,
+		Setting:    req.Setting,
+		Info:       meetingInfo,
+		RepeatInfo: req.RepeatInfo,
 	}
 	return metaData, nil
 }
@@ -137,19 +137,29 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 		ScheduledTime:   info.ScheduledTime,
 		MeetingDuration: info.MeetingDuration,
 		Password:        info.Password,
+		TimeZone:        info.TimeZone,
 	}
 	meetingInfo := &pbmeeting.MeetingInfo{
 		SystemGenerated:       systemInfo,
 		CreatorDefinedMeeting: creatorInfo,
 	}
+	repeatInfo := &pbmeeting.MeetingRepeatInfo{
+		EndDate:    info.EndDate,
+		RepeatType: info.RepeatType,
+		UintType:   info.UintType,
+		Interval:   info.Interval,
+	}
+
 	meetingInfoSetting := &pbmeeting.MeetingInfoSetting{
-		Info: meetingInfo,
+		Info:       meetingInfo,
+		RepeatInfo: repeatInfo,
 	}
 	metaData, err := s.meetingRtc.GetRoomData(ctx, info.MeetingID)
 	if err == nil {
 		meetingInfoSetting.Setting = metaData.Detail.Setting
 		meetingInfoSetting.Info.SystemGenerated.CreatorNickname = metaData.Detail.Info.SystemGenerated.CreatorNickname
 		meetingInfoSetting.Info.CreatorDefinedMeeting.MeetingDuration = metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration
+		meetingInfoSetting.Info.CreatorDefinedMeeting.HostUserID = metaData.Detail.Info.CreatorDefinedMeeting.HostUserID
 	}
 
 	return meetingInfoSetting, nil
@@ -205,7 +215,7 @@ func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *
 	}
 
 	if req.RepeatInfo != nil {
-		metaData.RepeatInfo = req.RepeatInfo
+		metaData.Detail.RepeatInfo = req.RepeatInfo
 		updateData["repeat_type"] = req.RepeatInfo.RepeatType
 		if req.RepeatInfo.RepeatType == constant.RepeatCustom {
 			updateData["uint_type"] = req.RepeatInfo.UintType

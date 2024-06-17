@@ -2,7 +2,6 @@ package meeting
 
 import (
 	"context"
-	"fmt"
 	"github.com/openimsdk/openmeeting-server/pkg/common"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
@@ -15,7 +14,6 @@ import (
 
 // BookMeeting Implement the MeetingServiceServer interface
 func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeetingReq) (*pbmeeting.BookMeetingResp, error) {
-	fmt.Println(req)
 	resp := &pbmeeting.BookMeetingResp{}
 	meetingDBInfo, err := s.generateMeetingDBData4Booking(ctx, req)
 	if err != nil {
@@ -232,7 +230,6 @@ func (s *meetingServer) GetMeeting(ctx context.Context, req *pbmeeting.GetMeetin
 }
 
 func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.UpdateMeetingRequest) (*pbmeeting.UpdateMeetingResp, error) {
-	fmt.Println(req)
 	resp := &pbmeeting.UpdateMeetingResp{}
 
 	_, err := s.meetingStorageHandler.TakeWithError(ctx, req.MeetingID)
@@ -279,7 +276,6 @@ func (s *meetingServer) GetPersonalMeetingSettings(ctx context.Context, req *pbm
 }
 
 func (s *meetingServer) SetPersonalMeetingSettings(ctx context.Context, req *pbmeeting.SetPersonalMeetingSettingsReq) (*pbmeeting.SetPersonalMeetingSettingsResp, error) {
-	fmt.Println(req)
 	resp := &pbmeeting.SetPersonalMeetingSettingsResp{}
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
@@ -312,7 +308,6 @@ func (s *meetingServer) SetPersonalMeetingSettings(ctx context.Context, req *pbm
 }
 
 func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting.OperateRoomAllStreamReq) (*pbmeeting.OperateRoomAllStreamResp, error) {
-	fmt.Println(req)
 	resp := &pbmeeting.OperateRoomAllStreamResp{}
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
@@ -347,7 +342,6 @@ func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting
 // ModifyMeetingParticipantNickName modify meeting participant nickname
 func (s *meetingServer) ModifyMeetingParticipantNickName(ctx context.Context, req *pbmeeting.ModifyMeetingParticipantNickNameReq) (*pbmeeting.ModifyMeetingParticipantNickNameResp, error) {
 	resp := &pbmeeting.ModifyMeetingParticipantNickNameResp{}
-	fmt.Println(req)
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get room data failed", req.MeetingID)
@@ -370,7 +364,6 @@ func (s *meetingServer) ModifyMeetingParticipantNickName(ctx context.Context, re
 // RemoveParticipants batch remove participant out of the meeting room
 func (s *meetingServer) RemoveParticipants(ctx context.Context, req *pbmeeting.RemoveMeetingParticipantsReq) (*pbmeeting.RemoveMeetingParticipantsResp, error) {
 	resp := &pbmeeting.RemoveMeetingParticipantsResp{}
-	fmt.Println(req)
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get room data failed", req.MeetingID)
@@ -397,7 +390,6 @@ func (s *meetingServer) RemoveParticipants(ctx context.Context, req *pbmeeting.R
 
 // SetMeetingHostInfo modify host or co-host of the meeting room
 func (s *meetingServer) SetMeetingHostInfo(ctx context.Context, req *pbmeeting.SetMeetingHostInfoReq) (*pbmeeting.SetMeetingHostInfoResp, error) {
-	fmt.Println(req)
 	resp := &pbmeeting.SetMeetingHostInfoResp{}
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {

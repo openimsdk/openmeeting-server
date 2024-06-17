@@ -62,6 +62,7 @@ message MeetingSetting {
 message MeetingInfoSetting {
   MeetingInfo info = 1;
   MeetingSetting setting = 2;
+  MeetingRepeatInfo repeatInfo = 3;
 }
 
 message UserInfo {
@@ -257,7 +258,6 @@ message PersonalData {
 message MeetingMetadata {
   MeetingInfoSetting detail = 1;
   repeated PersonalData personalData = 2;
-  MeetingRepeatInfo repeatInfo = 3;
 }
 
 // operate room all stream related to video and audio on entry.
