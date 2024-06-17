@@ -2,6 +2,7 @@ package meeting
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/openmeeting-server/pkg/common"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
@@ -9,30 +10,25 @@ import (
 	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	sysConstant "github.com/openimsdk/protocol/constant"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 )
 
 // BookMeeting Implement the MeetingServiceServer interface
 func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeetingReq) (*pbmeeting.BookMeetingResp, error) {
+	fmt.Println(req)
 	resp := &pbmeeting.BookMeetingResp{}
-	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.CreatorUserID})
-	if err != nil {
-		return resp, errs.WrapMsg(err, "get user info failed")
-	}
-
 	meetingDBInfo, err := s.generateMeetingDBData4Booking(ctx, req)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "generate meeting data failed")
 	}
-	metaData := &pbmeeting.MeetingMetadata{}
-	meetingDetail := s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
-	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
-	metaData.Detail = meetingDetail
-	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
+	metaData, err := s.generateMeetingMetaData(ctx, req, meetingDBInfo)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "generate meeting meta data failed")
+	}
 	_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, metaData, nil)
 	if err != nil {
 		return resp, err
 	}
-
 	err = s.meetingStorageHandler.Create(ctx, []*model.MeetingInfo{meetingDBInfo})
 	if err != nil {
 		return resp, err
@@ -41,9 +37,8 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 		return resp, err
 	}
-
 	// fill in response data
-	resp.Detail = s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
+	resp.Detail = metaData.Detail
 	return resp, nil
 }
 
@@ -99,6 +94,17 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get room data failed")
+	}
+
+	userIDs, err := s.meetingRtc.GetParticipantUserIDs(ctx, req.MeetingID)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get participants failed")
+	}
+	// check if user is already in meeting
+	for _, userID := range userIDs {
+		if userID == req.UserID {
+			return resp, errs.New("user's already in this meeting, please check")
+		}
 	}
 
 	if req.UserID != s.getHostUserID(metaData) && req.Password != metaData.Detail.Info.CreatorDefinedMeeting.Password {
@@ -226,6 +232,7 @@ func (s *meetingServer) GetMeeting(ctx context.Context, req *pbmeeting.GetMeetin
 }
 
 func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.UpdateMeetingRequest) (*pbmeeting.UpdateMeetingResp, error) {
+	fmt.Println(req)
 	resp := &pbmeeting.UpdateMeetingResp{}
 
 	_, err := s.meetingStorageHandler.TakeWithError(ctx, req.MeetingID)
@@ -272,6 +279,7 @@ func (s *meetingServer) GetPersonalMeetingSettings(ctx context.Context, req *pbm
 }
 
 func (s *meetingServer) SetPersonalMeetingSettings(ctx context.Context, req *pbmeeting.SetPersonalMeetingSettingsReq) (*pbmeeting.SetPersonalMeetingSettingsResp, error) {
+	fmt.Println(req)
 	resp := &pbmeeting.SetPersonalMeetingSettingsResp{}
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
@@ -304,6 +312,7 @@ func (s *meetingServer) SetPersonalMeetingSettings(ctx context.Context, req *pbm
 }
 
 func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting.OperateRoomAllStreamReq) (*pbmeeting.OperateRoomAllStreamResp, error) {
+	fmt.Println(req)
 	resp := &pbmeeting.OperateRoomAllStreamResp{}
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
@@ -332,5 +341,80 @@ func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting
 		return resp, errs.WrapMsg(err, "send notification to all participant failed")
 	}
 
+	return resp, nil
+}
+
+// ModifyMeetingParticipantNickName modify meeting participant nickname
+func (s *meetingServer) ModifyMeetingParticipantNickName(ctx context.Context, req *pbmeeting.ModifyMeetingParticipantNickNameReq) (*pbmeeting.ModifyMeetingParticipantNickNameResp, error) {
+	resp := &pbmeeting.ModifyMeetingParticipantNickNameResp{}
+	fmt.Println(req)
+	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get room data failed", req.MeetingID)
+	}
+	// check permission
+	if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
+		return resp, errs.ErrArgs.WrapMsg("user did not have permission to modify meeting participant's nickname")
+	}
+	participantMetaData, err := s.meetingRtc.GetParticipantMetaData(ctx, req.MeetingID, req.ParticipantUserID)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get participant data failed")
+	}
+	participantMetaData.UserInfo.Nickname = req.Nickname
+	if err = s.meetingRtc.UpdateParticipantData(ctx, participantMetaData, req.MeetingID, req.ParticipantUserID); err != nil {
+		return resp, errs.WrapMsg(err, "update participant data failed")
+	}
+	return resp, nil
+}
+
+// RemoveParticipants batch remove participant out of the meeting room
+func (s *meetingServer) RemoveParticipants(ctx context.Context, req *pbmeeting.RemoveMeetingParticipantsReq) (*pbmeeting.RemoveMeetingParticipantsResp, error) {
+	resp := &pbmeeting.RemoveMeetingParticipantsResp{}
+	fmt.Println(req)
+	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get room data failed", req.MeetingID)
+	}
+	// check permission only host can remove somebody
+	if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
+		return resp, errs.ErrArgs.WrapMsg("user did not have permission to remove participant out of the meeting")
+	}
+	var failedList []string
+	var successList []string
+	for _, one := range req.ParticipantUserIDs {
+		if err = s.meetingRtc.RemoveParticipant(ctx, req.MeetingID, one); err != nil {
+			log.ZError(ctx, "remove participant out of the meeting failed", err)
+			failedList = append(failedList, one)
+		} else {
+			successList = append(successList, one)
+		}
+	}
+	resp.FailedUserIDList = failedList
+	resp.SuccessUserIDList = successList
+
+	return resp, nil
+}
+
+// SetMeetingHostInfo modify host or co-host of the meeting room
+func (s *meetingServer) SetMeetingHostInfo(ctx context.Context, req *pbmeeting.SetMeetingHostInfoReq) (*pbmeeting.SetMeetingHostInfoResp, error) {
+	fmt.Println(req)
+	resp := &pbmeeting.SetMeetingHostInfoResp{}
+	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get room data failed", req.MeetingID)
+	}
+	// check permission only host can remove somebody
+	if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
+		return resp, errs.ErrArgs.WrapMsg("user did not have permission to remove participant out of the meeting")
+	}
+	if req.HostUserID != nil {
+		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = req.HostUserID.Value
+	}
+	if req.CoHostUserIDs != nil {
+		req.CoHostUserIDs = s.mergeAndUnique(req.CoHostUserIDs, req.CoHostUserIDs)
+	}
+	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
+		return resp, errs.WrapMsg(err, "update meta data failed")
+	}
 	return resp, nil
 }

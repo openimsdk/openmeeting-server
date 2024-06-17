@@ -272,3 +272,40 @@ func (x *LiveKit) GetParticipantUserIDs(ctx context.Context, roomID string) ([]s
 	}
 	return userIDs, nil
 }
+
+func (x *LiveKit) GetParticipantMetaData(ctx context.Context, roomID, userID string) (*meeting.ParticipantMetaData, error) {
+	var metaData meeting.ParticipantMetaData
+	participantList, err := x.ListParticipants(ctx, roomID)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "get participant data failed")
+	}
+	for _, one := range participantList {
+		if one.Identity == userID {
+			if err := json.Unmarshal([]byte(one.Metadata), &metaData); err != nil {
+				log.ZError(ctx, "Unmarshal failed roomId:", err)
+				return nil, errs.WrapMsg(err, "Unmarshal participant meta data failed userID:", userID)
+			}
+			return &metaData, nil
+		}
+	}
+	return nil, errs.ErrRecordNotFound.WrapMsg("not found participant", userID)
+}
+
+func (x *LiveKit) UpdateParticipantData(ctx context.Context, data *meeting.ParticipantMetaData, roomID, userID string) error {
+	bytes, err := json.Marshal(data)
+	if err != nil {
+		log.ZError(ctx, "json.Marshal failed", err)
+		return errs.WrapMsg(err, "json marshall failed")
+	}
+	resp, err := x.roomClient.UpdateParticipant(ctx, &livekit.UpdateParticipantRequest{
+		Room:     roomID,
+		Identity: userID,
+		Metadata: string(bytes),
+		Name:     data.UserInfo.Nickname,
+	})
+	if err != nil {
+		return errs.WrapMsg(err, "update participant data failed")
+	}
+	fmt.Println(resp)
+	return nil
+}

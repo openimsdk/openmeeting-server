@@ -60,6 +60,9 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		meetingRouterGroup.POST("/set_personal_setting", mwApi.CheckToken, m.SetPersonalMeetingSettings)
 		meetingRouterGroup.POST("/get_personal_setting", mwApi.CheckToken, m.GetPersonalMeetingSettings)
 		meetingRouterGroup.POST("/operate_meeting_all_stream", mwApi.CheckToken, m.OperateMeetingAllStream)
+		meetingRouterGroup.POST("/modify_meeting_participant_name", mwApi.CheckToken, m.ModifyMeetingParticipantNickName)
+		meetingRouterGroup.POST("/remove_participants", mwApi.CheckToken, m.RemoveMeetingParticipants)
+		meetingRouterGroup.POST("/set_meeting_host_info", mwApi.CheckToken, m.SetMeetingHostInfo)
 	}
 	return r
 }
