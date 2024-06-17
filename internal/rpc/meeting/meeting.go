@@ -403,7 +403,8 @@ func (s *meetingServer) SetMeetingHostInfo(ctx context.Context, req *pbmeeting.S
 		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = req.HostUserID.Value
 	}
 	if req.CoHostUserIDs != nil {
-		req.CoHostUserIDs = s.mergeAndUnique(req.CoHostUserIDs, req.CoHostUserIDs)
+		metaData.Detail.Info.CreatorDefinedMeeting.CoHostUSerID = s.mergeAndUnique(
+			metaData.Detail.Info.CreatorDefinedMeeting.CoHostUSerID, req.CoHostUserIDs)
 	}
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 		return resp, errs.WrapMsg(err, "update meta data failed")
