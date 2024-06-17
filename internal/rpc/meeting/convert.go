@@ -160,6 +160,7 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 		meetingInfoSetting.Info.SystemGenerated.CreatorNickname = metaData.Detail.Info.SystemGenerated.CreatorNickname
 		meetingInfoSetting.Info.CreatorDefinedMeeting.MeetingDuration = metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration
 		meetingInfoSetting.Info.CreatorDefinedMeeting.HostUserID = metaData.Detail.Info.CreatorDefinedMeeting.HostUserID
+		meetingInfoSetting.Info.CreatorDefinedMeeting.CoHostUSerID = metaData.Detail.Info.CreatorDefinedMeeting.CoHostUSerID
 	}
 
 	return meetingInfoSetting, nil
