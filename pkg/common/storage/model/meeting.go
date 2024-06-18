@@ -10,4 +10,9 @@ type MeetingInfo struct {
 	CreatorUserID   string `bson:"creator_user_id"`
 	Status          string `bson:"status"`
 	StartTime       int64  `bson:"start_time"`
+	TimeZone        string `bson:"time_zone"`
+	EndDate         string `bson:"end_date"`
+	RepeatType      string `bson:"repeat_type"` // none, daily, weekly, monthly, custom
+	UintType        string `bson:"uint_type"`   // only used when repeat_type is custom
+	Interval        int32  `bson:"interval"`    // only used when repeat_type is custom
 }

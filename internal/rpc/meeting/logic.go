@@ -32,10 +32,6 @@ func (s *meetingServer) setSelfPersonalSetting(ctx context.Context, metaData *pb
 			needUpdate = false
 		}
 	}
-	//if found && personalData.PersonalSetting.CameraOnEntry == req.CameraOnEntry &&
-	//	personalData.PersonalSetting.MicrophoneOnEntry == req.MicrophoneOnEntry {
-	//	needUpdate = false
-	//}
 	if !found {
 		personalData = s.generateDefaultPersonalData(req.UserID)
 	}
@@ -84,10 +80,6 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 
 	// judge whether user need to change or not
 	needUpdate := true
-	//if found && personalData.LimitSetting.MicrophoneOnEntry == req.Setting.MicrophoneOnEntry &&
-	//	personalData.LimitSetting.CameraOnEntry == req.Setting.CameraOnEntry {
-	//	needUpdate = false
-	//}
 	if found {
 		if req.CameraOnEntry == nil && req.MicrophoneOnEntry == nil {
 			needUpdate = false
@@ -239,7 +231,7 @@ func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
 	for _, one := range meetings {
 		if one.StartTime+one.MeetingDuration < nowTimestamp {
 			updateData := map[string]any{
-				"Status": constant.Completed,
+				"status": constant.Completed,
 			}
 			if err := s.meetingStorageHandler.Update(ctx, one.MeetingID, updateData); err != nil {
 				log.ZError(ctx, "update meeting status failed", err)
@@ -249,7 +241,7 @@ func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
 				continue
 			}
 			updateData := map[string]any{
-				"Status": constant.InProgress,
+				"status": constant.InProgress,
 			}
 			if err := s.meetingStorageHandler.Update(ctx, one.MeetingID, updateData); err != nil {
 				log.ZError(ctx, "update meeting status failed", err)

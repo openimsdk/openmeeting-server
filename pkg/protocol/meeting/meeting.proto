@@ -27,12 +27,22 @@ message CreatorDefinedMeetingInfo {
   int64 scheduledTime = 2; // The scheduled start time of the meeting (as a timestamp).
   int64 meetingDuration = 3; // The duration of the meeting in seconds.
   string password = 4; // Password required to join the meeting, if any.
+  string timeZone = 5; // creator specify time zone.
+  string hostUserID = 6;
+  repeated string coHostUSerID = 7;
 }
 
 // Information about a specific meeting, combining system-generated and creator-defined information.
 message MeetingInfo {
   SystemGeneratedMeetingInfo systemGenerated = 1;
   CreatorDefinedMeetingInfo creatorDefinedMeeting = 2;
+}
+
+message MeetingRepeatInfo {
+  string endDate  = 1;
+  string repeatType = 2;
+  string uintType = 3;
+  int32 interval = 4;
 }
 
 // Settings controlling meeting features such as video, audio, and screen sharing permissions.
@@ -42,12 +52,17 @@ message MeetingSetting {
   bool canParticipantsShareScreen = 3; // Whether participants can share their screen.
   bool disableCameraOnJoin = 4; // Whether the camera is disabled by default when joining.
   bool disableMicrophoneOnJoin = 5; // Whether the microphone is disabled by default when joining.
+  bool canParticipantJoinMeetingEarly = 6;  // Allow participants to join the meeting early.
+  bool lockMeeting = 7; // if the meeting is locked, new comer could not join the meeting.
+  bool audioEncouragement = 8; // could turn on the audio encouragement for client.
+  bool videoMirroring = 9;  // could turn on the video mirroring for client.
 }
 
 // Detailed information about a meeting, combining info and settings.
 message MeetingInfoSetting {
   MeetingInfo info = 1;
   MeetingSetting setting = 2;
+  MeetingRepeatInfo repeatInfo = 3;
 }
 
 message UserInfo {
@@ -80,6 +95,7 @@ message BookMeetingReq {
   string creatorUserID = 1;
   CreatorDefinedMeetingInfo creatorDefinedMeetingInfo = 2;
   MeetingSetting setting = 3;
+  MeetingRepeatInfo repeatInfo = 4;
 }
 
 // Response after booking a meeting.
@@ -166,6 +182,17 @@ message GetMeetingResp {
   MeetingInfoSetting meetingDetail = 1;
 }
 
+message ModifyMeetingParticipantNickNameReq {
+  string meetingID = 1;
+  string userID = 2;
+  string participantUserID = 3;
+  string nickname = 4;
+}
+
+message ModifyMeetingParticipantNickNameResp {
+
+}
+
 // Request to update specific fields of a meeting.
 message UpdateMeetingRequest {
   string meetingID = 1;
@@ -174,11 +201,17 @@ message UpdateMeetingRequest {
   pbwrapper.Int64Value scheduledTime = 4;
   pbwrapper.Int64Value meetingDuration = 5;
   pbwrapper.StringValue password = 6;
-  pbwrapper.BoolValue canParticipantsEnableCamera = 7;
-  pbwrapper.BoolValue canParticipantsUnmuteMicrophone = 8;
-  pbwrapper.BoolValue canParticipantsShareScreen = 9;
-  pbwrapper.BoolValue disableCameraOnJoin = 10;
-  pbwrapper.BoolValue disableMicrophoneOnJoin = 11;
+  pbwrapper.StringValue timeZone = 7;
+  MeetingRepeatInfo repeatInfo = 8;
+  pbwrapper.BoolValue canParticipantsEnableCamera = 9;
+  pbwrapper.BoolValue canParticipantsUnmuteMicrophone = 10;
+  pbwrapper.BoolValue canParticipantsShareScreen = 11;
+  pbwrapper.BoolValue disableCameraOnJoin = 12;
+  pbwrapper.BoolValue disableMicrophoneOnJoin = 13;
+  pbwrapper.BoolValue canParticipantJoinMeetingEarly = 14;  // Allow participants to join the meeting early.
+  pbwrapper.BoolValue lockMeeting = 15; // if the meeting is locked, new comer could not join the meeting.
+  pbwrapper.BoolValue audioEncouragement = 16; // could turn on the audio encouragement for client.
+  pbwrapper.BoolValue videoMirroring = 17;  // could turn on the video mirroring for client.
 }
 
 // Response after updating meeting settings.
@@ -241,6 +274,27 @@ message OperateRoomAllStreamResp {
   repeated string failedUserIDList = 2;
 }
 
+message RemoveMeetingParticipantsReq {
+  string meetingID = 1;
+  string userID = 2;
+  repeated string participantUserIDs = 3;
+}
+
+message RemoveMeetingParticipantsResp {
+  repeated string successUserIDList = 1;
+  repeated string failedUserIDList = 2;
+}
+
+message SetMeetingHostInfoReq {
+  string meetingID = 1;
+  string userID = 2;
+  pbwrapper.StringValue hostUserID = 3;
+  repeated string coHostUserIDs = 4;
+}
+
+message SetMeetingHostInfoResp {
+
+}
 
 // Defines services related to meeting management.
 service MeetingService {
@@ -268,4 +322,10 @@ service MeetingService {
   rpc SetPersonalMeetingSettings(SetPersonalMeetingSettingsReq) returns (SetPersonalMeetingSettingsResp);
   // operate room all stream.
   rpc OperateRoomAllStream(OperateRoomAllStreamReq) returns (OperateRoomAllStreamResp);
+  // modify meeting participant nickname
+  rpc ModifyMeetingParticipantNickName(ModifyMeetingParticipantNickNameReq) returns (ModifyMeetingParticipantNickNameResp);
+  // batch remove participant out of the meeting room
+  rpc RemoveParticipants(RemoveMeetingParticipantsReq) returns (RemoveMeetingParticipantsResp);
+  // modify host or co host of the meeting room
+  rpc SetMeetingHostInfo(SetMeetingHostInfoReq) returns (SetMeetingHostInfoResp);
 }

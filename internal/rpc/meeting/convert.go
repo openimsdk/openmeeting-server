@@ -20,16 +20,25 @@ func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *
 		return nil, errs.WrapMsg(err, "generate meeting id failed")
 	}
 
-	return &model.MeetingInfo{
+	dbInfo := &model.MeetingInfo{
 		MeetingID:       meetingID,
 		Title:           req.CreatorDefinedMeetingInfo.Title,
 		StartTime:       req.CreatorDefinedMeetingInfo.ScheduledTime,
 		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
 		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
 		Password:        req.CreatorDefinedMeetingInfo.Password,
+		TimeZone:        req.CreatorDefinedMeetingInfo.TimeZone,
 		Status:          constant.Scheduled,
+		EndDate:         req.RepeatInfo.EndDate,
+		RepeatType:      req.RepeatInfo.RepeatType,
 		CreatorUserID:   req.CreatorUserID,
-	}, nil
+	}
+	if req.RepeatInfo.RepeatType == constant.RepeatCustom {
+		dbInfo.UintType = req.RepeatInfo.UintType
+		dbInfo.Interval = req.RepeatInfo.Interval
+	}
+
+	return dbInfo, nil
 }
 
 func (s *meetingServer) generateMeetingDBData4Create(ctx context.Context, req *pbmeeting.CreateImmediateMeetingReq) (*model.MeetingInfo, error) {
@@ -74,6 +83,41 @@ func (s *meetingServer) generateDefaultPersonalData(userID string) *pbmeeting.Pe
 	}
 }
 
+func (s *meetingServer) generateMeetingMetaData(ctx context.Context, req *pbmeeting.BookMeetingReq, info *model.MeetingInfo) (*pbmeeting.MeetingMetadata, error) {
+	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
+	if err != nil {
+		return nil, errs.WrapMsg(err, "get user info failed")
+	}
+
+	metaData := &pbmeeting.MeetingMetadata{}
+	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
+	systemInfo := &pbmeeting.SystemGeneratedMeetingInfo{
+		CreatorUserID:   info.CreatorUserID,
+		Status:          info.Status,
+		StartTime:       info.StartTime,
+		MeetingID:       info.MeetingID,
+		CreatorNickname: userInfo.Nickname,
+	}
+	creatorInfo := &pbmeeting.CreatorDefinedMeetingInfo{
+		Title:           req.CreatorDefinedMeetingInfo.Title,
+		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
+		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
+		Password:        req.CreatorDefinedMeetingInfo.Password,
+		TimeZone:        req.CreatorDefinedMeetingInfo.TimeZone,
+		HostUserID:      req.CreatorUserID,
+	}
+	meetingInfo := &pbmeeting.MeetingInfo{
+		SystemGenerated:       systemInfo,
+		CreatorDefinedMeeting: creatorInfo,
+	}
+	metaData.Detail = &pbmeeting.MeetingInfoSetting{
+		Setting:    req.Setting,
+		Info:       meetingInfo,
+		RepeatInfo: req.RepeatInfo,
+	}
+	return metaData, nil
+}
+
 func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model.MeetingInfo) (*pbmeeting.MeetingInfoSetting, error) {
 	// Fill in response data
 	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
@@ -93,19 +137,30 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 		ScheduledTime:   info.ScheduledTime,
 		MeetingDuration: info.MeetingDuration,
 		Password:        info.Password,
+		TimeZone:        info.TimeZone,
 	}
 	meetingInfo := &pbmeeting.MeetingInfo{
 		SystemGenerated:       systemInfo,
 		CreatorDefinedMeeting: creatorInfo,
 	}
+	repeatInfo := &pbmeeting.MeetingRepeatInfo{
+		EndDate:    info.EndDate,
+		RepeatType: info.RepeatType,
+		UintType:   info.UintType,
+		Interval:   info.Interval,
+	}
+
 	meetingInfoSetting := &pbmeeting.MeetingInfoSetting{
-		Info: meetingInfo,
+		Info:       meetingInfo,
+		RepeatInfo: repeatInfo,
 	}
 	metaData, err := s.meetingRtc.GetRoomData(ctx, info.MeetingID)
 	if err == nil {
 		meetingInfoSetting.Setting = metaData.Detail.Setting
 		meetingInfoSetting.Info.SystemGenerated.CreatorNickname = metaData.Detail.Info.SystemGenerated.CreatorNickname
 		meetingInfoSetting.Info.CreatorDefinedMeeting.MeetingDuration = metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration
+		meetingInfoSetting.Info.CreatorDefinedMeeting.HostUserID = metaData.Detail.Info.CreatorDefinedMeeting.HostUserID
+		meetingInfoSetting.Info.CreatorDefinedMeeting.CoHostUSerID = metaData.Detail.Info.CreatorDefinedMeeting.CoHostUSerID
 	}
 
 	return meetingInfoSetting, nil
@@ -160,6 +215,21 @@ func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *
 		updateData["password"] = req.Password.Value
 	}
 
+	if req.RepeatInfo != nil {
+		metaData.Detail.RepeatInfo = req.RepeatInfo
+		updateData["repeat_type"] = req.RepeatInfo.RepeatType
+		if req.RepeatInfo.RepeatType == constant.RepeatCustom {
+			updateData["uint_type"] = req.RepeatInfo.UintType
+			updateData["interval"] = req.RepeatInfo.Interval
+		}
+	}
+
+	if req.TimeZone != nil {
+		liveKitUpdate = true
+		metaData.Detail.Info.CreatorDefinedMeeting.TimeZone = req.TimeZone.Value
+		updateData["time_zone"] = req.TimeZone.Value
+	}
+
 	if req.CanParticipantsEnableCamera != nil {
 		liveKitUpdate = true
 		metaData.Detail.Setting.CanParticipantsEnableCamera = req.CanParticipantsEnableCamera.Value
@@ -180,5 +250,41 @@ func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *
 		liveKitUpdate = true
 		metaData.Detail.Setting.DisableMicrophoneOnJoin = req.DisableMicrophoneOnJoin.Value
 	}
+	if req.CanParticipantJoinMeetingEarly != nil {
+		liveKitUpdate = true
+		metaData.Detail.Setting.CanParticipantJoinMeetingEarly = req.CanParticipantJoinMeetingEarly.Value
+	}
+	if req.AudioEncouragement != nil {
+		liveKitUpdate = true
+		metaData.Detail.Setting.AudioEncouragement = req.AudioEncouragement.Value
+	}
+	if req.LockMeeting != nil {
+		liveKitUpdate = true
+		metaData.Detail.Setting.LockMeeting = req.LockMeeting.Value
+	}
+	if req.VideoMirroring != nil {
+		liveKitUpdate = true
+		metaData.Detail.Setting.VideoMirroring = req.VideoMirroring.Value
+	}
+
 	return &updateData, liveKitUpdate
+}
+
+func (s *meetingServer) mergeAndUnique(array1, array2 []string) []string {
+	exists := make(map[string]bool)
+	var result []string
+
+	for _, v := range array1 {
+		if !exists[v] {
+			exists[v] = true
+			result = append(result, v)
+		}
+	}
+	for _, v := range array2 {
+		if !exists[v] {
+			exists[v] = true
+			result = append(result, v)
+		}
+	}
+	return result
 }

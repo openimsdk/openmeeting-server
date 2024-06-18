@@ -18,4 +18,6 @@ type MeetingRtc interface {
 	SendRoomData(ctx context.Context, roomID string, userIDList *[]string, sendData interface{}) error
 	ListParticipants(ctx context.Context, roomID string) ([]*livekit.ParticipantInfo, error)
 	GetParticipantUserIDs(ctx context.Context, roomID string) ([]string, error)
+	UpdateParticipantData(ctx context.Context, data *meeting.ParticipantMetaData, roomID, userID string) error
+	GetParticipantMetaData(ctx context.Context, roomID, userID string) (*meeting.ParticipantMetaData, error)
 }
