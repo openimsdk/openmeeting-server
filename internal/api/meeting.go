@@ -63,104 +63,12 @@ func (m *MeetingApi) SetMeetingHostInfo(c *gin.Context) {
 
 func (m *MeetingApi) SetPersonalMeetingSettings(c *gin.Context) {
 	a2r.Call(meeting.MeetingServiceClient.SetPersonalMeetingSettings, m.Client, c)
-
-	//var req apistruct.SetPersonalSettingReq
-	//if err := c.BindJSON(&req); err != nil {
-	//	apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
-	//	return
-	//}
-	//rpcReq := &meeting.SetPersonalMeetingSettingsReq{
-	//	MeetingID: req.MeetingID,
-	//	UserID:    req.UserID,
-	//}
-	//if req.Setting.CameraOnEntry != nil {
-	//	rpcReq.CameraOnEntry = &pbwrapper.BoolValue{Value: *req.Setting.CameraOnEntry}
-	//}
-	//if req.Setting.MicrophoneOnEntry != nil {
-	//	rpcReq.MicrophoneOnEntry = &pbwrapper.BoolValue{Value: *req.Setting.MicrophoneOnEntry}
-	//}
-	//resp, err := m.Client.SetPersonalMeetingSettings(c, rpcReq)
-	//if err != nil {
-	//	apiresp.GinError(c, err) // rpc call failed
-	//	return
-	//}
-	//apiresp.GinSuccess(c, resp) // rpc call success}
 }
 
 func (m *MeetingApi) UpdateMeeting(c *gin.Context) {
 	a2r.Call(meeting.MeetingServiceClient.UpdateMeeting, m.Client, c)
-
-	//var req apistruct.UpdateMeetingReq
-
-	//if err := c.BindJSON(&req); err != nil {
-	//	apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
-	//	return
-	//}
-	//
-	//rpcReq := &meeting.UpdateMeetingRequest{
-	//	MeetingID:      req.MeetingID,
-	//	UpdatingUserID: req.UpdatingUserID,
-	//}
-	//if req.Title != nil {
-	//	rpcReq.Title = &pbwrapper.StringValue{Value: *req.Title}
-	//}
-	//if req.Password != nil {
-	//	rpcReq.Password = &pbwrapper.StringValue{Value: *req.Password}
-	//}
-	//if req.MeetingDuration != nil {
-	//	rpcReq.MeetingDuration = &pbwrapper.Int64Value{Value: *req.MeetingDuration}
-	//}
-	//if req.ScheduledTime != nil {
-	//	rpcReq.ScheduledTime = &pbwrapper.Int64Value{Value: *req.ScheduledTime}
-	//}
-	//
-	//if req.CanParticipantsUnmuteMicrophone != nil {
-	//	rpcReq.CanParticipantsUnmuteMicrophone = &pbwrapper.BoolValue{Value: *req.CanParticipantsUnmuteMicrophone}
-	//}
-	//if req.CanParticipantsEnableCamera != nil {
-	//	rpcReq.CanParticipantsEnableCamera = &pbwrapper.BoolValue{Value: *req.CanParticipantsEnableCamera}
-	//}
-	//if req.DisableMicrophoneOnJoin != nil {
-	//	rpcReq.DisableMicrophoneOnJoin = &pbwrapper.BoolValue{Value: *req.DisableMicrophoneOnJoin}
-	//}
-	//if req.CanParticipantsShareScreen != nil {
-	//	rpcReq.CanParticipantsShareScreen = &pbwrapper.BoolValue{Value: *req.CanParticipantsShareScreen}
-	//}
-	//if req.DisableCameraOnJoin != nil {
-	//	rpcReq.DisableCameraOnJoin = &pbwrapper.BoolValue{Value: *req.DisableCameraOnJoin}
-	//}
-	//
-	//resp, err := m.Client.UpdateMeeting(c, rpcReq)
-	//if err != nil {
-	//	apiresp.GinError(c, err) // rpc call failed
-	//	return
-	//}
-	//apiresp.GinSuccess(c, resp) // rpc call success
 }
 
 func (m *MeetingApi) OperateMeetingAllStream(c *gin.Context) {
 	a2r.Call(meeting.MeetingServiceClient.OperateRoomAllStream, m.Client, c)
-	//
-	//var req apistruct.OperateMeetingAllStreamReq
-	//
-	//if err := c.BindJSON(&req); err != nil {
-	//	apiresp.GinError(c, errs.ErrArgs.WithDetail(err.Error()).Wrap())
-	//	return
-	//}
-	//rpcReq := &meeting.OperateRoomAllStreamReq{
-	//	MeetingID:      req.MeetingID,
-	//	OperatorUserID: req.OperatorUserID,
-	//}
-	//if req.CameraOnEntry != nil {
-	//	rpcReq.CameraOnEntry = &pbwrapper.BoolValue{Value: *req.CameraOnEntry}
-	//}
-	//if req.MicrophoneOnEntry != nil {
-	//	rpcReq.MicrophoneOnEntry = &pbwrapper.BoolValue{Value: *req.MicrophoneOnEntry}
-	//}
-	//resp, err := m.Client.OperateRoomAllStream(c, rpcReq)
-	//if err != nil {
-	//	apiresp.GinError(c, err) // rpc call failed
-	//	return
-	//}
-	//apiresp.GinSuccess(c, resp) // rpc call success
 }

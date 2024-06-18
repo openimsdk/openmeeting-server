@@ -32,10 +32,6 @@ func (s *meetingServer) setSelfPersonalSetting(ctx context.Context, metaData *pb
 			needUpdate = false
 		}
 	}
-	//if found && personalData.PersonalSetting.CameraOnEntry == req.CameraOnEntry &&
-	//	personalData.PersonalSetting.MicrophoneOnEntry == req.MicrophoneOnEntry {
-	//	needUpdate = false
-	//}
 	if !found {
 		personalData = s.generateDefaultPersonalData(req.UserID)
 	}
@@ -84,10 +80,6 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 
 	// judge whether user need to change or not
 	needUpdate := true
-	//if found && personalData.LimitSetting.MicrophoneOnEntry == req.Setting.MicrophoneOnEntry &&
-	//	personalData.LimitSetting.CameraOnEntry == req.Setting.CameraOnEntry {
-	//	needUpdate = false
-	//}
 	if found {
 		if req.CameraOnEntry == nil && req.MicrophoneOnEntry == nil {
 			needUpdate = false

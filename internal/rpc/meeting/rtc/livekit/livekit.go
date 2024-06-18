@@ -37,7 +37,7 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, met
 	canPublish := true
 	canSubscribe := true
 	canPublishData := true
-	// 配置里面的
+	// get key and secret from yaml configuration
 	at := auth.NewAccessToken(x.conf.ApiKey, x.conf.ApiSecret)
 	grant := &auth.VideoGrant{
 		RoomJoin:       true,
@@ -52,7 +52,7 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, met
 			log.ZError(ctx, "json.Marshal failed", err)
 			return "", "", errs.WrapMsg(err, "json marshall failed")
 		}
-		// 生成邀请者房间的jwt
+		// generates jwt of the participant
 		at.AddGrant(grant).
 			SetIdentity(identity).
 			SetName("participant-name").
@@ -64,7 +64,7 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, met
 		log.ZDebug(ctx, "getJoinToken", "jwt", jwt)
 		return jwt, x.getLiveURL(), nil
 	}
-	// 生成邀请者房间的jwt
+	// generate jwt of the room
 	at.AddGrant(grant).
 		SetIdentity(identity).
 		SetName("participant-name").
