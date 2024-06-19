@@ -29,13 +29,16 @@ func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *
 		Password:        req.CreatorDefinedMeetingInfo.Password,
 		TimeZone:        req.CreatorDefinedMeetingInfo.TimeZone,
 		Status:          constant.Scheduled,
-		EndDate:         req.RepeatInfo.EndDate,
-		RepeatType:      req.RepeatInfo.RepeatType,
 		CreatorUserID:   req.CreatorUserID,
 	}
-	if req.RepeatInfo.RepeatType == constant.RepeatCustom {
-		dbInfo.UintType = req.RepeatInfo.UintType
-		dbInfo.Interval = req.RepeatInfo.Interval
+
+	if req.RepeatInfo != nil {
+		dbInfo.EndDate = req.RepeatInfo.EndDate
+		dbInfo.RepeatType = req.RepeatInfo.RepeatType
+		if req.RepeatInfo.RepeatType == constant.RepeatCustom {
+			dbInfo.UintType = req.RepeatInfo.UintType
+			dbInfo.Interval = req.RepeatInfo.Interval
+		}
 	}
 
 	return dbInfo, nil
