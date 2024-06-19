@@ -94,16 +94,16 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		return resp, errs.WrapMsg(err, "get room data failed")
 	}
 
-	userIDs, err := s.meetingRtc.GetParticipantUserIDs(ctx, req.MeetingID)
+	_, err = s.meetingRtc.GetParticipantUserIDs(ctx, req.MeetingID)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get participants failed")
 	}
 	// check if user is already in meeting
-	for _, userID := range userIDs {
-		if userID == req.UserID {
-			return resp, errs.New("user's already in this meeting, please check")
-		}
-	}
+	//for _, userID := range userIDs {
+	//	if userID == req.UserID {
+	//		return resp, errs.New("user's already in this meeting, please check")
+	//	}
+	//}
 
 	if req.UserID != s.getHostUserID(metaData) && req.Password != metaData.Detail.Info.CreatorDefinedMeeting.Password {
 		return resp, errs.New("meeting password not match, please check and try again!")
