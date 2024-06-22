@@ -52,12 +52,11 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 		return resp, errs.WrapMsg(err, "generate meeting data failed")
 	}
 
+	metaData, err := s.generateMeetingMetaData4Create(ctx, req, meetingDBInfo)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "generate meeting meta data failed")
+	}
 	participantMetaData := s.generateParticipantMetaData(userInfo)
-	metaData := &pbmeeting.MeetingMetadata{}
-	meetingDetail := s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
-	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
-	metaData.Detail = meetingDetail
-	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
 
 	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, metaData, participantMetaData)
 	if err != nil {
@@ -74,7 +73,7 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 		return resp, err
 	}
 
-	resp.Detail = meetingDetail
+	resp.Detail = metaData.Detail
 	resp.LiveKit = &pbmeeting.LiveKit{
 		Token: token,
 		Url:   liveUrl,

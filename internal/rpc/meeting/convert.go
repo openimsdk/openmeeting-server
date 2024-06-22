@@ -169,6 +169,39 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 	return meetingInfoSetting, nil
 }
 
+func (s *meetingServer) generateMeetingMetaData4Create(ctx context.Context, req *pbmeeting.CreateImmediateMeetingReq, info *model.MeetingInfo) (*pbmeeting.MeetingMetadata, error) {
+	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
+	if err != nil {
+		return nil, errs.WrapMsg(err, "get user info failed")
+	}
+
+	metaData := &pbmeeting.MeetingMetadata{}
+	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
+	systemInfo := &pbmeeting.SystemGeneratedMeetingInfo{
+		CreatorUserID:   info.CreatorUserID,
+		Status:          info.Status,
+		StartTime:       info.StartTime,
+		MeetingID:       info.MeetingID,
+		CreatorNickname: userInfo.Nickname,
+	}
+	creatorInfo := &pbmeeting.CreatorDefinedMeetingInfo{
+		Title:           req.CreatorDefinedMeetingInfo.Title,
+		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
+		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
+		Password:        req.CreatorDefinedMeetingInfo.Password,
+		HostUserID:      req.CreatorUserID,
+	}
+	meetingInfo := &pbmeeting.MeetingInfo{
+		SystemGenerated:       systemInfo,
+		CreatorDefinedMeeting: creatorInfo,
+	}
+	metaData.Detail = &pbmeeting.MeetingInfoSetting{
+		Setting: req.Setting,
+		Info:    meetingInfo,
+	}
+	return metaData, nil
+}
+
 // generateMeetingInfoSetting generates MeetingInfoSetting from the given request and meeting ID.
 func (s *meetingServer) generateClientRespMeetingSetting(
 	meetingSetting *pbmeeting.MeetingSetting,
