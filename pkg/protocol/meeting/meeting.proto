@@ -296,6 +296,13 @@ message SetMeetingHostInfoResp {
 
 }
 
+message NotifyMeetingHostData {
+  string operatorUserID = 1;
+  string operatorNickname = 2;
+  string userID = 3;
+  string hostType = 4;
+}
+
 // Defines services related to meeting management.
 service MeetingService {
   // Books a future meeting.

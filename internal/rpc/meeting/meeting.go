@@ -3,8 +3,8 @@ package meeting
 import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common"
+	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
-	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	sysConstant "github.com/openimsdk/protocol/constant"
@@ -400,10 +400,19 @@ func (s *meetingServer) SetMeetingHostInfo(ctx context.Context, req *pbmeeting.S
 	}
 	if req.HostUserID != nil {
 		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = req.HostUserID.Value
+		if err := s.sendNotifyData(ctx, req.MeetingID, req.UserID, req.HostUserID.Value, constant.HostTypeHost); err != nil {
+			return resp, errs.ErrArgs.WrapMsg("notify host info to participant failed")
+		}
 	}
 	if req.CoHostUserIDs != nil {
 		metaData.Detail.Info.CreatorDefinedMeeting.CoHostUSerID = s.mergeAndUnique(
 			metaData.Detail.Info.CreatorDefinedMeeting.CoHostUSerID, req.CoHostUserIDs)
+
+		for _, one := range req.CoHostUserIDs {
+			if err := s.sendNotifyData(ctx, req.MeetingID, req.UserID, one, constant.HostTypeCoHost); err != nil {
+				return resp, errs.ErrArgs.WrapMsg("notify host info to participant failed")
+			}
+		}
 	}
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 		return resp, errs.WrapMsg(err, "update meta data failed")

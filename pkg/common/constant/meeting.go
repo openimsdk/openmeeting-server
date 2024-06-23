@@ -20,3 +20,8 @@ const (
 	UnitTypeWeek  = "Week"  // week
 	UnitTypeMonth = "Month" // month
 )
+
+const (
+	HostTypeHost   = "Host"
+	HostTypeCoHost = "CoHost"
+)
