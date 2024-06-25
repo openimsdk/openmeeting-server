@@ -17,7 +17,7 @@ package rpcclient
 import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common/servererrs"
-	"github.com/openimsdk/openmeeting-server/pkg/protocol/user"
+	"github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/protocol/sdkws"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/system/program"

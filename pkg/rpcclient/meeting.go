@@ -2,7 +2,7 @@ package rpcclient
 
 import (
 	"context"
-	"github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
+	"github.com/openimsdk/protocol/openmeeting/meeting"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/system/program"
 	"google.golang.org/grpc"

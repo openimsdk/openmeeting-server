@@ -16,7 +16,7 @@ package convert
 
 import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
-	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
+	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 )
 
 func UsersDB2Pb(users []*model.User) []*pbuser.UserInfo {

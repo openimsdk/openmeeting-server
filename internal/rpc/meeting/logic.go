@@ -3,9 +3,9 @@ package meeting
 import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
-	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
-	"github.com/openimsdk/openmeeting-server/pkg/protocol/pbwrapper"
-	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
+	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
+	pbuser "github.com/openimsdk/protocol/openmeeting/user"
+	pbwrapper "github.com/openimsdk/protocol/wrapperspb"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"

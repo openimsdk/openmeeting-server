@@ -3,7 +3,7 @@ package rtc
 import (
 	"context"
 	"github.com/livekit/protocol/livekit"
-	"github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
+	"github.com/openimsdk/protocol/openmeeting/meeting"
 )
 
 type MeetingRtc interface {

@@ -9,7 +9,7 @@ import (
 	lksdk "github.com/livekit/server-sdk-go"
 	"github.com/openimsdk/openmeeting-server/internal/rpc/meeting/rtc"
 	"github.com/openimsdk/openmeeting-server/pkg/common/config"
-	"github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
+	"github.com/openimsdk/protocol/openmeeting/meeting"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"

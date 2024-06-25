@@ -3,9 +3,9 @@ package mw
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/openimsdk/openmeeting-server/pkg/common/token"
-	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
+	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"
 )

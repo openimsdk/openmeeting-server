@@ -5,9 +5,9 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common"
 	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
-	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
-	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	sysConstant "github.com/openimsdk/protocol/constant"
+	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
+	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 )

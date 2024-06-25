@@ -1,6 +1,6 @@
 package meeting
 
-import pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
+import pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
 
 func (s *meetingServer) checkAuthPermission(hostUserID, requestUserID string) bool {
 	return hostUserID == requestUserID

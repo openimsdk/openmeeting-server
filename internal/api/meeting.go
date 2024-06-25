@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
+	"github.com/openimsdk/protocol/openmeeting/meeting"
 	"github.com/openimsdk/tools/a2r"
 )
 

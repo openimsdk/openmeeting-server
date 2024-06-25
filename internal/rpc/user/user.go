@@ -25,7 +25,7 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/openmeeting-server/pkg/common/token"
-	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
+	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	registry "github.com/openimsdk/tools/discovery"
