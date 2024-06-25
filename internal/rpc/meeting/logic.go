@@ -2,9 +2,10 @@ package meeting
 
 import (
 	"context"
-	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
+	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	"github.com/openimsdk/openmeeting-server/pkg/protocol/pbwrapper"
+	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
@@ -248,4 +249,23 @@ func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
 			}
 		}
 	}
+}
+
+func (s *meetingServer) sendNotifyData(ctx context.Context, roomID, operateUserID, userID, hostType string) error {
+	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: operateUserID})
+	if err != nil {
+		return errs.WrapMsg(err, "get user info failed")
+	}
+
+	sendData := &pbmeeting.NotifyMeetingHostData{
+		OperatorUserID:   operateUserID,
+		OperatorNickname: userInfo.Nickname,
+		UserID:           userID,
+		HostType:         hostType,
+	}
+
+	if err := s.meetingRtc.SendRoomData(ctx, roomID, &[]string{userID}, sendData); err != nil {
+		return errs.WrapMsg(err, "send room data failed")
+	}
+	return nil
 }

@@ -3,8 +3,8 @@ package meeting
 import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common"
+	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
-	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	sysConstant "github.com/openimsdk/protocol/constant"
@@ -52,12 +52,11 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 		return resp, errs.WrapMsg(err, "generate meeting data failed")
 	}
 
+	metaData, err := s.generateMeetingMetaData4Create(ctx, req, meetingDBInfo)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "generate meeting meta data failed")
+	}
 	participantMetaData := s.generateParticipantMetaData(userInfo)
-	metaData := &pbmeeting.MeetingMetadata{}
-	meetingDetail := s.generateClientRespMeetingSetting(req.Setting, req.CreatorDefinedMeetingInfo, meetingDBInfo)
-	meetingDetail.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
-	metaData.Detail = meetingDetail
-	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
 
 	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, metaData, participantMetaData)
 	if err != nil {
@@ -74,7 +73,7 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 		return resp, err
 	}
 
-	resp.Detail = meetingDetail
+	resp.Detail = metaData.Detail
 	resp.LiveKit = &pbmeeting.LiveKit{
 		Token: token,
 		Url:   liveUrl,
@@ -94,16 +93,16 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		return resp, errs.WrapMsg(err, "get room data failed")
 	}
 
-	userIDs, err := s.meetingRtc.GetParticipantUserIDs(ctx, req.MeetingID)
+	_, err = s.meetingRtc.GetParticipantUserIDs(ctx, req.MeetingID)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get participants failed")
 	}
 	// check if user is already in meeting
-	for _, userID := range userIDs {
-		if userID == req.UserID {
-			return resp, errs.New("user's already in this meeting, please check")
-		}
-	}
+	//for _, userID := range userIDs {
+	//	if userID == req.UserID {
+	//		return resp, errs.New("user's already in this meeting, please check")
+	//	}
+	//}
 
 	if req.UserID != s.getHostUserID(metaData) && req.Password != metaData.Detail.Info.CreatorDefinedMeeting.Password {
 		return resp, errs.New("meeting password not match, please check and try again!")
@@ -401,10 +400,19 @@ func (s *meetingServer) SetMeetingHostInfo(ctx context.Context, req *pbmeeting.S
 	}
 	if req.HostUserID != nil {
 		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = req.HostUserID.Value
+		if err := s.sendNotifyData(ctx, req.MeetingID, req.UserID, req.HostUserID.Value, constant.HostTypeHost); err != nil {
+			return resp, errs.ErrArgs.WrapMsg("notify host info to participant failed")
+		}
 	}
 	if req.CoHostUserIDs != nil {
 		metaData.Detail.Info.CreatorDefinedMeeting.CoHostUSerID = s.mergeAndUnique(
 			metaData.Detail.Info.CreatorDefinedMeeting.CoHostUSerID, req.CoHostUserIDs)
+
+		for _, one := range req.CoHostUserIDs {
+			if err := s.sendNotifyData(ctx, req.MeetingID, req.UserID, one, constant.HostTypeCoHost); err != nil {
+				return resp, errs.ErrArgs.WrapMsg("notify host info to participant failed")
+			}
+		}
 	}
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
 		return resp, errs.WrapMsg(err, "update meta data failed")

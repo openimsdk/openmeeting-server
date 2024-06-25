@@ -2,8 +2,8 @@ package meeting
 
 import (
 	"context"
+	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
-	"github.com/openimsdk/openmeeting-server/pkg/protocol/constant"
 	pbmeeting "github.com/openimsdk/openmeeting-server/pkg/protocol/meeting"
 	pbuser "github.com/openimsdk/openmeeting-server/pkg/protocol/user"
 	"github.com/openimsdk/tools/errs"
@@ -29,13 +29,16 @@ func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *
 		Password:        req.CreatorDefinedMeetingInfo.Password,
 		TimeZone:        req.CreatorDefinedMeetingInfo.TimeZone,
 		Status:          constant.Scheduled,
-		EndDate:         req.RepeatInfo.EndDate,
-		RepeatType:      req.RepeatInfo.RepeatType,
 		CreatorUserID:   req.CreatorUserID,
 	}
-	if req.RepeatInfo.RepeatType == constant.RepeatCustom {
-		dbInfo.UintType = req.RepeatInfo.UintType
-		dbInfo.Interval = req.RepeatInfo.Interval
+
+	if req.RepeatInfo != nil {
+		dbInfo.EndDate = req.RepeatInfo.EndDate
+		dbInfo.RepeatType = req.RepeatInfo.RepeatType
+		if req.RepeatInfo.RepeatType == constant.RepeatCustom {
+			dbInfo.UintType = req.RepeatInfo.UintType
+			dbInfo.Interval = req.RepeatInfo.Interval
+		}
 	}
 
 	return dbInfo, nil
@@ -164,6 +167,39 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 	}
 
 	return meetingInfoSetting, nil
+}
+
+func (s *meetingServer) generateMeetingMetaData4Create(ctx context.Context, req *pbmeeting.CreateImmediateMeetingReq, info *model.MeetingInfo) (*pbmeeting.MeetingMetadata, error) {
+	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
+	if err != nil {
+		return nil, errs.WrapMsg(err, "get user info failed")
+	}
+
+	metaData := &pbmeeting.MeetingMetadata{}
+	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
+	systemInfo := &pbmeeting.SystemGeneratedMeetingInfo{
+		CreatorUserID:   info.CreatorUserID,
+		Status:          info.Status,
+		StartTime:       info.StartTime,
+		MeetingID:       info.MeetingID,
+		CreatorNickname: userInfo.Nickname,
+	}
+	creatorInfo := &pbmeeting.CreatorDefinedMeetingInfo{
+		Title:           req.CreatorDefinedMeetingInfo.Title,
+		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
+		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
+		Password:        req.CreatorDefinedMeetingInfo.Password,
+		HostUserID:      req.CreatorUserID,
+	}
+	meetingInfo := &pbmeeting.MeetingInfo{
+		SystemGenerated:       systemInfo,
+		CreatorDefinedMeeting: creatorInfo,
+	}
+	metaData.Detail = &pbmeeting.MeetingInfoSetting{
+		Setting: req.Setting,
+		Info:    meetingInfo,
+	}
+	return metaData, nil
 }
 
 // generateMeetingInfoSetting generates MeetingInfoSetting from the given request and meeting ID.

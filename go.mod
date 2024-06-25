@@ -24,7 +24,7 @@ require github.com/google/uuid v1.6.0 // indirect
 
 require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
-	github.com/openimsdk/gomake v0.0.14-alpha.2
+	github.com/openimsdk/gomake v0.0.14-alpha.5
 	github.com/redis/go-redis/v9 v9.4.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/spf13/viper v1.18.2
