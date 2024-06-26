@@ -331,7 +331,7 @@ func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting
 		}
 	}
 
-	if err := s.send2AllParticipant(ctx, req, resp.StreamNotExistUserIDList, resp.FailedUserIDList); err != nil {
+	if err := s.broadcastStreamOperateData(ctx, req, resp.StreamNotExistUserIDList, resp.FailedUserIDList); err != nil {
 		return resp, errs.WrapMsg(err, "send notification to all participant failed")
 	}
 
@@ -400,7 +400,7 @@ func (s *meetingServer) SetMeetingHostInfo(ctx context.Context, req *pbmeeting.S
 	}
 	if req.HostUserID != nil {
 		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = req.HostUserID.Value
-		if err := s.sendNotifyData(ctx, req.MeetingID, req.UserID, req.HostUserID.Value, constant.HostTypeHost); err != nil {
+		if err := s.sendMeetingHostData2Client(ctx, req.MeetingID, req.UserID, req.HostUserID.Value, constant.HostTypeHost); err != nil {
 			return resp, errs.ErrArgs.WrapMsg("notify host info to participant failed")
 		}
 	}
@@ -409,7 +409,7 @@ func (s *meetingServer) SetMeetingHostInfo(ctx context.Context, req *pbmeeting.S
 			metaData.Detail.Info.CreatorDefinedMeeting.CoHostUSerID, req.CoHostUserIDs)
 
 		for _, one := range req.CoHostUserIDs {
-			if err := s.sendNotifyData(ctx, req.MeetingID, req.UserID, one, constant.HostTypeCoHost); err != nil {
+			if err := s.sendMeetingHostData2Client(ctx, req.MeetingID, req.UserID, one, constant.HostTypeCoHost); err != nil {
 				return resp, errs.ErrArgs.WrapMsg("notify host info to participant failed")
 			}
 		}

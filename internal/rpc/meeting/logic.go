@@ -125,14 +125,14 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 		return errs.WrapMsg(err, "update meta data failed")
 	}
 
-	if err := s.sendData(ctx, req.MeetingID, req.UserID, req.CameraOnEntry, req.MicrophoneOnEntry); err != nil {
+	if err := s.sendStreamOperateData2Client(ctx, req.MeetingID, req.UserID, req.CameraOnEntry, req.MicrophoneOnEntry); err != nil {
 		return errs.WrapMsg(err, "send data failed")
 	}
 
 	return nil
 }
 
-func (s *meetingServer) sendData(ctx context.Context, roomID, userID string, cameraOn, microphoneOn *pbwrapper.BoolValue) error {
+func (s *meetingServer) sendStreamOperateData2Client(ctx context.Context, roomID, userID string, cameraOn, microphoneOn *pbwrapper.BoolValue) error {
 	operationData := &pbmeeting.UserOperationData{
 		UserID: userID,
 	}
@@ -142,10 +142,13 @@ func (s *meetingServer) sendData(ctx context.Context, roomID, userID string, cam
 	if microphoneOn != nil {
 		operationData.MicrophoneOnEntry = microphoneOn.Value
 	}
+	streamOperationData := &pbmeeting.StreamOperateData{
+		Operation: []*pbmeeting.UserOperationData{operationData},
+	}
 
-	sendData := &pbmeeting.StreamOperateData{
+	sendData := &pbmeeting.NotifyMeetingData{
 		OperatorUserID: mcontext.GetOpUserID(ctx),
-		Operation:      []*pbmeeting.UserOperationData{operationData},
+		MessageType:    &pbmeeting.NotifyMeetingData_StreamOperateData{StreamOperateData: streamOperationData},
 	}
 
 	if err := s.meetingRtc.SendRoomData(ctx, roomID, &[]string{userID}, sendData); err != nil {
@@ -173,7 +176,7 @@ func (s *meetingServer) muteAllStream(ctx context.Context, roomID, streamType st
 	return
 }
 
-func (s *meetingServer) send2AllParticipant(ctx context.Context, req *pbmeeting.OperateRoomAllStreamReq, StreamNotExistUserIDList, FailedUserIDList []string) error {
+func (s *meetingServer) broadcastStreamOperateData(ctx context.Context, req *pbmeeting.OperateRoomAllStreamReq, StreamNotExistUserIDList, FailedUserIDList []string) error {
 	userIDs, err := s.meetingRtc.GetParticipantUserIDs(ctx, req.MeetingID)
 	if err != nil {
 		return err
@@ -210,9 +213,14 @@ func (s *meetingServer) send2AllParticipant(ctx context.Context, req *pbmeeting.
 		}
 		operationList = append(operationList, operationData)
 	}
-	sendData := &pbmeeting.StreamOperateData{
+
+	streamOperationData := &pbmeeting.StreamOperateData{
+		Operation: operationList,
+	}
+
+	sendData := &pbmeeting.NotifyMeetingData{
 		OperatorUserID: mcontext.GetOpUserID(ctx),
-		Operation:      operationList,
+		MessageType:    &pbmeeting.NotifyMeetingData_StreamOperateData{StreamOperateData: streamOperationData},
 	}
 
 	if err := s.meetingRtc.SendRoomData(ctx, req.MeetingID, nil, sendData); err != nil {
@@ -251,17 +259,21 @@ func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
 	}
 }
 
-func (s *meetingServer) sendNotifyData(ctx context.Context, roomID, operateUserID, userID, hostType string) error {
+func (s *meetingServer) sendMeetingHostData2Client(ctx context.Context, roomID, operateUserID, userID, hostType string) error {
 	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: operateUserID})
 	if err != nil {
 		return errs.WrapMsg(err, "get user info failed")
 	}
 
-	sendData := &pbmeeting.NotifyMeetingHostData{
-		OperatorUserID:   operateUserID,
+	hostInfo := &pbmeeting.MeetingHostData{
 		OperatorNickname: userInfo.Nickname,
 		UserID:           userID,
 		HostType:         hostType,
+	}
+
+	sendData := &pbmeeting.NotifyMeetingData{
+		OperatorUserID: operateUserID,
+		MessageType:    &pbmeeting.NotifyMeetingData_MeetingHostData{MeetingHostData: hostInfo},
 	}
 
 	if err := s.meetingRtc.SendRoomData(ctx, roomID, &[]string{userID}, sendData); err != nil {
