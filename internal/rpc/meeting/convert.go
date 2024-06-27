@@ -34,6 +34,7 @@ func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *
 
 	if req.RepeatInfo != nil {
 		dbInfo.EndDate = req.RepeatInfo.EndDate
+		dbInfo.RepeatTimes = req.RepeatInfo.RepeatTimes
 		dbInfo.RepeatType = req.RepeatInfo.RepeatType
 		if req.RepeatInfo.RepeatType == constant.RepeatCustom {
 			dbInfo.UintType = req.RepeatInfo.UintType
@@ -147,10 +148,11 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 		CreatorDefinedMeeting: creatorInfo,
 	}
 	repeatInfo := &pbmeeting.MeetingRepeatInfo{
-		EndDate:    info.EndDate,
-		RepeatType: info.RepeatType,
-		UintType:   info.UintType,
-		Interval:   info.Interval,
+		EndDate:     info.EndDate,
+		RepeatTimes: info.RepeatTimes,
+		RepeatType:  info.RepeatType,
+		UintType:    info.UintType,
+		Interval:    info.Interval,
 	}
 
 	meetingInfoSetting := &pbmeeting.MeetingInfoSetting{
@@ -253,6 +255,8 @@ func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *
 
 	if req.RepeatInfo != nil {
 		metaData.Detail.RepeatInfo = req.RepeatInfo
+		updateData["end_date"] = req.RepeatInfo.EndDate
+		updateData["repeat_times"] = req.RepeatInfo.RepeatTimes
 		updateData["repeat_type"] = req.RepeatInfo.RepeatType
 		if req.RepeatInfo.RepeatType == constant.RepeatCustom {
 			updateData["uint_type"] = req.RepeatInfo.UintType

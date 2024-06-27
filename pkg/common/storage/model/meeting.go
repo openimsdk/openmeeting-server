@@ -11,8 +11,9 @@ type MeetingInfo struct {
 	Status          string `bson:"status"`
 	StartTime       int64  `bson:"start_time"`
 	TimeZone        string `bson:"time_zone"`
-	EndDate         string `bson:"end_date"`
-	RepeatType      string `bson:"repeat_type"` // none, daily, weekly, monthly, custom
-	UintType        string `bson:"uint_type"`   // only used when repeat_type is custom
-	Interval        int32  `bson:"interval"`    // only used when repeat_type is custom
+	EndDate         int64  `bson:"end_date"`
+	RepeatTimes     int32  `bson:"repeat_times"` // repeat_times means times the meeting repeats
+	RepeatType      string `bson:"repeat_type"`  // none, daily, weekly, monthly, custom
+	UintType        string `bson:"uint_type"`    // only used when repeat_type is custom
+	Interval        int32  `bson:"interval"`     // only used when repeat_type is custom
 }

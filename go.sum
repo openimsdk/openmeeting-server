@@ -196,12 +196,8 @@ github.com/openimsdk/gomake v0.0.14-alpha.2 h1:8xERWek3GfQYracOvnIRXYs1i6Iv16oiL
 github.com/openimsdk/gomake v0.0.14-alpha.2/go.mod h1:PndCozNc2IsQIciyn9mvEblYWZwJmAI+06z94EY+csI=
 github.com/openimsdk/gomake v0.0.14-alpha.5 h1:VY9c5x515lTfmdhhPjMvR3BBRrRquAUCFsz7t7vbv7Y=
 github.com/openimsdk/gomake v0.0.14-alpha.5/go.mod h1:PndCozNc2IsQIciyn9mvEblYWZwJmAI+06z94EY+csI=
-github.com/openimsdk/protocol v0.0.65 h1:SPT9qyUsFRTTKSKb/FjpS+xr6sxz/Kbnu+su1bxYagc=
-github.com/openimsdk/protocol v0.0.65/go.mod h1:OZQA9FR55lseYoN2Ql1XAHYKHJGu7OMNkUbuekrKCM8=
-github.com/openimsdk/protocol v0.0.69-alpha.18 h1:XntMWXbwfgLiPf6PQp/bTJkN/bzB5KZsgRBruEE61GM=
-github.com/openimsdk/protocol v0.0.69-alpha.18/go.mod h1:OZQA9FR55lseYoN2Ql1XAHYKHJGu7OMNkUbuekrKCM8=
-github.com/openimsdk/protocol v0.0.69-alpha.19 h1:LsKAhI6LwdTn0soAeiEHLfeUu+SJ6AJASJXOx2YBz8Y=
-github.com/openimsdk/protocol v0.0.69-alpha.19/go.mod h1:OZQA9FR55lseYoN2Ql1XAHYKHJGu7OMNkUbuekrKCM8=
+github.com/openimsdk/protocol v0.0.69-alpha.21 h1:01FlEY5ryMCJ5oqhK+qe2mGskrXnWmOHSo2SxRU1fFk=
+github.com/openimsdk/protocol v0.0.69-alpha.21/go.mod h1:OZQA9FR55lseYoN2Ql1XAHYKHJGu7OMNkUbuekrKCM8=
 github.com/openimsdk/tools v0.0.49-alpha.22 h1:pZl6IOTcAURJrpHkb5cX4r4DPQBGBTGStv+JAtp7Njg=
 github.com/openimsdk/tools v0.0.49-alpha.22/go.mod h1:g7mkHXYUPi0/8aAX8VPMHpnb3hqdV69Jph+bXOGvvNM=
 github.com/pelletier/go-toml/v2 v2.1.0 h1:FnwAJ4oYMvbT/34k9zzHuZNrhlz48GB3/s6at6/MHO4=
