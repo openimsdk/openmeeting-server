@@ -39,10 +39,30 @@ func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *
 		if req.RepeatInfo.RepeatType == constant.RepeatCustom {
 			dbInfo.UintType = req.RepeatInfo.UintType
 			dbInfo.Interval = req.RepeatInfo.Interval
+			if req.RepeatInfo.RepeatDaysOfWeek != nil {
+				dbInfo.RepeatDayOfWeek = *s.getDBRepeatDayOfWeek(&req.RepeatInfo.RepeatDaysOfWeek)
+			}
 		}
 	}
-
 	return dbInfo, nil
+}
+
+func (s *meetingServer) getDBRepeatDayOfWeek(weeks *[]pbmeeting.DayOfWeek) *[7]bool {
+	dayOfWeek := &[7]bool{false}
+	for _, one := range *weeks {
+		dayOfWeek[one.Number()] = true
+	}
+	return dayOfWeek
+}
+
+func (s *meetingServer) getClientRepeatDayOfWeek(dayOfWeek *[7]bool) *[]pbmeeting.DayOfWeek {
+	days := &[]pbmeeting.DayOfWeek{}
+	for day, one := range *dayOfWeek {
+		if one == true {
+			*days = append(*days, pbmeeting.DayOfWeek(day))
+		}
+	}
+	return days
 }
 
 func (s *meetingServer) generateMeetingDBData4Create(ctx context.Context, req *pbmeeting.CreateImmediateMeetingReq) (*model.MeetingInfo, error) {
@@ -148,11 +168,12 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 		CreatorDefinedMeeting: creatorInfo,
 	}
 	repeatInfo := &pbmeeting.MeetingRepeatInfo{
-		EndDate:     info.EndDate,
-		RepeatTimes: info.RepeatTimes,
-		RepeatType:  info.RepeatType,
-		UintType:    info.UintType,
-		Interval:    info.Interval,
+		EndDate:          info.EndDate,
+		RepeatTimes:      info.RepeatTimes,
+		RepeatType:       info.RepeatType,
+		UintType:         info.UintType,
+		Interval:         info.Interval,
+		RepeatDaysOfWeek: *s.getClientRepeatDayOfWeek(&info.RepeatDayOfWeek),
 	}
 
 	meetingInfoSetting := &pbmeeting.MeetingInfoSetting{
@@ -261,6 +282,12 @@ func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *
 		if req.RepeatInfo.RepeatType == constant.RepeatCustom {
 			updateData["uint_type"] = req.RepeatInfo.UintType
 			updateData["interval"] = req.RepeatInfo.Interval
+			updateData["repeat_day_of_week"] = *s.getDBRepeatDayOfWeek(&req.RepeatInfo.RepeatDaysOfWeek)
+		} else {
+			// reset setting
+			updateData["uint_type"] = ""
+			updateData["interval"] = 0
+			updateData["repeat_day_of_week"] = nil
 		}
 	}
 

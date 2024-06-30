@@ -57,6 +57,7 @@ func (s *meetingServer) setSelfPersonalSetting(ctx context.Context, metaData *pb
 		metaData.PersonalData = append(metaData.PersonalData, personalData)
 	}
 	if !needUpdate {
+		log.CInfo(ctx, "no need update meta data for set setting")
 		// no need update
 		return nil
 	}
