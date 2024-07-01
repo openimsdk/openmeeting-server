@@ -3,7 +3,7 @@ package livekit
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/livekit/protocol/auth"
 	"github.com/livekit/protocol/livekit"
 	lksdk "github.com/livekit/server-sdk-go"
@@ -98,7 +98,14 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, ro
 	callback := rtc.NewRoomCallback(
 		mcontext.NewCtx("room_callback_"+mcontext.GetOperationID(ctx)), meetingID, room.Sid, x.roomClient)
 	roomCallback := &lksdk.RoomCallback{
-		ParticipantCallback:       lksdk.ParticipantCallback{},
+		ParticipantCallback: lksdk.ParticipantCallback{
+			OnDataReceived: func(data []byte, rp *lksdk.RemoteParticipant) {
+				log.CInfo(ctx, "data received:", "data:", string(data))
+			},
+		},
+		OnRoomMetadataChanged: func(metadata string) {
+			log.CInfo(ctx, "meta data change", "metaData:", metadata)
+		},
 		OnParticipantConnected:    callback.OnParticipantConnected,
 		OnParticipantDisconnected: callback.OnParticipantDisconnected,
 		OnDisconnected:            callback.OnDisconnected,
@@ -139,7 +146,6 @@ func (x *LiveKit) GetRoomData(ctx context.Context, roomID string) (*meeting.Meet
 		log.ZError(ctx, "list room error", err)
 		return nil, errs.WrapMsg(err, "list room error")
 	}
-	log.CInfo(ctx, "get room data", resp)
 
 	if len(resp.Rooms) == 0 {
 		log.ZError(ctx, "not found room", errs.ErrRecordNotFound.WrapMsg("roomIsNotExist"))
@@ -164,7 +170,7 @@ func (x *LiveKit) UpdateMetaData(ctx context.Context, updateData *meeting.Meetin
 	if err != nil {
 		return errs.Wrap(err)
 	}
-	room, err := x.roomClient.UpdateRoomMetadata(ctx, &livekit.UpdateRoomMetadataRequest{
+	_, err = x.roomClient.UpdateRoomMetadata(ctx, &livekit.UpdateRoomMetadataRequest{
 		Room:     meetingID,
 		Metadata: string(bytes),
 	})
@@ -172,7 +178,6 @@ func (x *LiveKit) UpdateMetaData(ctx context.Context, updateData *meeting.Meetin
 	if err != nil {
 		return errs.WrapMsg(err, "update room meta data failed, meetingID: ", meetingID)
 	}
-	fmt.Println(room)
 	return nil
 }
 
@@ -231,16 +236,16 @@ func (x *LiveKit) ToggleMimeStream(ctx context.Context, roomID, userID, mineType
 	return nil
 }
 
-func (x *LiveKit) SendRoomData(ctx context.Context, roomID string, userIDList *[]string, sendData interface{}) error {
-	bytes, err := json.Marshal(&sendData)
+func (x *LiveKit) SendRoomData(ctx context.Context, roomID string, userIDList *[]string, sendData *meeting.NotifyMeetingData) error {
+	marshal := jsonpb.Marshaler{}
+	sendMsg, err := marshal.MarshalToString(sendData)
 	if err != nil {
 		return errs.WrapMsg(err, "marshal send data failed")
 	}
-
 	topic := "system"
 	req := &livekit.SendDataRequest{
 		Room:  roomID,
-		Data:  bytes,
+		Data:  []byte(sendMsg),
 		Topic: &topic,
 	}
 	if userIDList != nil {
@@ -297,7 +302,7 @@ func (x *LiveKit) UpdateParticipantData(ctx context.Context, data *meeting.Parti
 		log.ZError(ctx, "json.Marshal failed", err)
 		return errs.WrapMsg(err, "json marshall failed")
 	}
-	resp, err := x.roomClient.UpdateParticipant(ctx, &livekit.UpdateParticipantRequest{
+	_, err = x.roomClient.UpdateParticipant(ctx, &livekit.UpdateParticipantRequest{
 		Room:     roomID,
 		Identity: userID,
 		Metadata: string(bytes),
@@ -306,6 +311,5 @@ func (x *LiveKit) UpdateParticipantData(ctx context.Context, data *meeting.Parti
 	if err != nil {
 		return errs.WrapMsg(err, "update participant data failed")
 	}
-	fmt.Println(resp)
 	return nil
 }
