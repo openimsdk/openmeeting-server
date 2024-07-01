@@ -176,7 +176,7 @@ func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetin
 	if err != nil {
 		return nil, err
 	}
-	if !s.checkAuthPermission(metaData.Detail.Info.SystemGenerated.CreatorUserID, req.UserID) {
+	if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
 		return resp, errs.ErrArgs.WrapMsg("user did not have permission to end somebody's meeting")
 	}
 	// change status to completed

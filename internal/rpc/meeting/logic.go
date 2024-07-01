@@ -120,6 +120,7 @@ func (s *meetingServer) setParticipantPersonalSetting(ctx context.Context, metaD
 	}
 	if !needUpdate {
 		// no need to update
+		log.CInfo(ctx, "no need update meta data for set setting")
 		return nil
 	}
 	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
