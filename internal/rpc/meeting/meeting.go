@@ -106,7 +106,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
-		if dbInfo.RepeatType == constant.NoneRepeat {
+		if dbInfo.RepeatType == "" {
 			return resp, errs.WrapMsg(err, "get room data failed")
 		}
 		// for those need repeat booking meeting, create new rooms

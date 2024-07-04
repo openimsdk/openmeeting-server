@@ -142,9 +142,11 @@ func (s *meetingServer) generateMeetingMetaData(ctx context.Context, info *model
 		CreatorDefinedMeeting: creatorInfo,
 	}
 	setting := &pbmeeting.MeetingSetting{}
-	unMarshal := jsonpb.Unmarshaler{}
-	if err := unMarshal.Unmarshal(strings.NewReader(info.Setting), setting); err != nil {
-		return nil, errs.WrapMsg(err, "unMarshal db data failed")
+	if info.Setting != "" {
+		unMarshal := jsonpb.Unmarshaler{}
+		if err := unMarshal.Unmarshal(strings.NewReader(info.Setting), setting); err != nil {
+			return nil, errs.WrapMsg(err, "unMarshal db data failed")
+		}
 	}
 	repeatInfo := &pbmeeting.MeetingRepeatInfo{
 		RepeatType:       info.RepeatType,
