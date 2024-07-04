@@ -2,12 +2,14 @@ package meeting
 
 import (
 	"context"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
 	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/timeutil"
+	"strings"
 )
 
 func (s *meetingServer) getHostUserID(metadata *pbmeeting.MeetingMetadata) string {
@@ -31,7 +33,12 @@ func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *
 		Status:          constant.Scheduled,
 		CreatorUserID:   req.CreatorUserID,
 	}
-
+	marshal := jsonpb.Marshaler{}
+	setting, err := marshal.MarshalToString(req.Setting)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "marshal send data failed")
+	}
+	dbInfo.Setting = setting
 	if req.RepeatInfo != nil {
 		dbInfo.EndDate = req.RepeatInfo.EndDate
 		dbInfo.RepeatTimes = req.RepeatInfo.RepeatTimes
@@ -107,14 +114,14 @@ func (s *meetingServer) generateDefaultPersonalData(userID string) *pbmeeting.Pe
 	}
 }
 
-func (s *meetingServer) generateMeetingMetaData(ctx context.Context, req *pbmeeting.BookMeetingReq, info *model.MeetingInfo) (*pbmeeting.MeetingMetadata, error) {
+func (s *meetingServer) generateMeetingMetaData(ctx context.Context, info *model.MeetingInfo) (*pbmeeting.MeetingMetadata, error) {
 	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
 	if err != nil {
 		return nil, errs.WrapMsg(err, "get user info failed")
 	}
 
 	metaData := &pbmeeting.MeetingMetadata{}
-	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(req.CreatorUserID)}
+	metaData.PersonalData = []*pbmeeting.PersonalData{s.generateDefaultPersonalData(info.CreatorUserID)}
 	systemInfo := &pbmeeting.SystemGeneratedMeetingInfo{
 		CreatorUserID:   info.CreatorUserID,
 		Status:          info.Status,
@@ -123,21 +130,35 @@ func (s *meetingServer) generateMeetingMetaData(ctx context.Context, req *pbmeet
 		CreatorNickname: userInfo.Nickname,
 	}
 	creatorInfo := &pbmeeting.CreatorDefinedMeetingInfo{
-		Title:           req.CreatorDefinedMeetingInfo.Title,
-		ScheduledTime:   req.CreatorDefinedMeetingInfo.ScheduledTime,
-		MeetingDuration: req.CreatorDefinedMeetingInfo.MeetingDuration,
-		Password:        req.CreatorDefinedMeetingInfo.Password,
-		TimeZone:        req.CreatorDefinedMeetingInfo.TimeZone,
-		HostUserID:      req.CreatorUserID,
+		Title:           info.Title,
+		ScheduledTime:   info.ScheduledTime,
+		MeetingDuration: info.MeetingDuration,
+		Password:        info.Password,
+		TimeZone:        info.TimeZone,
+		HostUserID:      info.CreatorUserID,
 	}
 	meetingInfo := &pbmeeting.MeetingInfo{
 		SystemGenerated:       systemInfo,
 		CreatorDefinedMeeting: creatorInfo,
 	}
+	setting := &pbmeeting.MeetingSetting{}
+	unMarshal := jsonpb.Unmarshaler{}
+	if err := unMarshal.Unmarshal(strings.NewReader(info.Setting), setting); err != nil {
+		return nil, errs.WrapMsg(err, "unMarshal db data failed")
+	}
+	repeatInfo := &pbmeeting.MeetingRepeatInfo{
+		RepeatType:       info.RepeatType,
+		EndDate:          info.EndDate,
+		RepeatTimes:      info.RepeatTimes,
+		UintType:         info.UintType,
+		Interval:         info.Interval,
+		RepeatDaysOfWeek: *s.getClientRepeatDayOfWeek(&info.RepeatDayOfWeek),
+	}
+
 	metaData.Detail = &pbmeeting.MeetingInfoSetting{
-		Setting:    req.Setting,
+		Setting:    setting,
 		Info:       meetingInfo,
-		RepeatInfo: req.RepeatInfo,
+		RepeatInfo: repeatInfo,
 	}
 	return metaData, nil
 }
@@ -180,6 +201,19 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 		Info:       meetingInfo,
 		RepeatInfo: repeatInfo,
 	}
+	if info.Setting != "" {
+		setting := &pbmeeting.MeetingSetting{}
+		unMarshal := jsonpb.Unmarshaler{}
+		if err := unMarshal.Unmarshal(strings.NewReader(info.Setting), setting); err != nil {
+			return nil, errs.WrapMsg(err, "unMarshal db data failed")
+		}
+		meetingInfoSetting.Setting = setting
+	}
+	meetingInfoSetting.Info.SystemGenerated.CreatorNickname = userInfo.Nickname
+	meetingInfoSetting.Info.CreatorDefinedMeeting.MeetingDuration = info.MeetingDuration
+	meetingInfoSetting.Info.CreatorDefinedMeeting.HostUserID = info.CreatorUserID
+
+	// first priority
 	metaData, err := s.meetingRtc.GetRoomData(ctx, info.MeetingID)
 	if err == nil {
 		meetingInfoSetting.Setting = metaData.Detail.Setting

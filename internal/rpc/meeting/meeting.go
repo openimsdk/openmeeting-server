@@ -19,22 +19,22 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 	if err != nil {
 		return resp, errs.WrapMsg(err, "generate meeting data failed")
 	}
-	metaData, err := s.generateMeetingMetaData(ctx, req, meetingDBInfo)
+	metaData, err := s.generateMeetingMetaData(ctx, meetingDBInfo)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "generate meeting meta data failed")
 	}
-	_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, metaData, nil)
-	if err != nil {
-		return resp, err
-	}
+	//_, _, _, err = s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, metaData, nil)
+	//if err != nil {
+	//	return resp, err
+	//}
 	err = s.meetingStorageHandler.Create(ctx, []*model.MeetingInfo{meetingDBInfo})
 	if err != nil {
 		return resp, err
 	}
 	// create meeting meta data
-	if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
-		return resp, err
-	}
+	//if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
+	//	return resp, err
+	//}
 	// fill in response data
 	resp.Detail = metaData.Detail
 	return resp, nil
@@ -88,21 +88,37 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		return resp, errs.WrapMsg(err, "get user info failed")
 	}
 
-	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	dbInfo, err := s.meetingStorageHandler.TakeWithError(ctx, req.MeetingID)
 	if err != nil {
-		return resp, errs.WrapMsg(err, "get room data failed")
+		return resp, errs.WrapMsg(err, "get meeting data failed")
 	}
 
-	_, err = s.meetingRtc.GetParticipantUserIDs(ctx, req.MeetingID)
+	userIDs, err := s.meetingRtc.GetParticipantUserIDs(ctx, req.MeetingID)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get participants failed")
 	}
-	// check if user is already in meeting
-	//for _, userID := range userIDs {
-	//	if userID == req.UserID {
-	//		return resp, errs.New("user's already in this meeting, please check")
-	//	}
-	//}
+	//check if user is already in meeting
+	for _, userID := range userIDs {
+		if userID == req.UserID {
+			return resp, errs.New("user's already in this meeting, please check")
+		}
+	}
+
+	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	if err != nil {
+		if dbInfo.RepeatType == constant.NoneRepeat {
+			return resp, errs.WrapMsg(err, "get room data failed")
+		}
+		// for those need repeat booking meeting, create new rooms
+		metaData, err = s.generateMeetingMetaData(ctx, dbInfo)
+		if err != nil {
+			return resp, errs.WrapMsg(err, "generate meeting meta data failed")
+		}
+		_, _, _, err = s.meetingRtc.CreateRoom(ctx, dbInfo.MeetingID, dbInfo.CreatorUserID, metaData, nil)
+		if err != nil {
+			return resp, err
+		}
+	}
 
 	if req.UserID != s.getHostUserID(metaData) && req.Password != metaData.Detail.Info.CreatorDefinedMeeting.Password {
 		return resp, errs.New("meeting password not match, please check and try again!")
