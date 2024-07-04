@@ -396,7 +396,7 @@ func (s *meetingServer) SetMeetingHostInfo(ctx context.Context, req *pbmeeting.S
 	}
 	// check permission only host can remove somebody
 	if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
-		return resp, errs.ErrArgs.WrapMsg("user did not have permission to remove participant out of the meeting")
+		return resp, errs.ErrArgs.WrapMsg("user did not have permission to set host info of the meeting")
 	}
 	if req.HostUserID != nil {
 		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = req.HostUserID.Value
