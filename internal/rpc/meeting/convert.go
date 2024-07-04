@@ -11,7 +11,7 @@ import (
 )
 
 func (s *meetingServer) getHostUserID(metadata *pbmeeting.MeetingMetadata) string {
-	return metadata.Detail.Info.SystemGenerated.CreatorUserID
+	return metadata.Detail.Info.CreatorDefinedMeeting.HostUserID
 }
 
 func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *pbmeeting.BookMeetingReq) (*model.MeetingInfo, error) {
