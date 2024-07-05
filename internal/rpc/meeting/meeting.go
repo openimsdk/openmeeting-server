@@ -247,22 +247,26 @@ func (s *meetingServer) GetMeeting(ctx context.Context, req *pbmeeting.GetMeetin
 func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.UpdateMeetingRequest) (*pbmeeting.UpdateMeetingResp, error) {
 	resp := &pbmeeting.UpdateMeetingResp{}
 
-	_, err := s.meetingStorageHandler.TakeWithError(ctx, req.MeetingID)
+	info, err := s.meetingStorageHandler.TakeWithError(ctx, req.MeetingID)
 	if err != nil {
 		return resp, err
 	}
 
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	hasMetaData := true
 	if err != nil {
-		return resp, err
+		//return resp, err
+		log.CInfo(ctx, "not found room info in livekit", "meetingID:", req.MeetingID)
+		hasMetaData = false
 	}
 
-	metaData.Detail.Info.SystemGenerated.MeetingID = req.MeetingID
-	updateData, liveKitUpdate := s.getUpdateData(metaData, req)
+	updateData := s.getDBUpdateData(info, req)
 
-	if liveKitUpdate {
-		if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
-			return resp, err
+	if hasMetaData {
+		if s.getLiveKitUpdateData(metaData, req) {
+			if err := s.meetingRtc.UpdateMetaData(ctx, metaData); err != nil {
+				return resp, err
+			}
 		}
 	}
 

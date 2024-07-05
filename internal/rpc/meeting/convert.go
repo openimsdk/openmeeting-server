@@ -4,11 +4,13 @@ import (
 	"context"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
+	"github.com/openimsdk/openmeeting-server/pkg/common/convert"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
 	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/utils/timeutil"
+	"sort"
 	"strings"
 )
 
@@ -54,20 +56,19 @@ func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *
 	return dbInfo, nil
 }
 
-func (s *meetingServer) getDBRepeatDayOfWeek(weeks *[]pbmeeting.DayOfWeek) *[7]bool {
-	dayOfWeek := &[7]bool{false}
+func (s *meetingServer) getDBRepeatDayOfWeek(weeks *[]pbmeeting.DayOfWeek) *[]int32 {
+	var dayOfWeek []int32
 	for _, one := range *weeks {
-		dayOfWeek[one.Number()] = true
+		dayOfWeek = append(dayOfWeek, int32(one))
 	}
-	return dayOfWeek
+	sort.Sort(convert.ByInt32(dayOfWeek))
+	return &dayOfWeek
 }
 
-func (s *meetingServer) getClientRepeatDayOfWeek(dayOfWeek *[7]bool) *[]pbmeeting.DayOfWeek {
+func (s *meetingServer) getClientRepeatDayOfWeek(dayOfWeek *[]int32) *[]pbmeeting.DayOfWeek {
 	days := &[]pbmeeting.DayOfWeek{}
-	for day, one := range *dayOfWeek {
-		if one == true {
-			*days = append(*days, pbmeeting.DayOfWeek(day))
-		}
+	for _, one := range *dayOfWeek {
+		*days = append(*days, pbmeeting.DayOfWeek(one))
 	}
 	return days
 }
@@ -148,6 +149,7 @@ func (s *meetingServer) generateMeetingMetaData(ctx context.Context, info *model
 			return nil, errs.WrapMsg(err, "unMarshal db data failed")
 		}
 	}
+
 	repeatInfo := &pbmeeting.MeetingRepeatInfo{
 		RepeatType:       info.RepeatType,
 		EndDate:          info.EndDate,
@@ -285,33 +287,23 @@ func (s *meetingServer) generateClientRespMeetingSetting(
 	return meetingInfoSetting
 }
 
-func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *pbmeeting.UpdateMeetingRequest) (*map[string]any, bool) {
+func (s *meetingServer) getDBUpdateData(info *model.MeetingInfo, req *pbmeeting.UpdateMeetingRequest) *map[string]any {
 	// Update the specific field based on the request
-	liveKitUpdate := false
 	updateData := map[string]any{}
 	if req.Title != nil {
-		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.Title = req.Title.Value
 		updateData["title"] = req.Title.Value
 	}
 	if req.ScheduledTime != nil {
-		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.ScheduledTime = req.ScheduledTime.Value
 		updateData["scheduled_time"] = req.ScheduledTime.Value
 	}
 	if req.MeetingDuration != nil {
-		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration = req.MeetingDuration.Value
 		updateData["meeting_duration"] = req.MeetingDuration.Value
 	}
 	if req.Password != nil {
-		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.Password = req.Password.Value
 		updateData["password"] = req.Password.Value
 	}
 
 	if req.RepeatInfo != nil {
-		metaData.Detail.RepeatInfo = req.RepeatInfo
 		updateData["end_date"] = req.RepeatInfo.EndDate
 		updateData["repeat_times"] = req.RepeatInfo.RepeatTimes
 		updateData["repeat_type"] = req.RepeatInfo.RepeatType
@@ -328,9 +320,91 @@ func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *
 	}
 
 	if req.TimeZone != nil {
+		updateData["time_zone"] = req.TimeZone.Value
+	}
+	setting := &pbmeeting.MeetingSetting{}
+	if info.Setting != "" {
+		unMarshal := jsonpb.Unmarshaler{}
+		if err := unMarshal.Unmarshal(strings.NewReader(info.Setting), setting); err != nil {
+			return &updateData
+		}
+	}
+	updateSetting := false
+	if req.CanParticipantsEnableCamera != nil {
+		updateSetting = true
+		setting.CanParticipantsEnableCamera = req.CanParticipantsEnableCamera.Value
+	}
+	if req.CanParticipantsUnmuteMicrophone != nil {
+		updateSetting = true
+		setting.CanParticipantsUnmuteMicrophone = req.CanParticipantsUnmuteMicrophone.Value
+	}
+	if req.CanParticipantsShareScreen != nil {
+		updateSetting = true
+		setting.CanParticipantsShareScreen = req.CanParticipantsShareScreen.Value
+	}
+	if req.DisableCameraOnJoin != nil {
+		updateSetting = true
+		setting.DisableCameraOnJoin = req.DisableCameraOnJoin.Value
+	}
+	if req.DisableMicrophoneOnJoin != nil {
+		updateSetting = true
+		setting.DisableMicrophoneOnJoin = req.DisableMicrophoneOnJoin.Value
+	}
+	if req.CanParticipantJoinMeetingEarly != nil {
+		updateSetting = true
+		setting.CanParticipantJoinMeetingEarly = req.CanParticipantJoinMeetingEarly.Value
+	}
+	if req.AudioEncouragement != nil {
+		updateSetting = true
+		setting.AudioEncouragement = req.AudioEncouragement.Value
+	}
+	if req.LockMeeting != nil {
+		updateSetting = true
+		setting.LockMeeting = req.LockMeeting.Value
+	}
+	if req.VideoMirroring != nil {
+		updateSetting = true
+		setting.VideoMirroring = req.VideoMirroring.Value
+	}
+	if updateSetting {
+		marshal := jsonpb.Marshaler{}
+		updateString, err := marshal.MarshalToString(setting)
+		if err != nil {
+			return &updateData
+		}
+		updateData["setting"] = updateString
+	}
+
+	return &updateData
+}
+
+func (s *meetingServer) getLiveKitUpdateData(metaData *pbmeeting.MeetingMetadata, req *pbmeeting.UpdateMeetingRequest) bool {
+	// Update the specific field based on the request
+	liveKitUpdate := false
+	if req.Title != nil {
+		liveKitUpdate = true
+		metaData.Detail.Info.CreatorDefinedMeeting.Title = req.Title.Value
+	}
+	if req.ScheduledTime != nil {
+		liveKitUpdate = true
+		metaData.Detail.Info.CreatorDefinedMeeting.ScheduledTime = req.ScheduledTime.Value
+	}
+	if req.MeetingDuration != nil {
+		liveKitUpdate = true
+		metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration = req.MeetingDuration.Value
+	}
+	if req.Password != nil {
+		liveKitUpdate = true
+		metaData.Detail.Info.CreatorDefinedMeeting.Password = req.Password.Value
+	}
+
+	if req.RepeatInfo != nil {
+		metaData.Detail.RepeatInfo = req.RepeatInfo
+	}
+
+	if req.TimeZone != nil {
 		liveKitUpdate = true
 		metaData.Detail.Info.CreatorDefinedMeeting.TimeZone = req.TimeZone.Value
-		updateData["time_zone"] = req.TimeZone.Value
 	}
 
 	if req.CanParticipantsEnableCamera != nil {
@@ -370,7 +444,7 @@ func (s *meetingServer) getUpdateData(metaData *pbmeeting.MeetingMetadata, req *
 		metaData.Detail.Setting.VideoMirroring = req.VideoMirroring.Value
 	}
 
-	return &updateData, liveKitUpdate
+	return liveKitUpdate
 }
 
 func (s *meetingServer) mergeAndUnique(array1, array2 []string) []string {

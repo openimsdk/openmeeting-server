@@ -3,13 +3,16 @@ package meeting
 import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
+	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
 	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	pbwrapper "github.com/openimsdk/protocol/wrapperspb"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
+	"github.com/openimsdk/tools/utils/stringutil"
 	"github.com/openimsdk/tools/utils/timeutil"
+	"time"
 )
 
 const (
@@ -232,28 +235,175 @@ func (s *meetingServer) broadcastStreamOperateData(ctx context.Context, req *pbm
 	return nil
 }
 
+func (s *meetingServer) refreshNonRepeatMeeting(ctx context.Context, info *model.MeetingInfo) map[string]any {
+	updateData := map[string]any{}
+	// todo change to timezone
+	nowTimestamp, err := timeutil.GetTimestampByTimezone(info.TimeZone)
+	if err != nil {
+		return updateData
+	}
+	if info.StartTime+info.MeetingDuration < nowTimestamp {
+		updateData["status"] = constant.Completed
+	} else if info.StartTime+info.MeetingDuration < nowTimestamp && info.StartTime > nowTimestamp {
+		if info.Status == constant.InProgress {
+			return updateData
+		}
+		updateData["status"] = constant.InProgress
+	}
+	return updateData
+}
+
+func (s *meetingServer) IsTodayNeedMeeting(ctx context.Context, info *model.MeetingInfo) bool {
+	currentTimestamp, err := timeutil.GetTimestampByTimezone(info.TimeZone)
+	if err != nil {
+		return false
+	}
+	switch info.RepeatType {
+	case constant.RepeatDaily:
+		// always return true
+		return true
+	case constant.RepeatWeekly:
+		// judge the day is the same day
+		sameDay, err := timeutil.IsSameWeekday(info.TimeZone, info.ScheduledTime)
+		if err != nil {
+			log.ZError(ctx, "error", err)
+			return false
+		}
+		return sameDay
+	case constant.RepeatMonth:
+		// judge the day is the same day of one month
+		sameDay, err := timeutil.IsSameDayOfMonth(info.TimeZone, info.ScheduledTime)
+		if err != nil {
+			log.ZError(ctx, "error", err)
+			return false
+		}
+		return sameDay
+	case constant.RepeatWeekDay:
+		// judge the day is weekday
+		return timeutil.IsWeekday(currentTimestamp)
+
+	case constant.RepeatCustom:
+		// customize repeat days
+		if len(info.RepeatDayOfWeek) > 0 {
+			startTime := time.Unix(currentTimestamp, 0)
+			if stringutil.IsContainInt32(int32(startTime.Day()), info.RepeatDayOfWeek) {
+				return true
+			}
+			return false
+		}
+		return processIntervalType(ctx, info)
+	default:
+		return false
+	}
+}
+
+func checkCycle(ctx context.Context, functions ...func() (bool, error)) bool {
+	for _, fn := range functions {
+		result, err := fn()
+		if err != nil {
+			log.ZError(ctx, "error", err)
+			return false
+		}
+		// return true only when all functions return true
+		if !result {
+			return false
+		}
+	}
+	return true
+}
+
+func checkNthMonthCycle(ctx context.Context, info *model.MeetingInfo) bool {
+	return checkCycle(ctx,
+		func() (bool, error) {
+			return timeutil.IsNthMonthCycle(info.TimeZone, info.ScheduledTime, int(info.Interval))
+		},
+		func() (bool, error) {
+			return timeutil.IsSameDayOfMonth(info.TimeZone, info.ScheduledTime)
+		})
+}
+
+func checkNthWeekCycle(ctx context.Context, info *model.MeetingInfo) bool {
+	return checkCycle(ctx,
+		func() (bool, error) {
+			return timeutil.IsNthWeekCycle(info.TimeZone, info.ScheduledTime, int(info.Interval))
+		},
+		func() (bool, error) {
+			return timeutil.IsSameWeekday(info.TimeZone, info.ScheduledTime)
+		})
+}
+
+func checkNthDayCycle(ctx context.Context, info *model.MeetingInfo) bool {
+	return checkCycle(ctx,
+		func() (bool, error) {
+			return timeutil.IsNthDayCycle(info.TimeZone, info.ScheduledTime, int(info.Interval))
+		})
+}
+
+func processIntervalType(ctx context.Context, info *model.MeetingInfo) bool {
+	switch info.UintType {
+	case constant.UnitTypeMonth:
+		return checkNthMonthCycle(ctx, info)
+	case constant.UnitTypeWeek:
+		return checkNthWeekCycle(ctx, info)
+	case constant.UnitTypeDay:
+		return checkNthDayCycle(ctx, info)
+	default:
+		return false
+	}
+}
+
+func (s *meetingServer) refreshRepeatMeeting(ctx context.Context, info *model.MeetingInfo) map[string]any {
+	updateData := map[string]any{}
+	// get current timestamp
+	nowTimestamp := timeutil.GetCurrentTimestampBySecond()
+	if info.EndDate < nowTimestamp {
+		updateData["status"] = constant.Completed
+		return updateData
+	}
+	// get days between start time and current time
+	// info.ScheduledTime + info.MeetingDuration
+	if info.RepeatTimes > 0 {
+		days, err := timeutil.DaysBetweenTimestamps(info.TimeZone, info.ScheduledTime+info.MeetingDuration)
+		if err != nil {
+			return updateData
+		}
+		if int32(days) > info.RepeatTimes {
+			updateData["status"] = constant.Completed
+		}
+		return updateData
+	}
+
+	if !s.IsTodayNeedMeeting(ctx, info) {
+		updateData["status"] = constant.Scheduled
+		return updateData
+	}
+
+	if info.StartTime+info.MeetingDuration < nowTimestamp {
+		updateData["status"] = constant.Completed
+	} else if info.StartTime+info.MeetingDuration < nowTimestamp && info.StartTime > nowTimestamp {
+		if info.Status == constant.InProgress {
+			return updateData
+		}
+		updateData["status"] = constant.InProgress
+	}
+
+	return updateData
+}
+
 func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
 	meetings, err := s.meetingStorageHandler.FindByStatus(ctx, []string{constant.InProgress, constant.Scheduled})
 	if err != nil {
 		log.ZError(ctx, "find meetings failed", err)
 		return
 	}
-	nowTimestamp := timeutil.GetCurrentTimestampBySecond()
 	for _, one := range meetings {
-		if one.StartTime+one.MeetingDuration < nowTimestamp {
-			updateData := map[string]any{
-				"status": constant.Completed,
-			}
-			if err := s.meetingStorageHandler.Update(ctx, one.MeetingID, updateData); err != nil {
-				log.ZError(ctx, "update meeting status failed", err)
-			}
-		} else if one.StartTime+one.MeetingDuration < nowTimestamp && one.StartTime > nowTimestamp {
-			if one.Status == constant.InProgress {
-				continue
-			}
-			updateData := map[string]any{
-				"status": constant.InProgress,
-			}
+		updateData := map[string]any{}
+		if one.RepeatType == constant.NoneRepeat || one.RepeatType == "" {
+			updateData = s.refreshNonRepeatMeeting(ctx, one)
+		} else {
+			updateData = s.refreshRepeatMeeting(ctx, one)
+		}
+		if len(updateData) > 0 {
 			if err := s.meetingStorageHandler.Update(ctx, one.MeetingID, updateData); err != nil {
 				log.ZError(ctx, "update meeting status failed", err)
 			}

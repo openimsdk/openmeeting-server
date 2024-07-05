@@ -124,15 +124,17 @@ func (r *RootCmd) applyOptions(opts ...func(*CmdOpts)) *CmdOpts {
 
 func (r *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 	err := log.InitFromConfig(
-
 		cmdOpts.loggerPrefixName,
 		r.processName,
 		r.log.RemainLogLevel,
 		r.log.IsStdout,
 		r.log.IsJson,
 		r.log.StorageLocation,
-		r.log.RemainRotationCount,
 		r.log.RotationTime,
+		2,
+		86400,
+		5*86400,
+		false,
 		config.Version,
 	)
 	if err != nil {
