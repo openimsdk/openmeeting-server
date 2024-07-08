@@ -19,20 +19,15 @@ const UnknownCode = 1000
 
 // Error codes for various error scenarios.
 const (
-	FormattingError      = 10001 // Error in formatting
-	HasRegistered        = 10002 // user has already registered
-	NotRegistered        = 10003 // user is not registered
-	PasswordErr          = 10004 // Password error
-	GetIMTokenErr        = 10005 // Error in getting IM token
-	RepeatSendCode       = 10006 // Repeat sending code
-	MailSendCodeErr      = 10007 // Error in sending code via email
-	SmsSendCodeErr       = 10008 // Error in sending code via SMS
-	CodeInvalidOrExpired = 10009 // Code is invalid or expired
-	RegisterFailed       = 10010 // Registration failed
-	ResetPasswordFailed  = 10011 // Resetting password failed
-	RegisterLimit        = 10012 // Registration limit exceeded
-	LoginLimit           = 10013 // Login limit exceeded
-	InvitationError      = 10014 // Error in invitation
+	HasRegistered        = 10001 // user has already registered
+	PasswordErr          = 10002 // Password error
+	NotFoundAccountErr   = 10003 // not found user account
+	NotFoundUserTokenErr = 10004 // not found user token
+
+	MeetingUserLimitError   = 20001 // one user joins more than one meeting
+	MeetingPasswordError    = 20002 // password not match error
+	MeetingAuthCheckError   = 20003 // meeting auth check permission error
+	MeetingUpdateCheckError = 20004 // meeting update check error
 )
 
 // General error codes.

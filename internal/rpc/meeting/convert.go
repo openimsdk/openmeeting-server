@@ -9,7 +9,9 @@ import (
 	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
 	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/timeutil"
+	"reflect"
 	"sort"
 	"strings"
 )
@@ -287,164 +289,105 @@ func (s *meetingServer) generateClientRespMeetingSetting(
 	return meetingInfoSetting
 }
 
-func (s *meetingServer) getDBUpdateData(info *model.MeetingInfo, req *pbmeeting.UpdateMeetingRequest) *map[string]any {
-	// Update the specific field based on the request
+func (s *meetingServer) getDBUpdateData(ctx context.Context, info *model.MeetingInfo, req *pbmeeting.UpdateMeetingRequest) *map[string]any {
 	updateData := map[string]any{}
-	if req.Title != nil {
-		updateData["title"] = req.Title.Value
-	}
-	if req.ScheduledTime != nil {
-		updateData["scheduled_time"] = req.ScheduledTime.Value
-	}
-	if req.MeetingDuration != nil {
-		updateData["meeting_duration"] = req.MeetingDuration.Value
-	}
-	if req.Password != nil {
-		updateData["password"] = req.Password.Value
-	}
 
-	if req.RepeatInfo != nil {
-		updateData["end_date"] = req.RepeatInfo.EndDate
-		updateData["repeat_times"] = req.RepeatInfo.RepeatTimes
-		updateData["repeat_type"] = req.RepeatInfo.RepeatType
-		if req.RepeatInfo.RepeatType == constant.RepeatCustom {
-			updateData["uint_type"] = req.RepeatInfo.UintType
-			updateData["interval"] = req.RepeatInfo.Interval
-			updateData["repeat_day_of_week"] = *s.getDBRepeatDayOfWeek(&req.RepeatInfo.RepeatDaysOfWeek)
-		} else {
-			// reset setting
-			updateData["uint_type"] = ""
-			updateData["interval"] = 0
-			updateData["repeat_day_of_week"] = nil
-		}
-	}
+	// Update main fields
+	s.updateMainFields(ctx, &updateData, req)
 
-	if req.TimeZone != nil {
-		updateData["time_zone"] = req.TimeZone.Value
-	}
-	setting := &pbmeeting.MeetingSetting{}
-	if info.Setting != "" {
-		unMarshal := jsonpb.Unmarshaler{}
-		if err := unMarshal.Unmarshal(strings.NewReader(info.Setting), setting); err != nil {
-			return &updateData
-		}
-	}
-	updateSetting := false
-	if req.CanParticipantsEnableCamera != nil {
-		updateSetting = true
-		setting.CanParticipantsEnableCamera = req.CanParticipantsEnableCamera.Value
-	}
-	if req.CanParticipantsUnmuteMicrophone != nil {
-		updateSetting = true
-		setting.CanParticipantsUnmuteMicrophone = req.CanParticipantsUnmuteMicrophone.Value
-	}
-	if req.CanParticipantsShareScreen != nil {
-		updateSetting = true
-		setting.CanParticipantsShareScreen = req.CanParticipantsShareScreen.Value
-	}
-	if req.DisableCameraOnJoin != nil {
-		updateSetting = true
-		setting.DisableCameraOnJoin = req.DisableCameraOnJoin.Value
-	}
-	if req.DisableMicrophoneOnJoin != nil {
-		updateSetting = true
-		setting.DisableMicrophoneOnJoin = req.DisableMicrophoneOnJoin.Value
-	}
-	if req.CanParticipantJoinMeetingEarly != nil {
-		updateSetting = true
-		setting.CanParticipantJoinMeetingEarly = req.CanParticipantJoinMeetingEarly.Value
-	}
-	if req.AudioEncouragement != nil {
-		updateSetting = true
-		setting.AudioEncouragement = req.AudioEncouragement.Value
-	}
-	if req.LockMeeting != nil {
-		updateSetting = true
-		setting.LockMeeting = req.LockMeeting.Value
-	}
-	if req.VideoMirroring != nil {
-		updateSetting = true
-		setting.VideoMirroring = req.VideoMirroring.Value
-	}
-	if updateSetting {
-		marshal := jsonpb.Marshaler{}
-		updateString, err := marshal.MarshalToString(setting)
-		if err != nil {
-			return &updateData
-		}
-		updateData["setting"] = updateString
-	}
+	// Update repeat info
+	s.updateRepeatInfo(&updateData, req)
+
+	// Update settings
+	s.updateSettings(info, &updateData, req)
 
 	return &updateData
 }
 
-func (s *meetingServer) getLiveKitUpdateData(metaData *pbmeeting.MeetingMetadata, req *pbmeeting.UpdateMeetingRequest) bool {
-	// Update the specific field based on the request
-	liveKitUpdate := false
-	if req.Title != nil {
-		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.Title = req.Title.Value
-	}
-	if req.ScheduledTime != nil {
-		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.ScheduledTime = req.ScheduledTime.Value
-	}
-	if req.MeetingDuration != nil {
-		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.MeetingDuration = req.MeetingDuration.Value
-	}
-	if req.Password != nil {
-		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.Password = req.Password.Value
+func (s *meetingServer) updateMainFields(ctx context.Context, updateData *map[string]any, req *pbmeeting.UpdateMeetingRequest) {
+	updateField := func(key string, ptr interface{}) {
+		val := reflect.ValueOf(ptr)
+		if !(val.Kind() == reflect.Ptr && val.IsNil()) {
+			v := val.Elem().FieldByName("Value")
+			switch v.Kind() {
+			case reflect.String:
+				(*updateData)[key] = v.String()
+			case reflect.Int:
+			case reflect.Int64:
+			case reflect.Int32:
+				(*updateData)[key] = v.Int()
+			case reflect.Bool:
+				(*updateData)[key] = v.Bool()
+
+			// Add other types as needed
+			default:
+				log.ZError(ctx, "Unhandled type", errs.ErrArgs, "type:", v.Kind())
+			}
+		}
 	}
 
+	updateField("title", req.Title)
+	updateField("scheduled_time", req.ScheduledTime)
+	updateField("meeting_duration", req.MeetingDuration)
+	updateField("password", req.Password)
+	updateField("time_zone", req.TimeZone)
+}
+
+func (s *meetingServer) updateRepeatInfo(updateData *map[string]any, req *pbmeeting.UpdateMeetingRequest) {
 	if req.RepeatInfo != nil {
-		metaData.Detail.RepeatInfo = req.RepeatInfo
+		(*updateData)["end_date"] = req.RepeatInfo.EndDate
+		(*updateData)["repeat_times"] = req.RepeatInfo.RepeatTimes
+		(*updateData)["repeat_type"] = req.RepeatInfo.RepeatType
+		if req.RepeatInfo.RepeatType == constant.RepeatCustom {
+			(*updateData)["uint_type"] = req.RepeatInfo.UintType
+			(*updateData)["interval"] = req.RepeatInfo.Interval
+			(*updateData)["repeat_day_of_week"] = *s.getDBRepeatDayOfWeek(&req.RepeatInfo.RepeatDaysOfWeek)
+		} else {
+			// reset setting
+			(*updateData)["uint_type"] = ""
+			(*updateData)["interval"] = 0
+			(*updateData)["repeat_day_of_week"] = nil
+		}
+	}
+}
+
+func (s *meetingServer) updateSettings(info *model.MeetingInfo, updateData *map[string]any, req *pbmeeting.UpdateMeetingRequest) {
+	setting := &pbmeeting.MeetingSetting{}
+	if info.Setting != "" {
+		unMarshal := jsonpb.Unmarshaler{}
+		if err := unMarshal.Unmarshal(strings.NewReader(info.Setting), setting); err != nil {
+			return
+		}
 	}
 
-	if req.TimeZone != nil {
-		liveKitUpdate = true
-		metaData.Detail.Info.CreatorDefinedMeeting.TimeZone = req.TimeZone.Value
+	updateSetting := false
+	updateSettingField := func(field interface{}, ptr interface{}) {
+		val := reflect.ValueOf(ptr)
+		if !(val.Kind() == reflect.Ptr && val.IsNil()) {
+			updateSetting = true
+			v := val.Elem().FieldByName("Value")
+			reflect.ValueOf(field).Elem().Set(v)
+		}
 	}
 
-	if req.CanParticipantsEnableCamera != nil {
-		liveKitUpdate = true
-		metaData.Detail.Setting.CanParticipantsEnableCamera = req.CanParticipantsEnableCamera.Value
-	}
-	if req.CanParticipantsUnmuteMicrophone != nil {
-		liveKitUpdate = true
-		metaData.Detail.Setting.CanParticipantsUnmuteMicrophone = req.CanParticipantsUnmuteMicrophone.Value
-	}
-	if req.CanParticipantsShareScreen != nil {
-		liveKitUpdate = true
-		metaData.Detail.Setting.CanParticipantsShareScreen = req.CanParticipantsShareScreen.Value
-	}
-	if req.DisableCameraOnJoin != nil {
-		liveKitUpdate = true
-		metaData.Detail.Setting.DisableCameraOnJoin = req.DisableCameraOnJoin.Value
-	}
-	if req.DisableMicrophoneOnJoin != nil {
-		liveKitUpdate = true
-		metaData.Detail.Setting.DisableMicrophoneOnJoin = req.DisableMicrophoneOnJoin.Value
-	}
-	if req.CanParticipantJoinMeetingEarly != nil {
-		liveKitUpdate = true
-		metaData.Detail.Setting.CanParticipantJoinMeetingEarly = req.CanParticipantJoinMeetingEarly.Value
-	}
-	if req.AudioEncouragement != nil {
-		liveKitUpdate = true
-		metaData.Detail.Setting.AudioEncouragement = req.AudioEncouragement.Value
-	}
-	if req.LockMeeting != nil {
-		liveKitUpdate = true
-		metaData.Detail.Setting.LockMeeting = req.LockMeeting.Value
-	}
-	if req.VideoMirroring != nil {
-		liveKitUpdate = true
-		metaData.Detail.Setting.VideoMirroring = req.VideoMirroring.Value
-	}
+	updateSettingField(&setting.CanParticipantsEnableCamera, req.CanParticipantsEnableCamera)
+	updateSettingField(&setting.CanParticipantsUnmuteMicrophone, req.CanParticipantsUnmuteMicrophone)
+	updateSettingField(&setting.CanParticipantsShareScreen, req.CanParticipantsShareScreen)
+	updateSettingField(&setting.DisableCameraOnJoin, req.DisableCameraOnJoin)
+	updateSettingField(&setting.DisableMicrophoneOnJoin, req.DisableMicrophoneOnJoin)
+	updateSettingField(&setting.CanParticipantJoinMeetingEarly, req.CanParticipantJoinMeetingEarly)
+	updateSettingField(&setting.AudioEncouragement, req.AudioEncouragement)
+	updateSettingField(&setting.LockMeeting, req.LockMeeting)
+	updateSettingField(&setting.VideoMirroring, req.VideoMirroring)
 
-	return liveKitUpdate
+	if updateSetting {
+		marshal := jsonpb.Marshaler{}
+		updateString, err := marshal.MarshalToString(setting)
+		if err != nil {
+			return
+		}
+		(*updateData)["setting"] = updateString
+	}
 }
 
 func (s *meetingServer) mergeAndUnique(array1, array2 []string) []string {

@@ -140,6 +140,14 @@ func (x *LiveKit) RoomIsExist(ctx context.Context, meetingID string) (string, er
 	return "", errs.ErrRecordNotFound.WrapMsg("roomIsNotExist meetingID: ", meetingID)
 }
 
+func (x *LiveKit) GetAllRooms(ctx context.Context) ([]*livekit.Room, error) {
+	roomsResp, err := x.roomClient.ListRooms(ctx, &livekit.ListRoomsRequest{})
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	return roomsResp.Rooms, nil
+}
+
 func (x *LiveKit) GetRoomData(ctx context.Context, roomID string) (*meeting.MeetingMetadata, error) {
 	resp, err := x.roomClient.ListRooms(ctx, &livekit.ListRoomsRequest{Names: []string{roomID}})
 	if err != nil {

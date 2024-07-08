@@ -20,6 +20,7 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/convert"
 	"github.com/openimsdk/openmeeting-server/pkg/common/prommetrics"
 	"github.com/openimsdk/openmeeting-server/pkg/common/securetools"
+	"github.com/openimsdk/openmeeting-server/pkg/common/servererrs"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/controller"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database/mgo"
@@ -95,7 +96,7 @@ func (s *userServer) UserRegister(ctx context.Context, req *pbuser.UserRegisterR
 	}
 
 	if datautil.DuplicateAny(req.Users, func(e *pbuser.UserInfo) string { return e.UserID }) {
-		return nil, errs.ErrArgs.WrapMsg("userID repeated")
+		return nil, servererrs.ErrRegisteredAlready.WrapMsg("userID repeated")
 	}
 	userIDs := make([]string, 0)
 	for _, user := range req.Users {
@@ -127,11 +128,11 @@ func (s *userServer) UserLogin(ctx context.Context, req *pbuser.UserLoginReq) (*
 	resp := &pbuser.UserLoginResp{}
 	user, err := s.userStorageHandler.GetByAccount(ctx, req.Account)
 	if err != nil {
-		return resp, errs.WrapMsg(err, "login failed, not found account, please check")
+		return resp, servererrs.ErrUserPasswordError.WrapMsg("wrong password or user account")
 	}
 	saltPasswd := securetools.VerifyPassword(req.Password, user.SaltValue)
 	if saltPasswd != user.Password {
-		return resp, errs.ErrRecordNotFound.WrapMsg("wrong password or user account")
+		return resp, servererrs.ErrUserPasswordError.WrapMsg("wrong password or user account")
 	}
 	userToken, err := s.tokenVerify.CreateToken(user.UserID)
 	if err != nil {
@@ -150,7 +151,7 @@ func (s *userServer) GetUserToken(ctx context.Context, req *pbuser.GetUserTokenR
 	resp := &pbuser.GetUserTokenResp{}
 	userToken, err := s.userStorageHandler.GetToken(ctx, req.UserID)
 	if err != nil {
-		return resp, errs.WrapMsg(err, "get user token failed")
+		return resp, servererrs.ErrUserTokenNotFoundErr.WrapMsg("get user token failed")
 	}
 	resp.Token = userToken
 	return resp, nil
@@ -160,7 +161,7 @@ func (s *userServer) GetUserInfo(ctx context.Context, req *pbuser.GetUserInfoReq
 	resp := &pbuser.GetUserInfoResp{}
 	userInfo, err := s.userStorageHandler.FindWithError(ctx, []string{req.UserID})
 	if err != nil {
-		return resp, errs.WrapMsg(err, "not found user info")
+		return resp, servererrs.ErrUserAccountNotFoundErr.WrapMsg("not found user")
 	}
 	resp.Account = userInfo[0].Account
 	resp.Nickname = userInfo[0].Nickname
