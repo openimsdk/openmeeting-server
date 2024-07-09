@@ -1,6 +1,10 @@
 package meeting
 
-import pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
+import (
+	"context"
+	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
+	"github.com/openimsdk/tools/errs"
+)
 
 func (s *meetingServer) checkAuthPermission(hostUserID, requestUserID string) bool {
 	return hostUserID == requestUserID
@@ -19,4 +23,25 @@ func (s *meetingServer) checkUserEnableMicrophone(setting *pbmeeting.MeetingSett
 		return true
 	}
 	return false
+}
+
+func (s *meetingServer) checkUserInMeeting(ctx context.Context, userID string) (bool, error) {
+	rooms, err := s.meetingRtc.GetAllRooms(ctx)
+	if err != nil {
+		return true, err
+	}
+
+	for _, room := range rooms {
+		userIDs, err := s.meetingRtc.GetParticipantUserIDs(ctx, room.Name)
+		if err != nil {
+			return true, errs.WrapMsg(err, "get participants failed")
+		}
+		//check if user is already in meeting
+		for _, userIdentity := range userIDs {
+			if userIdentity == userID {
+				return true, nil
+			}
+		}
+	}
+	return false, nil
 }
