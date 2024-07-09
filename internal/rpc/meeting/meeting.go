@@ -36,13 +36,13 @@ func (s *meetingServer) BookMeeting(ctx context.Context, req *pbmeeting.BookMeet
 func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeting.CreateImmediateMeetingReq) (*pbmeeting.CreateImmediateMeetingResp, error) {
 	resp := &pbmeeting.CreateImmediateMeetingResp{}
 
-	inMeeting, err := s.checkUserInMeeting(ctx, req.CreatorUserID)
-	if err != nil {
-		return resp, errs.WrapMsg(err, "create meeting failed")
-	}
-	if inMeeting {
-		return resp, servererrs.ErrMeetingUserLimit.WrapMsg("user already in meeting")
-	}
+	//inMeeting, err := s.checkUserInMeeting(ctx, req.CreatorUserID)
+	//if err != nil {
+	//	return resp, errs.WrapMsg(err, "create meeting failed")
+	//}
+	//if inMeeting {
+	//	return resp, servererrs.ErrMeetingUserLimit.WrapMsg("user already in meeting")
+	//}
 
 	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.CreatorUserID})
 	if err != nil {
