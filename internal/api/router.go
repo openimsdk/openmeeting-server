@@ -42,6 +42,8 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 		userRouterGroup.POST("/register", u.UserRegister)
 		userRouterGroup.POST("/login", u.UserLogin)
 		userRouterGroup.POST("/get_users_info", mwApi.CheckToken, u.GetUsersPublicInfo)
+		userRouterGroup.POST("/update_user_password", mwApi.CheckToken, u.UpdateUserPassword)
+
 	}
 
 	m := NewMeetingApi(*meetingRpc)

@@ -38,3 +38,6 @@ func (u *UserApi) UserLogin(c *gin.Context) {
 func (u *UserApi) GetUsersPublicInfo(c *gin.Context) {
 	a2r.Call(user.UserClient.GetDesignateUsers, u.Client, c)
 }
+
+func (u *UserApi) UpdateUserPassword(c *gin.Context) {
+}

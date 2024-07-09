@@ -7,29 +7,29 @@ import (
 )
 
 type CallbackInterface interface {
-	OnRoomParticipantConnected(ctx context.Context)
+	OnRoomParticipantConnected(ctx context.Context, userID string)
 	OnRoomParticipantDisconnected(ctx context.Context)
-	OnRoomDisconnected(ctx context.Context, roomID string, sid string)
+	OnRoomDisconnected(ctx context.Context)
 	OnMeetingDisconnected(ctx context.Context, roomID string)
 	OnMeetingUnmute(ctx context.Context, roomID string, streamType string, mute bool, userIDs []string)
 }
 
 func NewRoomCallback(ctx context.Context, roomID, sID string,
-	roomClient *lksdk.RoomServiceClient) *RoomCallback {
+	cb CallbackInterface) *RoomCallback {
 	return &RoomCallback{
-		ctx:        ctx,
-		roomID:     roomID,
-		sID:        sID,
-		roomClient: roomClient,
+		ctx:    ctx,
+		roomID: roomID,
+		sID:    sID,
+		cb:     cb,
 	}
 }
 
 type RoomCallback struct {
-	userJoin   bool
-	sID        string
-	roomID     string
-	ctx        context.Context
-	roomClient *lksdk.RoomServiceClient
+	userJoin bool
+	sID      string
+	roomID   string
+	ctx      context.Context
+	cb       CallbackInterface
 }
 
 func (r *RoomCallback) OnParticipantConnected(rp *lksdk.RemoteParticipant) {
@@ -38,10 +38,12 @@ func (r *RoomCallback) OnParticipantConnected(rp *lksdk.RemoteParticipant) {
 
 func (r *RoomCallback) OnParticipantDisconnected(rp *lksdk.RemoteParticipant) {
 	log.ZWarn(r.ctx, "OnParticipantDisconnected", nil)
+	r.cb.OnRoomParticipantConnected(r.ctx, rp.Identity())
 }
 
 func (r *RoomCallback) OnDisconnected() {
 	log.ZWarn(r.ctx, "OnDisconnected", nil)
+	r.cb.OnRoomDisconnected(r.ctx)
 }
 
 func (r *RoomCallback) OnReconnected() {

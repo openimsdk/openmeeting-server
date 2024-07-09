@@ -18,12 +18,6 @@ import (
 	"time"
 )
 
-type LiveKit struct {
-	roomClient *lksdk.RoomServiceClient
-	index      uint64
-	conf       *config.RTC
-}
-
 func NewLiveKit(conf *config.RTC) rtc.MeetingRtc {
 	return &LiveKit{
 		index:      0,
@@ -95,8 +89,9 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, ro
 		log.ZError(ctx, "Marshal failed", err)
 		return "", "", "", errs.WrapMsg(err, "create livekit room failed, meetingID", meetingID)
 	}
+	cb := NewRTC(meetingID, x)
 	callback := rtc.NewRoomCallback(
-		mcontext.NewCtx("room_callback_"+mcontext.GetOperationID(ctx)), meetingID, room.Sid, x.roomClient)
+		mcontext.NewCtx("room_callback_"+mcontext.GetOperationID(ctx)), meetingID, room.Sid, cb)
 	roomCallback := &lksdk.RoomCallback{
 		ParticipantCallback: lksdk.ParticipantCallback{
 			OnDataReceived: func(data []byte, rp *lksdk.RemoteParticipant) {

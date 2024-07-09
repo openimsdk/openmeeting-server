@@ -7,22 +7,40 @@ import (
 )
 
 type CallbackLiveKit struct {
+	roomID  string
+	liveKit *LiveKit
 }
 
-func NewRTC(ctx context.Context) rtc.CallbackInterface {
-	return &CallbackLiveKit{}
+func NewRTC(roomID string, liveKit *LiveKit) rtc.CallbackInterface {
+	return &CallbackLiveKit{
+		roomID:  roomID,
+		liveKit: liveKit,
+	}
 }
 
-func (r *CallbackLiveKit) OnRoomParticipantConnected(ctx context.Context) {
+func (r *CallbackLiveKit) OnRoomParticipantConnected(ctx context.Context, userID string) {
 	log.ZDebug(ctx, "OnRoomParticipantConnected", nil)
+	if err := r.liveKit.RemoveParticipant(ctx, r.roomID, userID); err != nil {
+		log.ZWarn(ctx, "remove participant failed", err)
+	}
 }
 
 func (r *CallbackLiveKit) OnRoomParticipantDisconnected(ctx context.Context) {
 	log.ZWarn(ctx, "OnRoomParticipantDisconnected", nil)
 }
 
-func (r *CallbackLiveKit) OnRoomDisconnected(ctx context.Context, roomID string, sid string) {
-	log.ZWarn(ctx, "OnRoomDisconnected", nil, roomID, sid)
+func (r *CallbackLiveKit) OnRoomDisconnected(ctx context.Context) {
+	log.ZWarn(ctx, "OnRoomDisconnected", nil, r.roomID)
+	participants, err := r.liveKit.ListParticipants(ctx, r.roomID)
+	if err != nil {
+		log.ZWarn(ctx, "remove participant failed", err)
+		return
+	}
+	for _, p := range participants {
+		if err := r.liveKit.RemoveParticipant(ctx, r.roomID, p.Identity); err != nil {
+			log.ZWarn(ctx, "remove participant failed", err)
+		}
+	}
 }
 
 func (r *CallbackLiveKit) OnMeetingDisconnected(ctx context.Context, roomID string) {
