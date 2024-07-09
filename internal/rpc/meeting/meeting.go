@@ -462,3 +462,21 @@ func (s *meetingServer) SetMeetingHostInfo(ctx context.Context, req *pbmeeting.S
 	}
 	return resp, nil
 }
+
+func (s *meetingServer) CleanPreviousMeetings(ctx context.Context, req *pbmeeting.CleanPreviousMeetingsReq) (*pbmeeting.CleanPreviousMeetingsResp, error) {
+	resp := &pbmeeting.CleanPreviousMeetingsResp{}
+
+	rooms, err := s.meetingRtc.GetAllRooms(ctx)
+	if err != nil {
+		log.ZError(ctx, "get all rooms error", err, "login and clean previous rooms", req.UserID)
+		return resp, errs.WrapMsg(err, "get all rooms error", "login and clean previous rooms", req.UserID)
+	}
+
+	for _, room := range rooms {
+		if err := s.meetingRtc.RemoveParticipant(ctx, room.Name, req.UserID); err != nil {
+			log.ZError(ctx, "remove participant error", err, "login and clean previous rooms", room.Name, req.UserID)
+		}
+	}
+
+	return resp, nil
+}

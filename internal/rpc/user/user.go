@@ -26,6 +26,8 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/openmeeting-server/pkg/common/token"
+	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
+	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
 	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
@@ -41,6 +43,7 @@ type userServer struct {
 	RegisterCenter     registry.SvcDiscoveryRegistry
 	config             *Config
 	tokenVerify        *token.Token
+	meetingRpc         *rpcclient.Meeting
 }
 
 type Config struct {
@@ -68,11 +71,15 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	userCache := redis.NewUser(rdb, userDB, redis.GetDefaultOpt())
 	database := controller.NewUser(userDB, userCache, mgoCli.GetTx())
 	tokenVerify := token.New(config.Rpc.Token.Expires, config.Rpc.Token.Secret)
+	// init rpc client here
+	meetingRpc := rpcclient.NewMeeting(client, config.Share.RpcRegisterName.Meeting)
+
 	u := &userServer{
 		userStorageHandler: database,
 		RegisterCenter:     client,
 		config:             config,
 		tokenVerify:        tokenVerify,
+		meetingRpc:         meetingRpc,
 	}
 	pbuser.RegisterUserServer(server, u)
 	return nil
@@ -144,6 +151,12 @@ func (s *userServer) UserLogin(ctx context.Context, req *pbuser.UserLoginReq) (*
 	resp.UserID = user.UserID
 	resp.Token = userToken
 	resp.Nickname = user.Nickname
+	if _, err := s.meetingRpc.Client.CleanPreviousMeetings(ctx, &pbmeeting.CleanPreviousMeetingsReq{UserID: user.UserID}); err != nil {
+		if err != nil {
+			return nil, errs.WrapMsg(err, "clean meeting failed")
+		}
+	}
+
 	return resp, nil
 }
 
@@ -166,5 +179,10 @@ func (s *userServer) GetUserInfo(ctx context.Context, req *pbuser.GetUserInfoReq
 	resp.Account = userInfo[0].Account
 	resp.Nickname = userInfo[0].Nickname
 	resp.UserID = userInfo[0].UserID
+	return resp, nil
+}
+
+func (s *userServer) UpdateUserPassword(context.Context, *pbuser.UpdateUserPasswordReq) (*pbuser.UpdateUserPasswordResp, error) {
+	resp := &pbuser.UpdateUserPasswordResp{}
 	return resp, nil
 }

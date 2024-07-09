@@ -8,7 +8,7 @@ import (
 
 type CallbackInterface interface {
 	OnRoomParticipantConnected(ctx context.Context, userID string)
-	OnRoomParticipantDisconnected(ctx context.Context)
+	OnRoomParticipantDisconnected(ctx context.Context, userID string)
 	OnRoomDisconnected(ctx context.Context)
 	OnMeetingDisconnected(ctx context.Context, roomID string)
 	OnMeetingUnmute(ctx context.Context, roomID string, streamType string, mute bool, userIDs []string)
@@ -38,7 +38,7 @@ func (r *RoomCallback) OnParticipantConnected(rp *lksdk.RemoteParticipant) {
 
 func (r *RoomCallback) OnParticipantDisconnected(rp *lksdk.RemoteParticipant) {
 	log.ZWarn(r.ctx, "OnParticipantDisconnected", nil)
-	r.cb.OnRoomParticipantConnected(r.ctx, rp.Identity())
+	r.cb.OnRoomParticipantDisconnected(r.ctx, rp.Identity())
 }
 
 func (r *RoomCallback) OnDisconnected() {

@@ -20,13 +20,13 @@ func NewRTC(roomID string, liveKit *LiveKit) rtc.CallbackInterface {
 
 func (r *CallbackLiveKit) OnRoomParticipantConnected(ctx context.Context, userID string) {
 	log.ZDebug(ctx, "OnRoomParticipantConnected", nil)
+}
+
+func (r *CallbackLiveKit) OnRoomParticipantDisconnected(ctx context.Context, userID string) {
+	log.ZWarn(ctx, "OnRoomParticipantDisconnected", nil)
 	if err := r.liveKit.RemoveParticipant(ctx, r.roomID, userID); err != nil {
 		log.ZWarn(ctx, "remove participant failed", err)
 	}
-}
-
-func (r *CallbackLiveKit) OnRoomParticipantDisconnected(ctx context.Context) {
-	log.ZWarn(ctx, "OnRoomParticipantDisconnected", nil)
 }
 
 func (r *CallbackLiveKit) OnRoomDisconnected(ctx context.Context) {
