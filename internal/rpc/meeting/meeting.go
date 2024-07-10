@@ -134,15 +134,17 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		}
 	}
 	metaData := &pbmeeting.MeetingMetadata{}
-	if room.Metadata == "" {
-		metaData, err = s.generateMeetingMetaData(ctx, dbInfo)
-		if err != nil {
-			return resp, errs.WrapMsg(err, "generate meeting meta data failed")
-		}
-	} else {
-		if err := json.Unmarshal([]byte(room.Metadata), metaData); err != nil {
-			log.ZError(ctx, "Unmarshal failed roomId:", err)
-			return nil, errs.WrapMsg(err, "Unmarshal failed roomId:", "roomID", req.MeetingID)
+	if room != nil {
+		if room.Metadata != "" {
+			metaData, err = s.generateMeetingMetaData(ctx, dbInfo)
+			if err != nil {
+				return resp, errs.WrapMsg(err, "generate meeting meta data failed")
+			}
+		} else {
+			if err := json.Unmarshal([]byte(room.Metadata), metaData); err != nil {
+				log.ZError(ctx, "Unmarshal failed roomId:", err)
+				return nil, errs.WrapMsg(err, "Unmarshal failed roomId:", "roomID", req.MeetingID)
+			}
 		}
 	}
 
