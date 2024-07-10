@@ -2,6 +2,7 @@ package meeting
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/openmeeting-server/pkg/common"
 	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/servererrs"
@@ -105,7 +106,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
-		if dbInfo.RepeatType == "" {
+		if !s.checkCanStartMeeting(ctx, dbInfo) {
 			return resp, errs.WrapMsg(err, "get room data failed")
 		}
 		// for those need repeat booking meeting, create new rooms
@@ -479,15 +480,16 @@ func (s *meetingServer) CleanPreviousMeetings(ctx context.Context, req *pbmeetin
 			log.ZError(ctx, "list participant error", err, "login and clean previous rooms", room.Name, req.UserID)
 		}
 		for _, p := range ps {
+			fmt.Println(p.Identity, req.UserID)
 			if p.Identity != req.UserID {
 				continue
+			}
+			if err := s.notifyKickOffMeetingInfo2Client(ctx, room.Name, req.UserID, constant.KickOffDuplicatedLogin, pbmeeting.KickOffReason_DuplicatedLogin); err != nil {
+				log.ZError(ctx, "notify kickoff msg to client error", err, "login and clean previous rooms", room.Name, req.UserID)
 			}
 			if err := s.meetingRtc.RemoveParticipant(ctx, room.Name, req.UserID); err != nil {
 				log.ZError(ctx, "remove participant error", err, "login and clean previous rooms", room.Name, req.UserID)
 				continue
-			}
-			if err := s.notifyKickOffMeetingInfo2Client(ctx, room.Name, req.UserID, constant.KickOffDuplicatedLogin); err != nil {
-				log.ZError(ctx, "notify kickoff msg to client error", err, "login and clean previous rooms", room.Name, req.UserID)
 			}
 		}
 	}

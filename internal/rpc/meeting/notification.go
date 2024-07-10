@@ -111,23 +111,23 @@ func (s *meetingServer) broadcastStreamOperateData(ctx context.Context, req *pbm
 	return nil
 }
 
-func (s *meetingServer) notifyKickOffMeetingInfo2Client(ctx context.Context, roomID, UserID, Reason string) error {
+func (s *meetingServer) notifyKickOffMeetingInfo2Client(ctx context.Context, roomID, UserID, Reason string, reasonCode pbmeeting.KickOffReason) error {
 	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: UserID})
 	if err != nil {
 		return errs.WrapMsg(err, "get user info failed")
 	}
 
 	kickOffData := &pbmeeting.KickOffMeetingData{
-		UserID:   UserID,
-		Nickname: userInfo.Nickname,
-		Reason:   Reason,
+		UserID:     UserID,
+		Nickname:   userInfo.Nickname,
+		ReasonCode: reasonCode,
+		Reason:     Reason,
 	}
 
 	sendData := &pbmeeting.NotifyMeetingData{
 		OperatorUserID: mcontext.GetOpUserID(ctx),
 		MessageType:    &pbmeeting.NotifyMeetingData_KickOffMeetingData{KickOffMeetingData: kickOffData},
 	}
-
 	if err := s.meetingRtc.SendRoomData(ctx, roomID, nil, sendData); err != nil {
 		return errs.WrapMsg(err, "send room data failed")
 	}

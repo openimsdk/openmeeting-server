@@ -359,3 +359,11 @@ func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
 		}
 	}
 }
+
+func (s *meetingServer) checkCanStartMeeting(ctx context.Context, info *model.MeetingInfo) bool {
+	now := timeutil.GetCurrentTimestampBySecond()
+	if info.RepeatType == "" && info.ScheduledTime+info.MeetingDuration > now {
+		return false
+	}
+	return true
+}
