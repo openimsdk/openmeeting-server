@@ -54,7 +54,7 @@ func (o *MW) isValidToken(c *gin.Context, userID, userToken string) error {
 	if err != nil {
 		return err
 	}
-	if resp.Token == "" {
+	if resp.Token == "" || resp.Token != userToken {
 		return errs.ErrTokenExpired.Wrap()
 	}
 	return nil

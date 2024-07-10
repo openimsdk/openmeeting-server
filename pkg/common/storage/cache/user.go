@@ -27,4 +27,5 @@ type User interface {
 	GetUserByAccount(ctx context.Context, account string) (*model.User, error)
 	CacheUserToken(ctx context.Context, userID, userToken string) error
 	GetUserToken(ctx context.Context, userID string) (string, error)
+	ClearUserToken(ctx context.Context, userID string) error
 }

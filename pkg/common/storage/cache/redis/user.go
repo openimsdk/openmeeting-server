@@ -112,6 +112,10 @@ func (u *User) GetUserToken(ctx context.Context, userID string) (string, error) 
 	return token, nil
 }
 
+func (u *User) ClearUserToken(ctx context.Context, userID string) error {
+	return errs.Wrap(u.rdb.Del(ctx, userID).Err())
+}
+
 type Comparable interface {
 	~int | ~string | ~float64 | ~int32
 }

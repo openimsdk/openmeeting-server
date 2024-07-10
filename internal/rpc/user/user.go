@@ -186,3 +186,13 @@ func (s *userServer) UpdateUserPassword(context.Context, *pbuser.UpdateUserPassw
 	resp := &pbuser.UpdateUserPasswordResp{}
 	return resp, nil
 }
+
+func (s *userServer) ClearUserToken(ctx context.Context, req *pbuser.ClearUserTokenReq) (*pbuser.ClearUserTokenResp, error) {
+	resp := &pbuser.ClearUserTokenResp{}
+
+	if err := s.userStorageHandler.ClearUserToken(ctx, req.UserID); err != nil {
+		return resp, errs.WrapMsg(err, "clear user token failed", "user", req.UserID)
+	}
+
+	return resp, nil
+}

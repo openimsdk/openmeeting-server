@@ -38,6 +38,9 @@ type User interface {
 
 	// GetToken get cache from storage
 	GetToken(ctx context.Context, userID string) (string, error)
+
+	// ClearUserToken clear cache from storage
+	ClearUserToken(ctx context.Context, userID string) error
 }
 
 type UserStorageManager struct {
@@ -95,4 +98,8 @@ func (u *UserStorageManager) GetToken(ctx context.Context, userID string) (strin
 		return "", errs.Wrap(err)
 	}
 	return token, nil
+}
+
+func (u *UserStorageManager) ClearUserToken(ctx context.Context, userID string) error {
+	return u.cache.ClearUserToken(ctx, userID)
 }

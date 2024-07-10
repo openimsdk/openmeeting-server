@@ -60,7 +60,7 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 	}
 	participantMetaData := s.generateParticipantMetaData(userInfo)
 
-	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, metaData, participantMetaData)
+	_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, meetingDBInfo.MeetingID, req.CreatorUserID, metaData, participantMetaData, s.userRpc)
 	if err != nil {
 		return resp, err
 	}
@@ -113,7 +113,8 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		if err != nil {
 			return resp, errs.WrapMsg(err, "generate meeting meta data failed")
 		}
-		_, _, _, err = s.meetingRtc.CreateRoom(ctx, dbInfo.MeetingID, dbInfo.CreatorUserID, metaData, nil)
+		participantMetaData := s.generateParticipantMetaData(userInfo)
+		_, _, _, err = s.meetingRtc.CreateRoom(ctx, dbInfo.MeetingID, dbInfo.CreatorUserID, metaData, participantMetaData, s.userRpc)
 		if err != nil {
 			return resp, err
 		}
@@ -473,8 +474,21 @@ func (s *meetingServer) CleanPreviousMeetings(ctx context.Context, req *pbmeetin
 	}
 
 	for _, room := range rooms {
-		if err := s.meetingRtc.RemoveParticipant(ctx, room.Name, req.UserID); err != nil {
-			log.ZError(ctx, "remove participant error", err, "login and clean previous rooms", room.Name, req.UserID)
+		ps, err := s.meetingRtc.ListParticipants(ctx, room.Name)
+		if err != nil {
+			log.ZError(ctx, "list participant error", err, "login and clean previous rooms", room.Name, req.UserID)
+		}
+		for _, p := range ps {
+			if p.Identity != req.UserID {
+				continue
+			}
+			if err := s.meetingRtc.RemoveParticipant(ctx, room.Name, req.UserID); err != nil {
+				log.ZError(ctx, "remove participant error", err, "login and clean previous rooms", room.Name, req.UserID)
+				continue
+			}
+			if err := s.notifyKickOffMeetingInfo2Client(ctx, room.Name, req.UserID, constant.KickOffDuplicatedLogin); err != nil {
+				log.ZError(ctx, "notify kickoff msg to client error", err, "login and clean previous rooms", room.Name, req.UserID)
+			}
 		}
 	}
 

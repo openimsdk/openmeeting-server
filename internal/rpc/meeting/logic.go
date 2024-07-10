@@ -295,9 +295,11 @@ func (s *meetingServer) refreshRepeatMeeting(ctx context.Context, info *model.Me
 		return updateData
 	}
 
-	if info.StartTime+info.MeetingDuration < nowTimestamp {
-		updateData["status"] = constant.Completed
-	} else if info.StartTime+info.MeetingDuration < nowTimestamp && info.StartTime > nowTimestamp {
+	startTime := s.GetDayTimestamp(info.ScheduledTime)
+	now := s.GetDayTimestamp(nowTimestamp)
+	if startTime+info.MeetingDuration < now {
+		updateData["status"] = constant.Scheduled
+	} else if startTime+info.MeetingDuration < now && startTime > now {
 		if info.Status == constant.InProgress {
 			return updateData
 		}
@@ -305,6 +307,36 @@ func (s *meetingServer) refreshRepeatMeeting(ctx context.Context, info *model.Me
 	}
 
 	return updateData
+}
+
+func (s *meetingServer) GetDayTimestamp(timestamp int64) int64 {
+	return timestamp - timeutil.GetCurDayZeroTimestamp()
+}
+
+func (s *meetingServer) getNextScheduleMeeting(info *model.MeetingInfo) int64 {
+	nowTimestamp := timeutil.GetCurrentTimestampBySecond()
+	if info.EndDate != 0 && info.EndDate < nowTimestamp {
+		// there is no next meeting
+		return 0
+	}
+
+	if info.RepeatTimes > 0 {
+		if info.RepeatType == constant.RepeatDaily {
+			days, err := timeutil.DaysBetweenTimestamps(info.TimeZone, info.ScheduledTime+info.MeetingDuration)
+			if err != nil {
+				return 0
+			}
+			if int32(days) > info.RepeatTimes {
+				return 0
+			}
+		} else if info.RepeatType == constant.RepeatWeekly {
+
+		} else if info.RepeatType == constant.RepeatMonth {
+
+		}
+
+	}
+	return 0
 }
 
 func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {

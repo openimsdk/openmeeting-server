@@ -9,6 +9,7 @@ import (
 	lksdk "github.com/livekit/server-sdk-go"
 	"github.com/openimsdk/openmeeting-server/internal/rpc/meeting/rtc"
 	"github.com/openimsdk/openmeeting-server/pkg/common/config"
+	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
 	"github.com/openimsdk/protocol/openmeeting/meeting"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
@@ -71,7 +72,7 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, met
 	return jwt, x.getLiveURL(), nil
 }
 
-func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, roomMetaData *meeting.MeetingMetadata, participantMetaData *meeting.ParticipantMetaData) (sID, token, liveUrl string, err error) {
+func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, roomMetaData *meeting.MeetingMetadata, participantMetaData *meeting.ParticipantMetaData, userRpc *rpcclient.User) (sID, token, liveUrl string, err error) {
 	req := &livekit.CreateRoomRequest{
 		Name:            meetingID,
 		EmptyTimeout:    86400,
@@ -91,7 +92,7 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, ro
 	}
 	cb := NewRTC(meetingID, x)
 	callback := rtc.NewRoomCallback(
-		mcontext.NewCtx("room_callback_"+mcontext.GetOperationID(ctx)), meetingID, room.Sid, cb)
+		mcontext.NewCtx("room_callback_"+mcontext.GetOperationID(ctx)), meetingID, room.Sid, cb, userRpc)
 	roomCallback := &lksdk.RoomCallback{
 		ParticipantCallback: lksdk.ParticipantCallback{
 			OnDataReceived: func(data []byte, rp *lksdk.RemoteParticipant) {

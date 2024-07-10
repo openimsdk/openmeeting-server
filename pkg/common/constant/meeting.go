@@ -25,3 +25,8 @@ const (
 	HostTypeHost   = "Host"
 	HostTypeCoHost = "CoHost"
 )
+
+const (
+	KickOffDuplicatedLogin = "Duplicated Login"
+	KickOffOffline         = "Offline"
+)
