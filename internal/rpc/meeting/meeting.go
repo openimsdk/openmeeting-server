@@ -123,7 +123,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 				}
 			}
 		}
-		_, _, _, err = s.meetingRtc.CreateRoom(ctx, dbInfo.MeetingID, dbInfo.CreatorUserID, metaData, participantMetaData, s.userRpc)
+		_, _, _, err = s.meetingRtc.CreateRoom(ctx, dbInfo.MeetingID, userInfo.UserID, metaData, participantMetaData, s.userRpc)
 		if err != nil {
 			return resp, err
 		}
