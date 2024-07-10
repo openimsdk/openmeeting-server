@@ -30,3 +30,7 @@ const (
 	KickOffDuplicatedLogin = "Duplicated Login"
 	KickOffOffline         = "Offline"
 )
+
+const (
+	KickOffMeetingMsg = "KickOffMeetingMsg"
+)

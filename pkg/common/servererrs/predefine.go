@@ -27,6 +27,7 @@ var (
 	ErrUserPasswordError      = errs.NewCodeError(PasswordErr, "PasswordErr")
 	ErrUserAccountNotFoundErr = errs.NewCodeError(NotFoundAccountErr, "NotFoundAccountErr")
 	ErrUserTokenNotFoundErr   = errs.NewCodeError(NotFoundUserTokenErr, "NotFoundUserTokenErr")
+	ErrKickOffMeeting         = errs.NewCodeError(KickOffMeetingError, "KickOffMeetingError")
 
 	ErrMeetingUserLimit        = errs.NewCodeError(MeetingUserLimitError, "MeetingUserLimitError")
 	ErrMeetingPasswordNotMatch = errs.NewCodeError(MeetingPasswordError, "MeetingPasswordError")

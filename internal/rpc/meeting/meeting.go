@@ -115,6 +115,14 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 			return resp, errs.WrapMsg(err, "generate meeting meta data failed")
 		}
 		participantMetaData := s.generateParticipantMetaData(userInfo)
+		if ps, err := s.meetingRtc.ListParticipants(ctx, req.MeetingID); err != nil {
+			for _, p := range ps {
+				if p.Identity == req.UserID {
+					participantMetaData = nil
+					break
+				}
+			}
+		}
 		_, _, _, err = s.meetingRtc.CreateRoom(ctx, dbInfo.MeetingID, dbInfo.CreatorUserID, metaData, participantMetaData, s.userRpc)
 		if err != nil {
 			return resp, err

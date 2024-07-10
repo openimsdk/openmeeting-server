@@ -2,6 +2,8 @@ package mw
 
 import (
 	"github.com/gin-gonic/gin"
+	cmConstant "github.com/openimsdk/openmeeting-server/pkg/common/constant"
+	"github.com/openimsdk/openmeeting-server/pkg/common/servererrs"
 	"github.com/openimsdk/openmeeting-server/pkg/common/token"
 	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
@@ -54,9 +56,13 @@ func (o *MW) isValidToken(c *gin.Context, userID, userToken string) error {
 	if err != nil {
 		return err
 	}
+	if resp.Token == cmConstant.KickOffMeetingMsg {
+		return servererrs.ErrKickOffMeeting.WrapMsg("kick off meeting, please login again")
+	}
 	if resp.Token == "" || resp.Token != userToken {
 		return errs.ErrTokenExpired.Wrap()
 	}
+
 	return nil
 }
 

@@ -23,14 +23,14 @@ func (r *CallbackLiveKit) OnRoomParticipantConnected(ctx context.Context, userID
 }
 
 func (r *CallbackLiveKit) OnRoomParticipantDisconnected(ctx context.Context, userID string) {
-	log.ZWarn(ctx, "OnRoomParticipantDisconnected", nil, userID)
+	log.ZWarn(ctx, "OnRoomParticipantDisconnected", nil, "userID:", userID)
 	if err := r.liveKit.RemoveParticipant(ctx, r.roomID, userID); err != nil {
 		log.ZWarn(ctx, "remove participant failed", err)
 	}
 }
 
 func (r *CallbackLiveKit) OnRoomDisconnected(ctx context.Context) {
-	log.ZWarn(ctx, "OnRoomDisconnected", nil, r.roomID)
+	log.ZWarn(ctx, "OnRoomDisconnected", nil, "roomID", r.roomID)
 	participants, err := r.liveKit.ListParticipants(ctx, r.roomID)
 	if err != nil {
 		log.ZWarn(ctx, "remove participant failed", err, r.roomID)

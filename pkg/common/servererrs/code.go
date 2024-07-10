@@ -23,6 +23,7 @@ const (
 	PasswordErr          = 10002 // Password error
 	NotFoundAccountErr   = 10003 // not found user account
 	NotFoundUserTokenErr = 10004 // not found user token
+	KickOffMeetingError  = 10010
 
 	MeetingUserLimitError   = 20001 // one user joins more than one meeting
 	MeetingPasswordError    = 20002 // password not match error

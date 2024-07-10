@@ -16,6 +16,7 @@ package redis
 
 import (
 	"context"
+	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/tools/errs"
@@ -113,7 +114,7 @@ func (u *User) GetUserToken(ctx context.Context, userID string) (string, error) 
 }
 
 func (u *User) ClearUserToken(ctx context.Context, userID string) error {
-	return errs.Wrap(u.rdb.Del(ctx, userID).Err())
+	return errs.Wrap(u.rdb.Set(ctx, userID, constant.KickOffMeetingMsg, u.expireTime).Err())
 }
 
 type Comparable interface {
