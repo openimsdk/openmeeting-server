@@ -273,7 +273,7 @@ func (s *meetingServer) refreshRepeatMeeting(ctx context.Context, info *model.Me
 	updateData := map[string]any{}
 	// get current timestamp
 	nowTimestamp := timeutil.GetCurrentTimestampBySecond()
-	if info.EndDate < nowTimestamp {
+	if info.EndDate != 0 && info.EndDate < nowTimestamp {
 		updateData["status"] = constant.Completed
 		return updateData
 	}
