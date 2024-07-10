@@ -106,7 +106,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
-		if !s.checkCanStartMeeting(ctx, dbInfo) {
+		if !s.checkCanStartMeeting(dbInfo) {
 			return resp, errs.WrapMsg(err, "get room data failed")
 		}
 		// for those need repeat booking meeting, create new rooms
@@ -204,9 +204,20 @@ func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetin
 	if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
 		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("user did not have permission to end somebody's meeting")
 	}
+	dbInfo, err := s.meetingStorageHandler.TakeWithError(ctx, req.MeetingID)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get meeting data failed")
+	}
+
 	// change status to completed
+	status := constant.Completed
+	// if we have next meeting schedule
+	if s.nextMeetingTimestamp(ctx, dbInfo) > 0 {
+		status = constant.Scheduled
+	}
+
 	updateData := map[string]any{
-		"status": constant.Completed,
+		"status": status,
 	}
 	if err := s.meetingRtc.CloseRoom(ctx, req.MeetingID); err != nil {
 		return resp, err
@@ -263,7 +274,7 @@ func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.Update
 
 	if info.Status == constant.Completed {
 		log.CInfo(ctx, "meeting is already completed, can not update anymore", "meetingID:", req.MeetingID)
-		return resp, servererrs.ErrMeetingUpdateCheck.WrapMsg("meeting is already completed, can not update anymore")
+		return resp, servererrs.ErrMeetingAlreadyCompleted.WrapMsg("meeting is already completed, can not update anymore")
 	}
 
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)

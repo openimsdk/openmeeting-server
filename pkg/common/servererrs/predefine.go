@@ -32,5 +32,5 @@ var (
 	ErrMeetingUserLimit        = errs.NewCodeError(MeetingUserLimitError, "MeetingUserLimitError")
 	ErrMeetingPasswordNotMatch = errs.NewCodeError(MeetingPasswordError, "MeetingPasswordError")
 	ErrMeetingAuthCheck        = errs.NewCodeError(MeetingAuthCheckError, "MeetingAuthCheckError")
-	ErrMeetingUpdateCheck      = errs.NewCodeError(MeetingUpdateCheckError, "MeetingUpdateCheckError")
+	ErrMeetingAlreadyCompleted = errs.NewCodeError(MeetingCompleteError, "MeetingCompleteError")
 )

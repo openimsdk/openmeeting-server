@@ -25,10 +25,10 @@ const (
 	NotFoundUserTokenErr = 10004 // not found user token
 	KickOffMeetingError  = 10010
 
-	MeetingUserLimitError   = 20001 // one user joins more than one meeting
-	MeetingPasswordError    = 20002 // password not match error
-	MeetingAuthCheckError   = 20003 // meeting auth check permission error
-	MeetingUpdateCheckError = 20004 // meeting update check error
+	MeetingUserLimitError = 20001 // one user joins more than one meeting
+	MeetingPasswordError  = 20002 // password not match error
+	MeetingAuthCheckError = 20003 // meeting auth check permission error
+	MeetingCompleteError  = 20004 // meeting update check error
 )
 
 // General error codes.

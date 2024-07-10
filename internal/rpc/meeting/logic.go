@@ -270,29 +270,61 @@ func processIntervalType(ctx context.Context, info *model.MeetingInfo) bool {
 	}
 }
 
+//func (s *meetingServer) refreshRepeatMeeting(ctx context.Context, info *model.MeetingInfo) map[string]any {
+//	updateData := map[string]any{}
+//	// get current timestamp
+//	nowTimestamp := timeutil.GetCurrentTimestampBySecond()
+//	if info.EndDate > 0 && info.EndDate < nowTimestamp {
+//		updateData["status"] = constant.Completed
+//		return updateData
+//	}
+//	// get days between start time and current time
+//	// info.ScheduledTime + info.MeetingDuration
+//	if info.RepeatTimes > 0 {
+//		days, err := timeutil.DaysBetweenTimestamps(info.TimeZone, info.ScheduledTime+info.MeetingDuration)
+//		if err != nil {
+//			return updateData
+//		}
+//		if int32(days) > info.RepeatTimes {
+//			updateData["status"] = constant.Completed
+//		}
+//		return updateData
+//	}
+//
+//	if !s.IsTodayNeedMeeting(ctx, info) {
+//		updateData["status"] = constant.Scheduled
+//		return updateData
+//	}
+//
+//	startTime := s.GetDayTimestamp(info.ScheduledTime)
+//	now := s.GetDayTimestamp(nowTimestamp)
+//	if startTime+info.MeetingDuration < now {
+//		updateData["status"] = constant.Scheduled
+//	} else if startTime+info.MeetingDuration < now && startTime > now {
+//		if info.Status == constant.InProgress {
+//			return updateData
+//		}
+//		updateData["status"] = constant.InProgress
+//	}
+//
+//	return updateData
+//}
+
 func (s *meetingServer) refreshRepeatMeeting(ctx context.Context, info *model.MeetingInfo) map[string]any {
 	updateData := map[string]any{}
 	// get current timestamp
 	nowTimestamp := timeutil.GetCurrentTimestampBySecond()
-	if info.EndDate != 0 && info.EndDate < nowTimestamp {
+	if info.EndDate > 0 && info.EndDate < nowTimestamp {
 		updateData["status"] = constant.Completed
-		return updateData
-	}
-	// get days between start time and current time
-	// info.ScheduledTime + info.MeetingDuration
-	if info.RepeatTimes > 0 {
-		days, err := timeutil.DaysBetweenTimestamps(info.TimeZone, info.ScheduledTime+info.MeetingDuration)
-		if err != nil {
-			return updateData
-		}
-		if int32(days) > info.RepeatTimes {
-			updateData["status"] = constant.Completed
-		}
 		return updateData
 	}
 
 	if !s.IsTodayNeedMeeting(ctx, info) {
 		updateData["status"] = constant.Scheduled
+		nextTime := s.nextMeetingTimestamp(ctx, info)
+		if nextTime == 0 {
+			updateData["status"] = constant.Completed
+		}
 		return updateData
 	}
 
@@ -314,76 +346,6 @@ func (s *meetingServer) GetDayTimestamp(timestamp int64) int64 {
 	return timestamp - timeutil.GetCurDayZeroTimestamp()
 }
 
-func (s *meetingServer) isOverCurrentDay(nowTimestamp, scheduleTimestamp int64) bool {
-	hourTimestamp := s.GetDayTimestamp(nowTimestamp)
-	scheduleHourTimestamp := s.GetDayTimestamp(scheduleTimestamp)
-	if hourTimestamp <= scheduleHourTimestamp {
-		return false
-	}
-	return true
-}
-
-func (s *meetingServer) getNextDay() {
-
-}
-
-func (s *meetingServer) getNextWeekDay(timezone string) int64 {
-	location, err := time.LoadLocation(timezone)
-	if err != nil {
-		return 0
-	}
-	// get current time
-	now := time.Now().In(location)
-	now.Add(time.Hour * 24 * 7)
-	return now.Unix()
-}
-
-func (s *meetingServer) getNextPeriodDay(timezone string) int64 {
-	location, err := time.LoadLocation(timezone)
-	if err != nil {
-		return 0
-	}
-	// get current time
-	now := time.Now().In(location)
-	now.Add(time.Hour * 24)
-	return now.Unix()
-}
-
-func (s *meetingServer) getNextPeriodMonth(timezone string) int64 {
-	timestamp := timeutil.GetCurrentTimestampBySecond()
-	// Parse the timezone
-	loc, err := time.LoadLocation(timezone)
-	if err != nil {
-		return 0
-	}
-
-	// Convert Unix timestamp to time.Time
-	t := time.Unix(timestamp, 0).In(loc)
-
-	// Get current year, month, and day
-	year, month, day := t.Date()
-
-	// Calculate the next month
-	nextMonth := month + 1
-	nextYear := year
-
-	if nextMonth > 12 {
-		nextMonth = 1
-		nextYear++
-	}
-
-	// Construct the same day in the next month
-	nextMonthToday := time.Date(nextYear, nextMonth, day, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), loc)
-
-	// Check if the generated date is valid (e.g., handle cases like February 30th)
-	if nextMonthToday.Month() != nextMonth {
-		nextMonthToday = time.Date(nextYear, nextMonth+1, 0, t.Hour(), t.Minute(), t.Second(), t.Nanosecond(), loc)
-	}
-
-	// Return Unix timestamp
-	return nextMonthToday.Unix()
-}
-
 func (s *meetingServer) isValidDay(day time.Weekday, days []int32) bool {
 	for _, d := range days {
 		if int32(day) == d {
@@ -393,9 +355,10 @@ func (s *meetingServer) isValidDay(day time.Weekday, days []int32) bool {
 	return false
 }
 
-func (s *meetingServer) nextMeetingTimestamp(info *model.MeetingInfo) int64 {
+func (s *meetingServer) nextMeetingTimestamp(ctx context.Context, info *model.MeetingInfo) int64 {
 	loc, err := time.LoadLocation(info.TimeZone)
 	if err != nil {
+		log.ZError(ctx, "load location failed", err, "timezone invalid", info.TimeZone)
 		fmt.Println("Unable to parse timezone:", err)
 		return 0
 	}
@@ -415,34 +378,44 @@ func (s *meetingServer) nextMeetingTimestamp(info *model.MeetingInfo) int64 {
 	}
 
 	var nextTime time.Time
-	switch info.RepeatType {
-	case constant.RepeatDaily:
-		nextTime = scheduledTime.AddDate(0, 0, 1)
-	case constant.RepeatWeekly:
-		nextTime = scheduledTime.AddDate(0, 0, 7)
-	case constant.RepeatWeekDay:
-		nextTime = scheduledTime.AddDate(0, 0, 1)
-		for nextTime.Weekday() == time.Saturday || nextTime.Weekday() == time.Sunday {
-			nextTime = nextTime.AddDate(0, 0, 1)
-		}
-	case constant.RepeatMonth:
-		nextTime = scheduledTime.AddDate(0, 1, 0)
-	case constant.RepeatCustom:
-		switch info.UintType {
-		case constant.UnitTypeDay:
-			nextTime = scheduledTime.AddDate(0, 0, int(info.Interval))
-		case constant.UnitTypeWeek:
-			nextTime = scheduledTime.AddDate(0, 0, int(info.Interval*7))
-		}
-		if len(info.RepeatDayOfWeek) > 0 {
-			for !s.isValidDay(nextTime.Weekday(), info.RepeatDayOfWeek) {
+
+	if now.After(scheduledTime) {
+		switch info.RepeatType {
+		case constant.RepeatDaily:
+			for nextTime = scheduledTime; !now.Before(nextTime); nextTime = nextTime.AddDate(0, 0, 1) {
+			}
+		case constant.RepeatWeekly:
+			for nextTime = scheduledTime; !now.Before(nextTime); nextTime = nextTime.AddDate(0, 0, 7) {
+			}
+		case constant.RepeatWeekDay:
+			nextTime = scheduledTime
+			for !now.Before(nextTime) || nextTime.Weekday() == time.Saturday || nextTime.Weekday() == time.Sunday {
 				nextTime = nextTime.AddDate(0, 0, 1)
 			}
+		case constant.RepeatMonth:
+			for nextTime = scheduledTime; !now.Before(nextTime); nextTime = nextTime.AddDate(0, 1, 0) {
+			}
+		case constant.RepeatCustom:
+			nextTime = scheduledTime
+			interval := int(info.Interval)
+			for !now.Before(nextTime) {
+				switch info.UintType {
+				case constant.UnitTypeDay:
+					nextTime = nextTime.AddDate(0, 0, interval)
+				case constant.UnitTypeWeek:
+					nextTime = nextTime.AddDate(0, 0, interval*7)
+				case constant.UnitTypeMonth:
+					nextTime = nextTime.AddDate(0, interval, 0)
+				}
+				if len(info.RepeatDayOfWeek) > 0 {
+					for !s.isValidDay(nextTime.Weekday(), info.RepeatDayOfWeek) {
+						nextTime = nextTime.AddDate(0, 0, 1)
+					}
+				}
+			}
 		}
-	}
-
-	if nextTime.Before(now) {
-		nextTime = now
+	} else {
+		nextTime = scheduledTime
 	}
 
 	if info.EndDate > 0 && nextTime.After(time.Unix(info.EndDate, 0).In(loc)) {
@@ -466,6 +439,9 @@ func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
 			updateData = s.refreshRepeatMeeting(ctx, one)
 		}
 		if len(updateData) > 0 {
+			if updateData["status"] == constant.Completed {
+				_ = s.handleCompleteMeeting(ctx, one.MeetingID)
+			}
 			if err := s.meetingStorageHandler.Update(ctx, one.MeetingID, updateData); err != nil {
 				log.ZError(ctx, "update meeting status failed", err)
 			}
@@ -473,10 +449,18 @@ func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
 	}
 }
 
-func (s *meetingServer) checkCanStartMeeting(ctx context.Context, info *model.MeetingInfo) bool {
+func (s *meetingServer) checkCanStartMeeting(info *model.MeetingInfo) bool {
 	now := timeutil.GetCurrentTimestampBySecond()
 	if info.RepeatType == "" && info.ScheduledTime+info.MeetingDuration > now {
 		return false
 	}
 	return true
+}
+
+func (s *meetingServer) handleCompleteMeeting(ctx context.Context, meetingID string) error {
+	if err := s.meetingRtc.CloseRoom(ctx, meetingID); err != nil {
+		log.ZError(ctx, "handle complete meeting close room failed", err, "meetingID", meetingID)
+		return err
+	}
+	return nil
 }
