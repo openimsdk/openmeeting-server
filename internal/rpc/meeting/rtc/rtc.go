@@ -12,6 +12,7 @@ type MeetingRtc interface {
 	CreateRoom(ctx context.Context, roomID, identify string, roomMetaData *meeting.MeetingMetadata, participantMetaData *meeting.ParticipantMetaData, userRpc *rpcclient.User) (sID, token, liveUrl string, err error)
 	GetRoomData(ctx context.Context, roomID string) (*meeting.MeetingMetadata, error)
 	GetAllRooms(ctx context.Context) ([]*livekit.Room, error)
+	GetRoom(ctx context.Context, roomID string) (*livekit.Room, error)
 	RoomIsExist(ctx context.Context, roomID string) (string, error)
 	UpdateMetaData(ctx context.Context, info *meeting.MeetingMetadata) error
 	CloseRoom(ctx context.Context, roomID string) error

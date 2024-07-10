@@ -2,7 +2,8 @@ package meeting
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"errors"
 	"github.com/openimsdk/openmeeting-server/pkg/common"
 	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/servererrs"
@@ -104,13 +105,17 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		return resp, servererrs.ErrMeetingUserLimit.WrapMsg("user already in meeting")
 	}
 
-	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	room, err := s.meetingRtc.GetRoom(ctx, req.MeetingID)
 	if err != nil {
+		if !errors.Is(err, errs.ErrRecordNotFound) {
+			return resp, errs.WrapMsg(err, "get room failed", "roomID", req.MeetingID)
+		}
+
 		if !s.checkCanStartMeeting(dbInfo) {
-			return resp, errs.WrapMsg(err, "get room data failed")
+			return resp, errs.WrapMsg(err, "can not start meeting, check failed", "roomID", req.MeetingID)
 		}
 		// for those need repeat booking meeting, create new rooms
-		metaData, err = s.generateMeetingMetaData(ctx, dbInfo)
+		metaData, err := s.generateMeetingMetaData(ctx, dbInfo)
 		if err != nil {
 			return resp, errs.WrapMsg(err, "generate meeting meta data failed")
 		}
@@ -126,6 +131,18 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		_, _, _, err = s.meetingRtc.CreateRoom(ctx, dbInfo.MeetingID, userInfo.UserID, metaData, participantMetaData, s.userRpc)
 		if err != nil {
 			return resp, err
+		}
+	}
+	metaData := &pbmeeting.MeetingMetadata{}
+	if room.Metadata == "" {
+		metaData, err = s.generateMeetingMetaData(ctx, dbInfo)
+		if err != nil {
+			return resp, errs.WrapMsg(err, "generate meeting meta data failed")
+		}
+	} else {
+		if err := json.Unmarshal([]byte(room.Metadata), metaData); err != nil {
+			log.ZError(ctx, "Unmarshal failed roomId:", err)
+			return nil, errs.WrapMsg(err, "Unmarshal failed roomId:", "roomID", req.MeetingID)
 		}
 	}
 
@@ -499,7 +516,6 @@ func (s *meetingServer) CleanPreviousMeetings(ctx context.Context, req *pbmeetin
 			log.ZError(ctx, "list participant error", err, "login and clean previous rooms", room.Name, req.UserID)
 		}
 		for _, p := range ps {
-			fmt.Println(p.Identity, req.UserID)
 			if p.Identity != req.UserID {
 				continue
 			}
