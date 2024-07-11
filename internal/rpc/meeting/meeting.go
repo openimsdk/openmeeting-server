@@ -129,9 +129,14 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 				}
 			}
 		}
-		_, _, _, err = s.meetingRtc.CreateRoom(ctx, dbInfo.MeetingID, userInfo.UserID, metaData, participantMetaData, s.userRpc)
+		_, token, liveUrl, err := s.meetingRtc.CreateRoom(ctx, dbInfo.MeetingID, userInfo.UserID, metaData, participantMetaData, s.userRpc)
 		if err != nil {
 			return resp, err
+		}
+
+		resp.LiveKit = &pbmeeting.LiveKit{
+			Token: token,
+			Url:   liveUrl,
 		}
 	}
 	if room != nil {
@@ -155,7 +160,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 	metaData.Detail.Info.SystemGenerated.MeetingID = req.MeetingID
 	participantMetaData := s.generateParticipantMetaData(userInfo)
 
-	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.UserID, participantMetaData)
+	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.UserID, participantMetaData, false)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get join token failed")
 	}
@@ -191,7 +196,7 @@ func (s *meetingServer) GetMeetingToken(ctx context.Context, req *pbmeeting.GetM
 
 	participantMetaData := s.generateParticipantMetaData(userInfo)
 
-	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.UserID, participantMetaData)
+	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.UserID, participantMetaData, false)
 	if err != nil {
 		return resp, err
 	}

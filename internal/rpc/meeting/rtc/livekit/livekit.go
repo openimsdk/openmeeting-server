@@ -27,7 +27,7 @@ func NewLiveKit(conf *config.RTC) rtc.MeetingRtc {
 	}
 }
 
-func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, metadata *meeting.ParticipantMetaData) (string, string, error) {
+func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, metadata *meeting.ParticipantMetaData, isListener bool) (string, string, error) {
 	log.ZDebug(ctx, "getJoinToken", "roomID", roomID, "identity", identity)
 	canPublish := true
 	canSubscribe := true
@@ -41,6 +41,10 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, met
 		CanSubscribe:   &canSubscribe,
 		CanPublishData: &canPublishData,
 	}
+	if isListener {
+		grant.Hidden = true
+	}
+
 	if metadata != nil {
 		bytes, err := json.Marshal(metadata)
 		if err != nil {
@@ -108,13 +112,24 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, ro
 		OnReconnected:             callback.OnReconnected,
 		OnReconnecting:            callback.OnReconnecting,
 	}
-	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, identify, participantMetaData)
+
+	listenerInfo := &meeting.UserInfo{UserID: meetingID, Nickname: meetingID, Account: meetingID}
+
+	listenerMetaData := &meeting.ParticipantMetaData{
+		UserInfo: listenerInfo,
+	}
+	_, _, err = x.GetJoinToken(ctx, meetingID, meetingID, listenerMetaData, true)
 	if err != nil {
 		return "", "", "", errs.WrapMsg(err, "get join token failed, meetingID:", meetingID)
 	}
 	if _, err = lksdk.ConnectToRoomWithToken(x.conf.InnerURL, token, roomCallback); err != nil {
 		return "", "", "", errs.WrapMsg(err, "connect to room with token failed, meetingID: ", meetingID)
 	}
+	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, identify, participantMetaData, true)
+	if err != nil {
+		return "", "", "", errs.WrapMsg(err, "get join token failed, meetingID:", meetingID)
+	}
+
 	return room.Sid, token, liveUrl, nil
 }
 

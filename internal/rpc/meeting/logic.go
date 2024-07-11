@@ -451,7 +451,7 @@ func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
 
 func (s *meetingServer) checkCanStartMeeting(info *model.MeetingInfo) bool {
 	now := timeutil.GetCurrentTimestampBySecond()
-	if info.RepeatType == "" && info.ScheduledTime+info.MeetingDuration > now {
+	if info.RepeatType == "" && info.ScheduledTime+info.MeetingDuration < now {
 		return false
 	}
 	return true

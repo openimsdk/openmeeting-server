@@ -4,7 +4,6 @@ import (
 	"context"
 	lksdk "github.com/livekit/server-sdk-go"
 	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
-	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/log"
 )
 
@@ -41,12 +40,12 @@ func (r *RoomCallback) OnParticipantConnected(rp *lksdk.RemoteParticipant) {
 }
 
 func (r *RoomCallback) OnParticipantDisconnected(rp *lksdk.RemoteParticipant) {
-	log.ZWarn(r.ctx, "OnParticipantDisconnected", nil)
+	log.ZWarn(r.ctx, "OnParticipantDisconnected", nil, "kind:", rp.Kind().String())
 	r.cb.OnRoomParticipantDisconnected(r.ctx, rp.Identity())
 	// clear user token
-	if _, err := r.userRpc.Client.ClearUserToken(r.ctx, &pbuser.ClearUserTokenReq{UserID: rp.Identity()}); err != nil {
-		log.ZWarn(r.ctx, "clear user token failed", err, "userID", rp.Identity())
-	}
+	//if _, err := r.userRpc.Client.ClearUserToken(r.ctx, &pbuser.ClearUserTokenReq{UserID: rp.Identity()}); err != nil {
+	//	log.ZWarn(r.ctx, "clear user token failed", err, "userID", rp.Identity())
+	//}
 }
 
 func (r *RoomCallback) OnDisconnected() {
