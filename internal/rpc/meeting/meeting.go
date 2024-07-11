@@ -135,7 +135,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		}
 	}
 	if room != nil {
-		if room.Metadata != "" {
+		if room.Metadata == "" {
 			metaData, err = s.generateMeetingMetaData(ctx, dbInfo)
 			if err != nil {
 				return resp, errs.WrapMsg(err, "generate meeting meta data failed")
