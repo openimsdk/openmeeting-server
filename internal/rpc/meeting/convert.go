@@ -173,6 +173,7 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 	// Fill in response data
 	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
 	if err != nil {
+		log.ZError(ctx, "get user info failed", err, "userID", info.CreatorUserID)
 		return nil, errs.WrapMsg(err, "get user info failed")
 	}
 

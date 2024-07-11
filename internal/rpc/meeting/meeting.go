@@ -260,7 +260,7 @@ func (s *meetingServer) GetMeetings(ctx context.Context, req *pbmeeting.GetMeeti
 	for _, meeting := range meetings {
 		detailSetting, err := s.getMeetingDetailSetting(ctx, meeting)
 		if err != nil {
-			return resp, err
+			continue
 		}
 		meetingDetails = append(meetingDetails, detailSetting)
 	}
