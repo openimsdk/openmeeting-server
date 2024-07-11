@@ -106,6 +106,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 	}
 
 	room, err := s.meetingRtc.GetRoom(ctx, req.MeetingID)
+	metaData := &pbmeeting.MeetingMetadata{}
 	if err != nil {
 		if !errors.Is(err, errs.ErrRecordNotFound) {
 			return resp, errs.WrapMsg(err, "get room failed", "roomID", req.MeetingID)
@@ -115,7 +116,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 			return resp, errs.WrapMsg(err, "can not start meeting, check failed", "roomID", req.MeetingID)
 		}
 		// for those need repeat booking meeting, create new rooms
-		metaData, err := s.generateMeetingMetaData(ctx, dbInfo)
+		metaData, err = s.generateMeetingMetaData(ctx, dbInfo)
 		if err != nil {
 			return resp, errs.WrapMsg(err, "generate meeting meta data failed")
 		}
@@ -133,7 +134,6 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 			return resp, err
 		}
 	}
-	metaData := &pbmeeting.MeetingMetadata{}
 	if room != nil {
 		if room.Metadata != "" {
 			metaData, err = s.generateMeetingMetaData(ctx, dbInfo)
