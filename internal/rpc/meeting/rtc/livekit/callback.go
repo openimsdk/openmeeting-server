@@ -19,13 +19,65 @@ func NewRTC(roomID string, liveKit *LiveKit) rtc.CallbackInterface {
 }
 
 func (r *CallbackLiveKit) OnRoomParticipantConnected(ctx context.Context, userID string) {
-	log.ZDebug(ctx, "OnRoomParticipantConnected", nil)
+	log.ZDebug(ctx, "OnRoomParticipantConnected", "roomID:", r.roomID, "userID:", userID)
+	// set default host when the first one coming in
+	metaData, err := r.liveKit.GetRoomData(ctx, r.roomID)
+	if err != nil {
+		return
+	}
+	hostUserID := metaData.Detail.Info.CreatorDefinedMeeting.HostUserID
+
+	participants, err := r.liveKit.ListParticipants(ctx, r.roomID)
+	if err != nil {
+		return
+	}
+	log.ZDebug(ctx, "OnRoomParticipantConnected",
+		"room participant number:", len(participants),
+		"hostID", hostUserID)
+
+	// when first coming
+	if len(participants) == 2 {
+		if userID == hostUserID {
+			return
+		}
+		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = userID
+		log.CInfo(ctx, "change host info when last host disconnected",
+			"roomID:", r.roomID, "old host:", hostUserID, "new host:", userID)
+		if err := r.liveKit.UpdateMetaData(ctx, metaData); err != nil {
+			log.ZError(ctx, "update meta room data change host info failed", err,
+				"old host:", hostUserID, "new host:", userID)
+		}
+	}
 }
 
 func (r *CallbackLiveKit) OnRoomParticipantDisconnected(ctx context.Context, userID string) {
 	log.ZWarn(ctx, "OnRoomParticipantDisconnected", nil, "userID:", userID)
 	if err := r.liveKit.RemoveParticipant(ctx, r.roomID, userID); err != nil {
 		log.ZWarn(ctx, "remove participant failed", err)
+	}
+	metaData, err := r.liveKit.GetRoomData(ctx, r.roomID)
+	if err != nil {
+		return
+	}
+	hostUserID := metaData.Detail.Info.CreatorDefinedMeeting.HostUserID
+	if hostUserID == userID {
+		participants, err := r.liveKit.ListParticipants(ctx, r.roomID)
+		if err != nil {
+			return
+		}
+		newHostID := ""
+		for _, p := range participants {
+			if p.Identity == r.roomID {
+				continue
+			}
+			newHostID = p.Identity
+			break
+		}
+		log.CInfo(ctx, "change host info when last host disconnected", "roomID:", r.roomID, "old host:", hostUserID, "new host:", newHostID)
+		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = newHostID
+		if err := r.liveKit.UpdateMetaData(ctx, metaData); err != nil {
+			log.ZError(ctx, "update meta room data change host info failed", err, "old host:", hostUserID, "new host:", newHostID)
+		}
 	}
 }
 

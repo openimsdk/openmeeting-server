@@ -118,7 +118,7 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, ro
 	listenerMetaData := &meeting.ParticipantMetaData{
 		UserInfo: listenerInfo,
 	}
-	_, _, err = x.GetJoinToken(ctx, meetingID, meetingID, listenerMetaData, true)
+	token, _, err = x.GetJoinToken(ctx, meetingID, meetingID, listenerMetaData, true)
 	if err != nil {
 		return "", "", "", errs.WrapMsg(err, "get join token failed, meetingID:", meetingID)
 	}

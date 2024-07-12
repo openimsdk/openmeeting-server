@@ -37,6 +37,7 @@ type RoomCallback struct {
 
 func (r *RoomCallback) OnParticipantConnected(rp *lksdk.RemoteParticipant) {
 	log.ZWarn(r.ctx, "OnParticipantConnected", nil)
+	r.cb.OnRoomParticipantConnected(r.ctx, rp.Identity())
 }
 
 func (r *RoomCallback) OnParticipantDisconnected(rp *lksdk.RemoteParticipant) {
