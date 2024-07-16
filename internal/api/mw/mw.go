@@ -59,6 +59,9 @@ func (o *MW) isValidToken(c *gin.Context, userID, userToken string) error {
 	if resp.Token == cmConstant.KickOffMeetingMsg {
 		return servererrs.ErrKickOffMeeting.WrapMsg("kick off meeting, please login again")
 	}
+	if resp.Token != "" && resp.Token != userToken {
+		return servererrs.ErrKickOffMeeting.WrapMsg("kick off meeting, please login again")
+	}
 	if resp.Token == "" || resp.Token != userToken {
 		return errs.ErrTokenExpired.Wrap()
 	}

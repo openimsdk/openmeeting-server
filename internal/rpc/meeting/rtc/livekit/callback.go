@@ -35,17 +35,18 @@ func (r *CallbackLiveKit) OnRoomParticipantConnected(ctx context.Context, userID
 		"room participant number:", len(participants),
 		"hostID", hostUserID)
 
-	// when first coming
-	if len(participants) == 2 {
-		if userID == hostUserID {
-			return
-		}
-		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = userID
-		log.CInfo(ctx, "change host info when last host disconnected",
-			"roomID:", r.roomID, "old host:", hostUserID, "new host:", userID)
+	// when first coming deleted
+	//if len(participants) == 2 {
+	//	if userID == hostUserID {
+	//		return
+	//	}
+	if hostUserID == "" {
+		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = metaData.Detail.Info.SystemGenerated.CreatorUserID
+		log.CInfo(ctx, "set host info as default when last host is nil",
+			"roomID:", r.roomID, "new host:", metaData.Detail.Info.SystemGenerated.CreatorUserID)
 		if err := r.liveKit.UpdateMetaData(ctx, metaData); err != nil {
 			log.ZError(ctx, "update meta room data change host info failed", err,
-				"old host:", hostUserID, "new host:", userID)
+				"new host:", metaData.Detail.Info.SystemGenerated.CreatorUserID)
 		}
 	}
 }
@@ -73,10 +74,12 @@ func (r *CallbackLiveKit) OnRoomParticipantDisconnected(ctx context.Context, use
 			newHostID = p.Identity
 			break
 		}
-		log.CInfo(ctx, "change host info when last host disconnected", "roomID:", r.roomID, "old host:", hostUserID, "new host:", newHostID)
-		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = newHostID
-		if err := r.liveKit.UpdateMetaData(ctx, metaData); err != nil {
-			log.ZError(ctx, "update meta room data change host info failed", err, "old host:", hostUserID, "new host:", newHostID)
+		if newHostID != "" {
+			log.CInfo(ctx, "change host info when last host disconnected", "roomID:", r.roomID, "old host:", hostUserID, "new host:", newHostID)
+			metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = newHostID
+			if err := r.liveKit.UpdateMetaData(ctx, metaData); err != nil {
+				log.ZError(ctx, "update meta room data change host info failed", err, "old host:", hostUserID, "new host:", newHostID)
+			}
 		}
 	}
 }

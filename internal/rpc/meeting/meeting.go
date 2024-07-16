@@ -138,6 +138,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 			Token: token,
 			Url:   liveUrl,
 		}
+		return resp, nil
 	}
 	if room != nil {
 		if room.Metadata == "" {
@@ -526,7 +527,7 @@ func (s *meetingServer) CleanPreviousMeetings(ctx context.Context, req *pbmeetin
 			if p.Identity != req.UserID {
 				continue
 			}
-			if err := s.notifyKickOffMeetingInfo2Client(ctx, room.Name, req.UserID, constant.KickOffDuplicatedLogin, pbmeeting.KickOffReason_DuplicatedLogin); err != nil {
+			if err := s.notifyKickOffMeetingInfo2Client(ctx, room.Name, req.UserID, req.Reason, pbmeeting.KickOffReason(req.ReasonCode)); err != nil {
 				log.ZError(ctx, "notify kickoff msg to client error", err, "login and clean previous rooms", room.Name, req.UserID)
 			}
 			if err := s.meetingRtc.RemoveParticipant(ctx, room.Name, req.UserID); err != nil {

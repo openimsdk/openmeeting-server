@@ -41,3 +41,7 @@ func (u *UserApi) GetUsersPublicInfo(c *gin.Context) {
 
 func (u *UserApi) UpdateUserPassword(c *gin.Context) {
 }
+
+func (u *UserApi) UserLogout(c *gin.Context) {
+	a2r.Call(user.UserClient.UserLogout, u.Client, c)
+}

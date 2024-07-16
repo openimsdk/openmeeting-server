@@ -17,6 +17,7 @@ package user
 import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common/config"
+	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/convert"
 	"github.com/openimsdk/openmeeting-server/pkg/common/prommetrics"
 	"github.com/openimsdk/openmeeting-server/pkg/common/securetools"
@@ -151,7 +152,13 @@ func (s *userServer) UserLogin(ctx context.Context, req *pbuser.UserLoginReq) (*
 	resp.UserID = user.UserID
 	resp.Token = userToken
 	resp.Nickname = user.Nickname
-	if _, err := s.meetingRpc.Client.CleanPreviousMeetings(ctx, &pbmeeting.CleanPreviousMeetingsReq{UserID: user.UserID}); err != nil {
+	cleanMsg := &pbmeeting.CleanPreviousMeetingsReq{
+		UserID:     user.UserID,
+		Reason:     constant.KickOffDuplicatedLogin,
+		ReasonCode: int32(pbmeeting.KickOffReason_DuplicatedLogin),
+	}
+
+	if _, err := s.meetingRpc.Client.CleanPreviousMeetings(ctx, cleanMsg); err != nil {
 		if err != nil {
 			return nil, errs.WrapMsg(err, "clean meeting failed")
 		}
@@ -190,8 +197,30 @@ func (s *userServer) UpdateUserPassword(context.Context, *pbuser.UpdateUserPassw
 func (s *userServer) ClearUserToken(ctx context.Context, req *pbuser.ClearUserTokenReq) (*pbuser.ClearUserTokenResp, error) {
 	resp := &pbuser.ClearUserTokenResp{}
 
-	if err := s.userStorageHandler.ClearUserToken(ctx, req.UserID); err != nil {
+	if err := s.userStorageHandler.StoreToken(ctx, req.UserID, constant.KickOffMeetingMsg); err != nil {
 		return resp, errs.WrapMsg(err, "clear user token failed", "user", req.UserID)
+	}
+
+	return resp, nil
+}
+
+func (s *userServer) UserLogout(ctx context.Context, req *pbuser.LogoutReq) (*pbuser.LogoutResp, error) {
+	resp := &pbuser.LogoutResp{}
+
+	if err := s.userStorageHandler.ClearUserToken(ctx, req.UserID); err != nil {
+		return resp, errs.WrapMsg(err, "clear token failed")
+	}
+
+	// clean previous meeting
+	cleanMsg := &pbmeeting.CleanPreviousMeetingsReq{
+		UserID:     req.UserID,
+		Reason:     constant.KickOffLogout,
+		ReasonCode: int32(pbmeeting.KickOffReason_Logout),
+	}
+	if _, err := s.meetingRpc.Client.CleanPreviousMeetings(ctx, cleanMsg); err != nil {
+		if err != nil {
+			return nil, errs.WrapMsg(err, "clean meeting failed")
+		}
 	}
 
 	return resp, nil

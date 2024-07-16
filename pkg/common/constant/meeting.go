@@ -29,6 +29,7 @@ const (
 const (
 	KickOffDuplicatedLogin = "Duplicated Login"
 	KickOffOffline         = "Offline"
+	KickOffLogout          = "Logout"
 )
 
 const (
