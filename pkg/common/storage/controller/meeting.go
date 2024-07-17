@@ -16,6 +16,7 @@ type Meeting interface {
 	// Create Insert multiple external guarantees that the meetingID is not repeated and does not exist in the storage
 	Create(ctx context.Context, meetings []*model.MeetingInfo) (err error) //1
 	Update(ctx context.Context, meetingID string, updateData map[string]any) (err error)
+	Delete(ctx context.Context, meetingID string) (err error)
 	FindByStatus(ctx context.Context, status []string) ([]*model.MeetingInfo, error)
 	GenerateMeetingID(ctx context.Context) (string, error)
 }
@@ -55,6 +56,15 @@ func (u *MeetingStorageManager) Update(ctx context.Context, meetingID string, up
 	return u.tx.Transaction(ctx, func(ctx context.Context) error {
 		if err = u.db.Update(ctx, meetingID, updateData); err != nil {
 			return errs.WrapMsg(err, "update meeting info failed, meetingID:", meetingID)
+		}
+		return u.cache.DelMeeting(meetingID).ExecDel(ctx)
+	})
+}
+
+func (u *MeetingStorageManager) Delete(ctx context.Context, meetingID string) (err error) {
+	return u.tx.Transaction(ctx, func(ctx context.Context) error {
+		if err = u.db.Delete(ctx, meetingID); err != nil {
+			return errs.WrapMsg(err, "delete meeting info failed, meetingID:", meetingID)
 		}
 		return u.cache.DelMeeting(meetingID).ExecDel(ctx)
 	})

@@ -227,13 +227,17 @@ func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetin
 		return resp, errs.WrapMsg(err, "get meeting data failed")
 	}
 
+	deleted := false
+	hostUserID := dbInfo.CreatorUserID
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
+		deleted = true
 		log.ZDebug(ctx, "get room failed still can end meeting", "roomID", req.MeetingID)
 	} else {
-		if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
-			return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("user did not have permission to end somebody's meeting")
-		}
+		hostUserID = metaData.Detail.Info.CreatorDefinedMeeting.HostUserID
+	}
+	if !s.checkAuthPermission(hostUserID, req.UserID) {
+		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("user did not have permission to end somebody's meeting")
 	}
 	// change status to completed
 	status := constant.Completed
@@ -248,9 +252,16 @@ func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetin
 	if err := s.meetingRtc.CloseRoom(ctx, req.MeetingID); err != nil {
 		return resp, err
 	}
-	if err := s.meetingStorageHandler.Update(ctx, req.MeetingID, updateData); err != nil {
-		return resp, err
+	if deleted {
+		if err := s.meetingStorageHandler.Delete(ctx, req.MeetingID); err != nil {
+			return resp, err
+		}
+	} else {
+		if err := s.meetingStorageHandler.Update(ctx, req.MeetingID, updateData); err != nil {
+			return resp, err
+		}
 	}
+
 	return resp, nil
 }
 

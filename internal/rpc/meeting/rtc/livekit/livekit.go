@@ -3,7 +3,6 @@ package livekit
 import (
 	"context"
 	"encoding/json"
-	"github.com/golang/protobuf/jsonpb"
 	"github.com/livekit/protocol/auth"
 	"github.com/livekit/protocol/livekit"
 	lksdk "github.com/livekit/server-sdk-go"
@@ -15,6 +14,7 @@ import (
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/mcontext"
 	"github.com/twitchtv/twirp"
+	"google.golang.org/protobuf/proto"
 	"sync/atomic"
 	"time"
 )
@@ -267,10 +267,12 @@ func (x *LiveKit) ToggleMimeStream(ctx context.Context, roomID, userID, mineType
 }
 
 func (x *LiveKit) SendRoomData(ctx context.Context, roomID string, userIDList *[]string, sendData *meeting.NotifyMeetingData) error {
-	marshal := jsonpb.Marshaler{
-		EmitDefaults: false,
-	}
-	sendMsg, err := marshal.MarshalToString(sendData)
+	//marshal := jsonpb.Marshaler{}
+	//sendMsg, err := marshal.MarshalToString(sendData)
+	//if err != nil {
+	//	return errs.WrapMsg(err, "marshal send data failed")
+	//}
+	sendMsg, err := proto.Marshal(sendData)
 	if err != nil {
 		return errs.WrapMsg(err, "marshal send data failed")
 	}
@@ -278,7 +280,7 @@ func (x *LiveKit) SendRoomData(ctx context.Context, roomID string, userIDList *[
 	topic := "system"
 	req := &livekit.SendDataRequest{
 		Room:  roomID,
-		Data:  []byte(sendMsg),
+		Data:  sendMsg,
 		Topic: &topic,
 	}
 	if userIDList != nil {
