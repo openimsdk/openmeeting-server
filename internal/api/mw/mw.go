@@ -1,6 +1,7 @@
 package mw
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	cmConstant "github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/servererrs"
@@ -10,6 +11,7 @@ import (
 	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/apiresp"
 	"github.com/openimsdk/tools/errs"
+	"github.com/openimsdk/tools/log"
 )
 
 type MW struct {
@@ -60,7 +62,8 @@ func (o *MW) isValidToken(c *gin.Context, userID, userToken string) error {
 		return servererrs.ErrKickOffMeeting.WrapMsg("kick off meeting, please login again")
 	}
 	if resp.Token != "" && resp.Token != userToken {
-		return servererrs.ErrKickOffMeeting.WrapMsg("kick off meeting, please login again")
+		log.ZDebug(context.Background(), "token not match", "redis token:", resp.Token, "request token", userToken)
+		return servererrs.ErrKickOffMeeting.WrapMsg("kick off meeting for login duplicated, please login again")
 	}
 	if resp.Token == "" || resp.Token != userToken {
 		return errs.ErrTokenExpired.Wrap()

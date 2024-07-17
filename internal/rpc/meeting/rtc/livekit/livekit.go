@@ -100,11 +100,11 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, ro
 	roomCallback := &lksdk.RoomCallback{
 		ParticipantCallback: lksdk.ParticipantCallback{
 			OnDataReceived: func(data []byte, rp *lksdk.RemoteParticipant) {
-				log.CInfo(ctx, "data received:", "data:", string(data))
+				log.ZDebug(ctx, "data received:", "data:", string(data))
 			},
 		},
 		OnRoomMetadataChanged: func(metadata string) {
-			log.CInfo(ctx, "meta data change", "metaData:", metadata)
+			log.ZDebug(ctx, "meta data change", "metaData:", metadata)
 		},
 		OnParticipantConnected:    callback.OnParticipantConnected,
 		OnParticipantDisconnected: callback.OnParticipantDisconnected,
@@ -267,11 +267,14 @@ func (x *LiveKit) ToggleMimeStream(ctx context.Context, roomID, userID, mineType
 }
 
 func (x *LiveKit) SendRoomData(ctx context.Context, roomID string, userIDList *[]string, sendData *meeting.NotifyMeetingData) error {
-	marshal := jsonpb.Marshaler{}
+	marshal := jsonpb.Marshaler{
+		EmitDefaults: false,
+	}
 	sendMsg, err := marshal.MarshalToString(sendData)
 	if err != nil {
 		return errs.WrapMsg(err, "marshal send data failed")
 	}
+	log.ZDebug(ctx, "send room data after marshal", "sendMsg:", sendMsg)
 	topic := "system"
 	req := &livekit.SendDataRequest{
 		Room:  roomID,

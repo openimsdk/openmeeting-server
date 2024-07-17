@@ -36,12 +36,9 @@ func (s *meetingServer) sendStreamOperateData2Client(ctx context.Context, roomID
 	operationData := &pbmeeting.UserOperationData{
 		UserID: userID,
 	}
-	if cameraOn != nil {
-		operationData.CameraOnEntry = cameraOn.Value
-	}
-	if microphoneOn != nil {
-		operationData.MicrophoneOnEntry = microphoneOn.Value
-	}
+	operationData.CameraOnEntry = cameraOn
+	operationData.MicrophoneOnEntry = microphoneOn
+
 	streamOperationData := &pbmeeting.StreamOperateData{
 		Operation: []*pbmeeting.UserOperationData{operationData},
 	}
@@ -86,12 +83,8 @@ func (s *meetingServer) broadcastStreamOperateData(ctx context.Context, req *pbm
 		operationData := &pbmeeting.UserOperationData{
 			UserID: v,
 		}
-		if req.CameraOnEntry != nil {
-			operationData.CameraOnEntry = req.CameraOnEntry.Value
-		}
-		if req.MicrophoneOnEntry != nil {
-			operationData.MicrophoneOnEntry = req.MicrophoneOnEntry.Value
-		}
+		operationData.CameraOnEntry = req.CameraOnEntry
+		operationData.MicrophoneOnEntry = req.MicrophoneOnEntry
 		operationList = append(operationList, operationData)
 	}
 
