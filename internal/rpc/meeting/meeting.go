@@ -222,18 +222,19 @@ func (s *meetingServer) LeaveMeeting(ctx context.Context, req *pbmeeting.LeaveMe
 
 func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetingReq) (*pbmeeting.EndMeetingResp, error) {
 	resp := &pbmeeting.EndMeetingResp{}
-	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
-	if err != nil {
-		return nil, err
-	}
-	if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
-		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("user did not have permission to end somebody's meeting")
-	}
 	dbInfo, err := s.meetingStorageHandler.TakeWithError(ctx, req.MeetingID)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get meeting data failed")
 	}
 
+	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	if err != nil {
+		log.ZDebug(ctx, "get room failed still can end meeting", "roomID", req.MeetingID)
+	} else {
+		if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
+			return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("user did not have permission to end somebody's meeting")
+		}
+	}
 	// change status to completed
 	status := constant.Completed
 	// if we have next meeting schedule
