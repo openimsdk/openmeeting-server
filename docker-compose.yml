@@ -1,0 +1,84 @@
+version: '3.8'
+
+networks:
+  openmeeting:
+    driver: bridge
+
+services:
+  mongodb:
+    image: "${MONGO_IMAGE}"
+    ports:
+      - "37017:27017"
+    container_name: mongo
+    command: [ "/bin/bash", "-c", "/docker-entrypoint-initdb.d/mongo-init.sh; docker-entrypoint.sh mongod --wiredTigerCacheSizeGB 1 --auth" ]
+    volumes:
+      - "${DATA_DIR}/mongodb/data/db:/data/db"
+      - "${DATA_DIR}/mongodb/data/logs:/data/logs"
+      - "${DATA_DIR}/mongodb/data/conf:/etc/mongo"
+      - "./scripts/mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh:ro"
+    environment:
+      - TZ=Asia/Shanghai
+      - wiredTigerCacheSizeGB=1
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=openMeeting123
+      - MONGO_INITDB_DATABASE=openmeeting_v1
+      - MONGO_OPENIM_USERNAME=openmeeting
+      - MONGO_OPENIM_PASSWORD=openmeeting123
+    restart: always
+    networks:
+      - openmeeting
+
+  redis:
+    image: "${REDIS_IMAGE}"
+    container_name: redis
+    ports:
+      - "16379:6379"
+    volumes:
+      - "${DATA_DIR}/redis/data:/data"
+      - "${DATA_DIR}/redis/config/redis.conf:${DOCKER_DIR}/redis/config/redis.conf"
+    environment:
+      TZ: Asia/Shanghai
+    restart: always
+    sysctls:
+      net.core.somaxconn: 1024
+    command: redis-server ${DOCKER_DIR}/redis/config/redis.conf --requirepass openmeeting_v1 --appendonly yes
+    networks:
+      - openmeeting
+
+  etcd:
+    image: "${ETCD_IMAGE}"
+    container_name: etcd
+    ports:
+      - "12379:2379"
+      - "12380:2380"
+    environment:
+      - ETCD_NAME=s1
+      - ETCD_DATA_DIR=/etcd-data
+      - ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_ADVERTISE_CLIENT_URLS=http://0.0.0.0:2379
+      - ETCD_LISTEN_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://0.0.0.0:2380
+      - ETCD_INITIAL_CLUSTER=s1=http://0.0.0.0:2380
+      - ETCD_INITIAL_CLUSTER_TOKEN=tkn
+      - ETCD_INITIAL_CLUSTER_STATE=new
+    restart: always
+    networks:
+      - openmeeting
+
+  livekit:
+    image: "${LIVEKIT_IMAGE}"
+    container_name: livekit
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+    volumes:
+      - ${DATA_DIR}/livekit/config/livekit.yml:${DOCKER_DIR}/livekit.yaml
+    environment:
+      TZ: Asia/Shanghai
+    restart: always
+    command: --config ${DOCKER_DIR}/livekit.yaml --bind 0.0.0.0
+    networks:
+      - openmeeting
+    depends_on:
+      - redis

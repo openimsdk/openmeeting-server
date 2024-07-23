@@ -1,0 +1,20 @@
+port: 7880
+log_level: debug
+rtc:
+  port_range_start: 50000
+  port_range_end: 60000
+  tcp_port: 7881
+  use_external_ip: true
+
+#redis:
+#  address: 127.0.0.1:16379
+#  db: 2
+#  password: openmeeting_v1
+
+keys:
+  APIGPW3gnFTzqHH: 23ztfSqsfQ8hKkHzHTl3Z4bvaxro0snjk5jwbp5p6Q3
+
+room:
+  empty_timeout: 72000
+  departure_timeout: 86400
+
