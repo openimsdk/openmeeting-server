@@ -125,7 +125,7 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, ro
 	if _, err = lksdk.ConnectToRoomWithToken(x.conf.InnerURL, token, roomCallback); err != nil {
 		return "", "", "", errs.WrapMsg(err, "connect to room with token failed, meetingID: ", meetingID)
 	}
-	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, identify, participantMetaData, true)
+	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, identify, participantMetaData, false)
 	if err != nil {
 		return "", "", "", errs.WrapMsg(err, "get join token failed, meetingID:", meetingID)
 	}
