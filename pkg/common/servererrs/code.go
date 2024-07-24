@@ -19,24 +19,24 @@ const UnknownCode = 1000
 
 // Error codes for various error scenarios.
 const (
-	HasRegistered        = 10001 // user has already registered
-	PasswordErr          = 10002 // Password error
-	NotFoundAccountErr   = 10003 // not found user account
-	NotFoundUserTokenErr = 10004 // not found user token
-	KickOffMeetingError  = 10010
+	HasRegistered        = 100001 // user has already registered
+	PasswordErr          = 100002 // Password error
+	NotFoundAccountErr   = 100003 // not found user account
+	NotFoundUserTokenErr = 100004 // not found user token
+	KickOffMeetingError  = 100010
 
-	MeetingUserLimitError = 20001 // one user joins more than one meeting
-	MeetingPasswordError  = 20002 // password not match error
-	MeetingAuthCheckError = 20003 // meeting auth check permission error
-	MeetingCompleteError  = 20004 // meeting update check error
+	MeetingUserLimitError = 200001 // one user joins more than one meeting
+	MeetingPasswordError  = 200002 // password not match error
+	MeetingAuthCheckError = 200003 // meeting auth check permission error
+	MeetingCompleteError  = 200004 // meeting update check error
 )
 
 // General error codes.
 const (
-	NoError       = 0     // No error
-	DatabaseError = 90002 // Database error (redis/mysql, etc.)
-	NetworkError  = 90004 // Network error
-	DataError     = 90007 // Data error
+	NoError       = 0      // No error
+	DatabaseError = 900002 // Database error (redis/mysql, etc.)
+	NetworkError  = 900004 // Network error
+	DataError     = 900007 // Data error
 
 	// General error codes.
 	ServerInternalError = 500  // Server internal error
