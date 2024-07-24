@@ -48,8 +48,12 @@ func (u *MeetingMgo) Delete(ctx context.Context, meetingID string) error {
 	return mongoutil.DeleteOne(ctx, u.coll, bson.M{"meeting_id": meetingID})
 }
 
-func (u *MeetingMgo) FindByStatus(ctx context.Context, status []string) ([]*model.MeetingInfo, error) {
-	return mongoutil.Find[*model.MeetingInfo](ctx, u.coll, bson.M{"status": bson.M{
-		"$in": status,
-	}})
+func (u *MeetingMgo) FindByStatus(ctx context.Context, status []string, userID string) ([]*model.MeetingInfo, error) {
+	filter := bson.M{
+		"status": bson.M{"$in": status},
+	}
+	if userID != "" {
+		filter["creator_user_id"] = userID
+	}
+	return mongoutil.Find[*model.MeetingInfo](ctx, u.coll, filter)
 }

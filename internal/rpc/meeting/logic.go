@@ -426,7 +426,7 @@ func (s *meetingServer) nextMeetingTimestamp(ctx context.Context, info *model.Me
 }
 
 func (s *meetingServer) refreshMeetingStatus(ctx context.Context) {
-	meetings, err := s.meetingStorageHandler.FindByStatus(ctx, []string{constant.InProgress, constant.Scheduled})
+	meetings, err := s.meetingStorageHandler.FindByStatus(ctx, []string{constant.InProgress, constant.Scheduled}, "")
 	if err != nil {
 		log.ZError(ctx, "find meetings failed", err)
 		return

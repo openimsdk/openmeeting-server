@@ -268,7 +268,7 @@ func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetin
 func (s *meetingServer) GetMeetings(ctx context.Context, req *pbmeeting.GetMeetingsReq) (*pbmeeting.GetMeetingsResp, error) {
 	s.refreshMeetingStatus(ctx)
 	resp := &pbmeeting.GetMeetingsResp{}
-	meetings, err := s.meetingStorageHandler.FindByStatus(ctx, req.Status)
+	meetings, err := s.meetingStorageHandler.FindByStatus(ctx, req.Status, req.UserID)
 	if err != nil {
 		return resp, err
 	}
