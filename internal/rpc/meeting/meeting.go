@@ -160,7 +160,6 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 
 	metaData.Detail.Info.SystemGenerated.MeetingID = req.MeetingID
 	participantMetaData := s.generateParticipantMetaData(userInfo)
-
 	token, liveUrl, err := s.meetingRtc.GetJoinToken(ctx, req.MeetingID, req.UserID, participantMetaData, false)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get join token failed")
@@ -227,11 +226,9 @@ func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetin
 		return resp, errs.WrapMsg(err, "get meeting data failed")
 	}
 
-	deleted := false
 	hostUserID := dbInfo.CreatorUserID
 	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
 	if err != nil {
-		deleted = true
 		log.ZDebug(ctx, "get room failed still can end meeting", "roomID", req.MeetingID)
 	} else {
 		hostUserID = metaData.Detail.Info.CreatorDefinedMeeting.HostUserID
@@ -252,14 +249,16 @@ func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetin
 	if err := s.meetingRtc.CloseRoom(ctx, req.MeetingID); err != nil {
 		return resp, err
 	}
-	if deleted {
+	if req.EndType == pbmeeting.MeetingEndType_EndType {
+		if err := s.meetingStorageHandler.Update(ctx, req.MeetingID, updateData); err != nil {
+			return resp, err
+		}
+	} else if req.EndType == pbmeeting.MeetingEndType_CancelType {
 		if err := s.meetingStorageHandler.Delete(ctx, req.MeetingID); err != nil {
 			return resp, err
 		}
 	} else {
-		if err := s.meetingStorageHandler.Update(ctx, req.MeetingID, updateData); err != nil {
-			return resp, err
-		}
+		return resp, errs.ErrArgs.WrapMsg("not support for this end type", "type:", req.EndType)
 	}
 
 	return resp, nil

@@ -9,13 +9,13 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/openimsdk/protocol v0.0.69-alpha.36
+	github.com/openimsdk/protocol v0.0.69-alpha.43
 	github.com/openimsdk/tools v0.0.49-alpha.46
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.18.0
 	go.mongodb.org/mongo-driver v1.14.0
 	google.golang.org/grpc v1.62.1
-	google.golang.org/protobuf v1.33.0 // indirect
+	google.golang.org/protobuf v1.33.0
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
