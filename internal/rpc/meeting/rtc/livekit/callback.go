@@ -35,11 +35,19 @@ func (r *CallbackLiveKit) OnRoomParticipantConnected(ctx context.Context, userID
 		"room participant number:", len(participants),
 		"hostID", hostUserID)
 
-	// when first coming deleted
-	//if len(participants) == 2 {
-	//	if userID == hostUserID {
-	//		return
-	//	}
+	// when first coming
+	if len(participants) == 2 {
+		// when first comer is creator, he is not host, so set him as the host
+		if userID == metaData.Detail.Info.SystemGenerated.CreatorUserID && userID != hostUserID {
+			metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = userID
+			log.CInfo(ctx, "set host info as default when creator is the first one to come in",
+				"roomID:", r.roomID, "new host:", metaData.Detail.Info.SystemGenerated.CreatorUserID)
+			if err := r.liveKit.UpdateMetaData(ctx, metaData); err != nil {
+				log.ZError(ctx, "update meta room data change host info failed", err,
+					"new host:", metaData.Detail.Info.SystemGenerated.CreatorUserID)
+			}
+		}
+	}
 	if hostUserID == "" {
 		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = metaData.Detail.Info.SystemGenerated.CreatorUserID
 		log.CInfo(ctx, "set host info as default when last host is nil",

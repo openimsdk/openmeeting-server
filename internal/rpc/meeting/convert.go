@@ -20,6 +20,10 @@ func (s *meetingServer) getHostUserID(metadata *pbmeeting.MeetingMetadata) strin
 	return metadata.Detail.Info.CreatorDefinedMeeting.HostUserID
 }
 
+func (s *meetingServer) getCreatorUserID(metadata *pbmeeting.MeetingMetadata) string {
+	return metadata.Detail.Info.SystemGenerated.CreatorUserID
+}
+
 func (s *meetingServer) generateMeetingDBData4Booking(ctx context.Context, req *pbmeeting.BookMeetingReq) (*model.MeetingInfo, error) {
 	meetingID, err := s.meetingStorageHandler.GenerateMeetingID(ctx)
 	if err != nil {
@@ -295,12 +299,15 @@ func (s *meetingServer) getDBUpdateData(ctx context.Context, info *model.Meeting
 
 	// Update main fields
 	s.updateMainFields(ctx, &updateData, req)
+	log.ZDebug(ctx, "after update main fields", "update data:", updateData)
 
 	// Update repeat info
 	s.updateRepeatInfo(&updateData, req)
+	log.ZDebug(ctx, "after update repeat info fields", "update data:", updateData)
 
 	// Update settings
 	s.updateSettings(info, &updateData, req)
+	log.ZDebug(ctx, "after update setting fields", "update data:", updateData)
 
 	return &updateData
 }
@@ -314,7 +321,9 @@ func (s *meetingServer) updateMainFields(ctx context.Context, updateData *map[st
 			case reflect.String:
 				(*updateData)[key] = v.String()
 			case reflect.Int:
+				(*updateData)[key] = v.Int()
 			case reflect.Int64:
+				(*updateData)[key] = v.Int()
 			case reflect.Int32:
 				(*updateData)[key] = v.Int()
 			case reflect.Bool:

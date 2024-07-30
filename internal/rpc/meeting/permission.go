@@ -6,8 +6,8 @@ import (
 	"github.com/openimsdk/tools/errs"
 )
 
-func (s *meetingServer) checkAuthPermission(hostUserID, requestUserID string) bool {
-	return hostUserID == requestUserID
+func (s *meetingServer) checkAuthPermission(creatorUserID, hostUserID, requestUserID string) bool {
+	return hostUserID == requestUserID || creatorUserID == requestUserID
 }
 
 func (s *meetingServer) checkUserEnableCamera(setting *pbmeeting.MeetingSetting, personalData *pbmeeting.PersonalData) bool {

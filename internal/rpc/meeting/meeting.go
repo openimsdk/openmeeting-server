@@ -233,7 +233,7 @@ func (s *meetingServer) EndMeeting(ctx context.Context, req *pbmeeting.EndMeetin
 	} else {
 		hostUserID = metaData.Detail.Info.CreatorDefinedMeeting.HostUserID
 	}
-	if !s.checkAuthPermission(hostUserID, req.UserID) {
+	if !s.checkAuthPermission(dbInfo.CreatorUserID, hostUserID, req.UserID) {
 		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("user did not have permission to end somebody's meeting")
 	}
 	// change status to completed
@@ -325,6 +325,8 @@ func (s *meetingServer) UpdateMeeting(ctx context.Context, req *pbmeeting.Update
 		log.ZDebug(ctx, "no need to update meeting", "meeting id", req.MeetingID)
 		return resp, nil
 	}
+	log.ZDebug(ctx, "update data:", "updates", updateData)
+
 	if err := s.meetingStorageHandler.Update(ctx, req.MeetingID, *updateData); err != nil {
 		return resp, err
 	}
@@ -413,8 +415,9 @@ func (s *meetingServer) OperateRoomAllStream(ctx context.Context, req *pbmeeting
 		return resp, err
 	}
 
-	hostUser := s.getHostUserID(metaData)
-	if !s.checkAuthPermission(hostUser, req.OperatorUserID) {
+	hostUserID := s.getHostUserID(metaData)
+	creatorUserID := s.getCreatorUserID(metaData)
+	if !s.checkAuthPermission(creatorUserID, hostUserID, req.OperatorUserID) {
 		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("do not have the permission")
 	}
 	if req.MicrophoneOnEntry != nil {
@@ -446,7 +449,9 @@ func (s *meetingServer) ModifyMeetingParticipantNickName(ctx context.Context, re
 		return resp, errs.WrapMsg(err, "get room data failed", req.MeetingID)
 	}
 	// check permission
-	if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
+	hostUserID := s.getHostUserID(metaData)
+	creatorUserID := s.getCreatorUserID(metaData)
+	if !s.checkAuthPermission(creatorUserID, hostUserID, req.UserID) {
 		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("user did not have permission to modify meeting participant's nickname")
 	}
 	participantMetaData, err := s.meetingRtc.GetParticipantMetaData(ctx, req.MeetingID, req.ParticipantUserID)
@@ -467,8 +472,10 @@ func (s *meetingServer) RemoveParticipants(ctx context.Context, req *pbmeeting.R
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get room data failed", req.MeetingID)
 	}
+	hostUserID := s.getHostUserID(metaData)
+	creatorUserID := s.getCreatorUserID(metaData)
 	// check permission only host can remove somebody
-	if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
+	if !s.checkAuthPermission(creatorUserID, hostUserID, req.UserID) {
 		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("user did not have permission to remove participant out of the meeting")
 	}
 	var failedList []string
@@ -494,8 +501,10 @@ func (s *meetingServer) SetMeetingHostInfo(ctx context.Context, req *pbmeeting.S
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get room data failed", req.MeetingID)
 	}
+	hostUserID := s.getHostUserID(metaData)
+	creatorUserID := s.getCreatorUserID(metaData)
 	// check permission only host can remove somebody
-	if !s.checkAuthPermission(metaData.Detail.Info.CreatorDefinedMeeting.HostUserID, req.UserID) {
+	if !s.checkAuthPermission(creatorUserID, hostUserID, req.UserID) {
 		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("user did not have permission to set host info of the meeting")
 	}
 	if req.HostUserID != nil {
