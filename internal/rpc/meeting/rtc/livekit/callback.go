@@ -35,7 +35,7 @@ func (r *CallbackLiveKit) OnRoomParticipantConnected(ctx context.Context, userID
 		"room participant number:", len(participants),
 		"hostID", hostUserID)
 
-	// when first coming
+	// when first coming delete auto change host
 	if len(participants) == 2 {
 		// when first comer is creator, he is not host, so set him as the host
 		if userID == metaData.Detail.Info.SystemGenerated.CreatorUserID && userID != hostUserID {
@@ -64,30 +64,18 @@ func (r *CallbackLiveKit) OnRoomParticipantDisconnected(ctx context.Context, use
 	if err := r.liveKit.RemoveParticipant(ctx, r.roomID, userID); err != nil {
 		log.ZWarn(ctx, "remove participant failed", err)
 	}
+	// auto change host to creator
 	metaData, err := r.liveKit.GetRoomData(ctx, r.roomID)
 	if err != nil {
 		return
 	}
 	hostUserID := metaData.Detail.Info.CreatorDefinedMeeting.HostUserID
-	if hostUserID == userID {
-		participants, err := r.liveKit.ListParticipants(ctx, r.roomID)
-		if err != nil {
-			return
-		}
-		newHostID := ""
-		for _, p := range participants {
-			if p.Identity == r.roomID {
-				continue
-			}
-			newHostID = p.Identity
-			break
-		}
-		if newHostID != "" {
-			log.CInfo(ctx, "change host info when last host disconnected", "roomID:", r.roomID, "old host:", hostUserID, "new host:", newHostID)
-			metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = newHostID
-			if err := r.liveKit.UpdateMetaData(ctx, metaData); err != nil {
-				log.ZError(ctx, "update meta room data change host info failed", err, "old host:", hostUserID, "new host:", newHostID)
-			}
+	creatorUserID := metaData.Detail.Info.SystemGenerated.CreatorUserID
+	if hostUserID == userID && creatorUserID != hostUserID {
+		log.CInfo(ctx, "change host info when last host disconnected", "roomID:", r.roomID, "old host:", hostUserID, "default host:", creatorUserID)
+		metaData.Detail.Info.CreatorDefinedMeeting.HostUserID = creatorUserID
+		if err := r.liveKit.UpdateMetaData(ctx, metaData); err != nil {
+			log.ZError(ctx, "update meta room data change host info failed", err, "old host:", hostUserID, "default host:", creatorUserID)
 		}
 	}
 }
