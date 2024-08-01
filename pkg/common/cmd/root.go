@@ -130,12 +130,10 @@ func (r *RootCmd) initializeLogger(cmdOpts *CmdOpts) error {
 		r.log.IsStdout,
 		r.log.IsJson,
 		r.log.StorageLocation,
+		r.log.RemainRotationCount,
 		r.log.RotationTime,
-		2,
-		86400,
-		5*86400,
-		false,
 		config.Version,
+		r.log.IsSimplify,
 	)
 	if err != nil {
 		return errs.Wrap(err)

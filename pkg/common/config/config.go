@@ -31,6 +31,7 @@ type Log struct {
 	RemainLogLevel      int    `mapstructure:"remainLogLevel"`
 	IsStdout            bool   `mapstructure:"isStdout"`
 	IsJson              bool   `mapstructure:"isJson"`
+	IsSimplify          bool   `mapstructure:"isSimplify"`
 	WithStack           bool   `mapstructure:"withStack"`
 }
 
