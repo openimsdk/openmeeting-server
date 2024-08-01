@@ -20,8 +20,6 @@ OpenMeeting是一个使用Golang开发的开源实时音视频会议系统。Ope
 
 ![App-OpenMeeting 关系](./assets/open-meeting-design.png)
 
-👉 **[探索 GO SDK](https://github.com/openimsdk/openim-sdk-core)**
-
 ## 🌐 OpenMeetingServer 介绍
 
 + **OpenMeetingServer** 的特点包括：
@@ -47,7 +45,7 @@ OpenMeeting是一个使用Golang开发的开源实时音视频会议系统。Ope
 
 为了便于用户体验，我们提供了多种部署解决方案，您可以根据以下列表选择适合您的部署方式：
 
-+ **[源代码部署指南]()**
++ **[源代码部署指南](https://github.com/openimsdk/openmeeting-server/blob/main/deployments/deployment_zh_CN.md)**
 + **[Docker 部署指南]()**
 
 ## 系统支持
@@ -75,6 +73,6 @@ OpenMeeting 在 GNU AFFERO GENERAL PUBLIC LICENSE 3.0 许可下可用。查看[L
 
 ## 🔮 Thanks to our contributors!
 
-<a href="https://github.com/openimsdk/open-im-server/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=openimsdk/open-im-server" />
+<a href="https://github.com/openimsdk/openmeeting-server/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=openimsdk/openmeeting-server" />
 </a>
