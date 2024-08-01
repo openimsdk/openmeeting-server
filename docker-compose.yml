@@ -69,9 +69,9 @@ services:
     image: "${LIVEKIT_IMAGE}"
     container_name: livekit
     ports:
-      - "7880:7880"
-      - "7881:7881"
-      - "7882:7882/udp"
+      - "17880:7880"
+      - "17881:7881"
+      - "17882:7882/udp"
     volumes:
       - ${DATA_DIR}/livekit/config/livekit.yml:${DOCKER_DIR}/livekit.yaml
     environment:

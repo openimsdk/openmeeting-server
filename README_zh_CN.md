@@ -15,18 +15,23 @@
 
 ## Ⓜ️ 关于 OpenMeeting
 
-与zoom，腾讯会议，飞书会议等独立会议应用不同，OpenMeeting提供了专为开发者设计的开源实时音视频通讯解决方案，而不是直接安装使用的独立聊天应用。OpenMeeting为开发者提供了一整套实时音视频会议的工具和服务，包括会议音视频收发、共享屏幕通信、用户管理等。总体来说，OpenMeeting旨在为开发者提供必要的工具和框架，帮助他们在自己的应用中实现高效的实时音视频通信的解决方案。
+OpenMeeting是一个使用Golang开发的开源实时音视频会议系统。OpenMeeting提供了用户管理、会议管理、音视频收发、即刻会议、预约会议、共享屏幕等功能，旨在为用户提供便捷的远程会议体验。它类似于Zoom和腾讯会议，同时支持私有化部署，确保企业和个人用户的数据安全和隐私。
 
-![App-OpenIM 关系](./assets/open-meeting-design.png)
+
+![App-OpenMeeting 关系](./assets/open-meeting-design.png)
 
 👉 **[探索 GO SDK](https://github.com/openimsdk/openim-sdk-core)**
 
 ## 🌐 OpenMeetingServer 介绍
 
 + **OpenMeetingServer** 的特点包括：
-    - 🌐 微服务架构：支持集群模式，包括网关(gateway)和多个rpc服务。
-    - 🚀 多样的部署方式：支持源代码、Kubernetes或Docker部署。
-    - 海量用户支持：支持十万级超大群组，千万级用户和百亿级消息。
+    - 立即会议：用户可以随时创建即时会议，邀请他人加入，进行高效的远程沟通。
+    - 预约会议：支持预约未来的会议，设置会议时间和参与者，系统会在会议开始前提醒用户。
+    - 共享屏幕：用户可以在会议中共享自己的屏幕，便于演示和协作。
+    - 高质量音视频：提供高质量的音视频传输，确保会议流畅进行。
+    - 多平台支持：支持多种操作系统，包括Windows、macOS、Linux等。
+    - 微服务架构：支持集群模式，包括网关(gateway)和多个rpc服务。
+    - 多样的部署方式：支持源代码、Kubernetes或Docker部署。
 
 ### 增强的业务功能：
 
@@ -42,8 +47,8 @@
 
 为了便于用户体验，我们提供了多种部署解决方案，您可以根据以下列表选择适合您的部署方式：
 
-+ **[源代码部署指南](https://docs.openim.io/guides/gettingStarted/imSourceCodeDeployment)**
-+ **[Docker 部署指南](https://docs.openim.io/guides/gettingStarted/dockerCompose)**
++ **[源代码部署指南]()**
++ **[Docker 部署指南]()**
 
 ## 系统支持
 
@@ -51,18 +56,18 @@
 
 ## :link: 相关链接
 
-+ **[开发手册](https://docs.openim.io/)**
-+ **[更新日志](https://github.com/openimsdk/open-im-server/blob/main/CHANGELOG.md)**
++ **[开发手册]()**
++ **[更新日志]()**
 
 ## :writing_hand: 如何贡献
 
 我们欢迎任何形式的贡献！在提交 Pull Request 之前，请确保阅读我们的[贡献者文档](https://github.com/openimsdk/open-im-server/blob/main/CONTRIBUTING.md)
 
-+ **[报告 Bug](https://github.com/openimsdk/open-im-server/issues/new?assignees=&labels=bug&template=bug_report.md&title=)**
-+ **[提出新特性](https://github.com/openimsdk/open-im-server/issues/new?assignees=&labels=enhancement&template=feature_request.md&title=)**
-+ **[提交 Pull Request](https://github.com/openimsdk/open-im-server/pulls)**
++ **[报告 Bug](https://github.com/openimsdk/openmeeting-server/issues/new?assignees=&labels=kind%2Fbug&projects=&template=bug-report.yaml&title=%5BBUG%5D+)**
++ **[提出新特性](https://github.com/openimsdk/openmeeting-server/issues/new?assignees=&labels=feature+request&projects=&template=feature-request.yaml&title=%5BFEATURE+REQUEST%5D+)**
++ **[提交 Pull Request](https://github.com/openimsdk/openmeeting-server/pulls)**
 
-感谢您的贡献，一起来打造强大的即时通讯解决方案！
+感谢您的贡献，一起来打造强大的即时音视频会议系统！
 
 ## :closed_book: 许可证
 
