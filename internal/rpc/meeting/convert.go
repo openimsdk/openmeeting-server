@@ -86,12 +86,7 @@ func (s *meetingServer) generateMeetingDBData4Create(ctx context.Context, req *p
 	}
 
 	marshal := jsonpb.Marshaler{}
-	setting := &pbmeeting.MeetingSetting{
-		DisableCameraOnJoin:            true,
-		DisableMicrophoneOnJoin:        true,
-		CanParticipantJoinMeetingEarly: true,
-	}
-	settingString, err := marshal.MarshalToString(setting)
+	settingString, err := marshal.MarshalToString(req.Setting)
 	if err != nil {
 		return nil, errs.WrapMsg(err, "marshal send data failed")
 	}
