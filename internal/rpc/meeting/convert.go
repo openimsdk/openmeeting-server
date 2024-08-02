@@ -85,6 +85,17 @@ func (s *meetingServer) generateMeetingDBData4Create(ctx context.Context, req *p
 		return nil, errs.WrapMsg(err, "generate meeting id failed")
 	}
 
+	marshal := jsonpb.Marshaler{}
+	setting := &pbmeeting.MeetingSetting{
+		DisableCameraOnJoin:            true,
+		DisableMicrophoneOnJoin:        true,
+		CanParticipantJoinMeetingEarly: true,
+	}
+	settingString, err := marshal.MarshalToString(setting)
+	if err != nil {
+		return nil, errs.WrapMsg(err, "marshal send data failed")
+	}
+
 	return &model.MeetingInfo{
 		MeetingID:       meetingID,
 		Title:           req.CreatorDefinedMeetingInfo.Title,
@@ -94,6 +105,7 @@ func (s *meetingServer) generateMeetingDBData4Create(ctx context.Context, req *p
 		Password:        req.CreatorDefinedMeetingInfo.Password,
 		Status:          constant.InProgress,
 		CreatorUserID:   req.CreatorUserID,
+		Setting:         settingString,
 	}, nil
 }
 
