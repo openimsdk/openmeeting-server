@@ -10,7 +10,6 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	sysConstant "github.com/openimsdk/protocol/constant"
 	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
-	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 )
@@ -46,7 +45,7 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 		return resp, servererrs.ErrMeetingUserLimit.WrapMsg("user already in meeting")
 	}
 
-	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.CreatorUserID})
+	userInfo, err := s.userRpc.GetUserInfo(ctx, req.CreatorUserID)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get user info failed")
 	}
@@ -87,7 +86,7 @@ func (s *meetingServer) CreateImmediateMeeting(ctx context.Context, req *pbmeeti
 
 func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeetingReq) (*pbmeeting.JoinMeetingResp, error) {
 	resp := &pbmeeting.JoinMeetingResp{}
-	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.UserID})
+	userInfo, err := s.userRpc.GetUserInfo(ctx, req.UserID)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get user info failed")
 	}
@@ -189,7 +188,7 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 
 func (s *meetingServer) GetMeetingToken(ctx context.Context, req *pbmeeting.GetMeetingTokenReq) (*pbmeeting.GetMeetingTokenResp, error) {
 	resp := &pbmeeting.GetMeetingTokenResp{}
-	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: req.UserID})
+	userInfo, err := s.userRpc.GetUserInfo(ctx, req.UserID)
 	if err != nil {
 		return resp, errs.WrapMsg(err, "get user info failed")
 	}

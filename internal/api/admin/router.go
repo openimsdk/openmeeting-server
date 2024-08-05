@@ -10,6 +10,7 @@ import (
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/openmeeting-server/pkg/common/token"
 	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
+	userfind "github.com/openimsdk/openmeeting-server/pkg/user"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
 	"github.com/openimsdk/tools/discovery"
@@ -54,8 +55,9 @@ func newAdminGinRouter(ctx context.Context, disCov discovery.SvcDiscoveryRegistr
 	userCache := redis.NewUser(rdb, userDB, redis.GetDefaultOpt())
 	database := controller.NewUser(userDB, userCache, mgoCli.GetTx())
 
+	user := userfind.NewMeeting(disCov, config.Share.RpcRegisterName.User)
 	// init rpc client here
-	userRpc := rpcclient.NewUser(disCov, config.Share.RpcRegisterName.User)
+	userRpc := rpcclient.NewUser(user)
 	userToken := token.New(config.AdminAPI.Expire, config.AdminAPI.Secret)
 	u := NewAdminApi(database, *userRpc, userToken)
 	adminRouterGroup := r.Group("/admin")

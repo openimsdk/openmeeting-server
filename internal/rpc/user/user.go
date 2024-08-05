@@ -225,3 +225,24 @@ func (s *userServer) UserLogout(ctx context.Context, req *pbuser.LogoutReq) (*pb
 
 	return resp, nil
 }
+
+func (s *userServer) ParseToken(ctx context.Context, req *pbuser.ParseTokenReq) (*pbuser.ParseTokenResp, error) {
+	resp := &pbuser.ParseTokenResp{}
+	userID, err := s.tokenVerify.GetToken(req.Token)
+	if err != nil {
+		return resp, err
+	}
+	userToken, err := s.userStorageHandler.GetToken(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	if userToken == constant.KickOffMeetingMsg {
+		return nil, servererrs.ErrKickOffMeeting.WrapMsg("kick off meeting, please login again")
+	}
+	if req.Token != userToken {
+		return nil, servererrs.ErrKickOffMeeting.WrapMsg("kick off meeting for login duplicated, please login again")
+	}
+	return &pbuser.ParseTokenResp{
+		UserID: userID,
+	}, nil
+}

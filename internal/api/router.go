@@ -7,6 +7,7 @@ import (
 	apiMw "github.com/openimsdk/openmeeting-server/internal/api/mw"
 	"github.com/openimsdk/openmeeting-server/pkg/common/token"
 	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
+	"github.com/openimsdk/openmeeting-server/pkg/user"
 	"github.com/openimsdk/tools/discovery"
 	"github.com/openimsdk/tools/mw"
 	"google.golang.org/grpc"
@@ -31,12 +32,12 @@ func newGinRouter(disCov discovery.SvcDiscoveryRegistry, config *Config) *gin.En
 	r := gin.New()
 	r.Use(gin.Recovery(), mw.CorsHandler(), mw.GinParseOperationID(), mw.GinParseToken(secretKey(config.API.Secret), whitelist))
 	// init rpc client here
-	userRpc := rpcclient.NewUser(disCov, config.Share.RpcRegisterName.User)
+	userRpc := user.NewMeetingUserClient(disCov, config.Share.RpcRegisterName.User)
 	meetingRpc := rpcclient.NewMeeting(disCov, config.Share.RpcRegisterName.Meeting)
 
 	userToken := token.New(config.API.Expire, config.API.Secret)
 	mwApi := apiMw.New(userRpc, userToken)
-	u := NewUserApi(*userRpc)
+	u := NewUserApi(userRpc)
 	userRouterGroup := r.Group("/user")
 	{
 		userRouterGroup.POST("/register", u.UserRegister)
