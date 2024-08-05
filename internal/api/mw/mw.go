@@ -6,7 +6,6 @@ import (
 	cmConstant "github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/servererrs"
 	"github.com/openimsdk/openmeeting-server/pkg/common/token"
-	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
 	"github.com/openimsdk/protocol/constant"
 	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/apiresp"
@@ -15,11 +14,11 @@ import (
 )
 
 type MW struct {
-	client      *rpcclient.User
+	client      pbuser.UserClient
 	tokenVerify *token.Token
 }
 
-func New(c *rpcclient.User, t *token.Token) *MW {
+func New(c pbuser.UserClient, t *token.Token) *MW {
 	return &MW{
 		client:      c,
 		tokenVerify: t,
@@ -54,7 +53,7 @@ func (o *MW) CheckToken(c *gin.Context) {
 }
 
 func (o *MW) isValidToken(c *gin.Context, userID, userToken string) error {
-	resp, err := o.client.Client.GetUserToken(c, &pbuser.GetUserTokenReq{UserID: userID})
+	resp, err := o.client.GetUserToken(c, &pbuser.GetUserTokenReq{UserID: userID})
 	if err != nil {
 		return err
 	}

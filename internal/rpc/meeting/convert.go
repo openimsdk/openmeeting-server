@@ -97,7 +97,7 @@ func (s *meetingServer) generateMeetingDBData4Create(ctx context.Context, req *p
 	}, nil
 }
 
-func (s *meetingServer) generateParticipantMetaData(userInfo *pbuser.GetUserInfoResp) *pbmeeting.ParticipantMetaData {
+func (s *meetingServer) generateParticipantMetaData(userInfo *pbuser.UserInfo) *pbmeeting.ParticipantMetaData {
 	return &pbmeeting.ParticipantMetaData{
 		UserInfo: &pbmeeting.UserInfo{
 			UserID:   userInfo.UserID,
@@ -122,7 +122,7 @@ func (s *meetingServer) generateDefaultPersonalData(userID string) *pbmeeting.Pe
 }
 
 func (s *meetingServer) generateMeetingMetaData(ctx context.Context, info *model.MeetingInfo) (*pbmeeting.MeetingMetadata, error) {
-	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
+	userInfo, err := s.userRpc.GetUserInfo(ctx, info.CreatorUserID)
 	if err != nil {
 		return nil, errs.WrapMsg(err, "get user info failed")
 	}
@@ -175,7 +175,7 @@ func (s *meetingServer) generateMeetingMetaData(ctx context.Context, info *model
 
 func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model.MeetingInfo) (*pbmeeting.MeetingInfoSetting, error) {
 	// Fill in response data
-	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
+	userInfo, err := s.userRpc.GetUserInfo(ctx, info.CreatorUserID)
 	if err != nil {
 		log.ZError(ctx, "get user info failed", err, "userID", info.CreatorUserID)
 		return nil, errs.WrapMsg(err, "get user info failed")
@@ -238,7 +238,7 @@ func (s *meetingServer) getMeetingDetailSetting(ctx context.Context, info *model
 }
 
 func (s *meetingServer) generateMeetingMetaData4Create(ctx context.Context, req *pbmeeting.CreateImmediateMeetingReq, info *model.MeetingInfo) (*pbmeeting.MeetingMetadata, error) {
-	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: info.CreatorUserID})
+	userInfo, err := s.userRpc.GetUserInfo(ctx, info.CreatorUserID)
 	if err != nil {
 		return nil, errs.WrapMsg(err, "get user info failed")
 	}

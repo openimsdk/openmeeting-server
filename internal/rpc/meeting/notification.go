@@ -3,14 +3,13 @@ package meeting
 import (
 	"context"
 	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
-	pbuser "github.com/openimsdk/protocol/openmeeting/user"
 	pbwrapper "github.com/openimsdk/protocol/wrapperspb"
 	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/mcontext"
 )
 
 func (s *meetingServer) sendMeetingHostData2Client(ctx context.Context, roomID, operateUserID, userID, hostType string) error {
-	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: operateUserID})
+	userInfo, err := s.userRpc.GetUserInfo(ctx, operateUserID)
 	if err != nil {
 		return errs.WrapMsg(err, "get user info failed")
 	}
@@ -105,7 +104,7 @@ func (s *meetingServer) broadcastStreamOperateData(ctx context.Context, req *pbm
 }
 
 func (s *meetingServer) notifyKickOffMeetingInfo2Client(ctx context.Context, roomID, UserID, Reason string, reasonCode pbmeeting.KickOffReason) error {
-	userInfo, err := s.userRpc.Client.GetUserInfo(ctx, &pbuser.GetUserInfoReq{UserID: UserID})
+	userInfo, err := s.userRpc.GetUserInfo(ctx, UserID)
 	if err != nil {
 		return errs.WrapMsg(err, "get user info failed")
 	}

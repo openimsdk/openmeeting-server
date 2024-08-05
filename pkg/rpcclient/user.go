@@ -17,70 +17,40 @@ package rpcclient
 import (
 	"context"
 	"github.com/openimsdk/openmeeting-server/pkg/common/servererrs"
+	userfind "github.com/openimsdk/openmeeting-server/pkg/user"
 	"github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/protocol/sdkws"
-	"github.com/openimsdk/tools/discovery"
-	"github.com/openimsdk/tools/system/program"
 	"github.com/openimsdk/tools/utils/datautil"
-	"google.golang.org/grpc"
 	"strings"
 )
 
-// User represents a structure holding connection details for the User RPC client.
+func NewUser(user userfind.User) *User {
+	return &User{user: user}
+}
+
 type User struct {
-	conn   grpc.ClientConnInterface
-	Client user.UserClient
-	Discov discovery.SvcDiscoveryRegistry
-}
-
-// NewUser initializes and returns a User instance based on the provided service discovery registry.
-func NewUser(discov discovery.SvcDiscoveryRegistry, rpcRegisterName string) *User {
-	conn, err := discov.GetConn(context.Background(), rpcRegisterName)
-	if err != nil {
-		program.ExitWithError(err)
-	}
-	client := user.NewUserClient(conn)
-	return &User{Discov: discov, Client: client,
-		conn: conn,
-	}
-}
-
-// UserRpcClient represents the structure for a User RPC client.
-type UserRpcClient User
-
-// NewUserRpcClientByUser initializes a UserRpcClient based on the provided User instance.
-func NewUserRpcClientByUser(user *User) *UserRpcClient {
-	rpc := UserRpcClient(*user)
-	return &rpc
-}
-
-// NewUserRpcClient initializes a UserRpcClient based on the provided service discovery registry.
-func NewUserRpcClient(client discovery.SvcDiscoveryRegistry, rpcRegisterName string,
-	imAdminUserID []string) UserRpcClient {
-	return UserRpcClient(*NewUser(client, rpcRegisterName))
+	user userfind.User
 }
 
 // GetUsersInfo retrieves information for multiple users based on their user IDs.
-func (u *UserRpcClient) GetUsersInfo(ctx context.Context, userIDs []string) ([]*user.UserInfo, error) {
+func (u *User) GetUsersInfo(ctx context.Context, userIDs []string) ([]*user.UserInfo, error) {
 	if len(userIDs) == 0 {
 		return []*user.UserInfo{}, nil
 	}
-	resp, err := u.Client.GetDesignateUsers(ctx, &user.GetDesignateUsersReq{
-		UserIDs: userIDs,
-	})
+	users, err := u.user.GetUsersInfos(ctx, userIDs)
 	if err != nil {
 		return nil, err
 	}
-	if ids := datautil.Single(userIDs, datautil.Slice(resp.UsersInfo, func(e *user.UserInfo) string {
+	if ids := datautil.Single(userIDs, datautil.Slice(users, func(e *user.UserInfo) string {
 		return e.UserID
 	})); len(ids) > 0 {
 		return nil, servererrs.ErrUserIDNotFound.WrapMsg(strings.Join(ids, ","))
 	}
-	return resp.UsersInfo, nil
+	return users, nil
 }
 
 // GetUserInfo retrieves information for a single user based on the provided user ID.
-func (u *UserRpcClient) GetUserInfo(ctx context.Context, userID string) (*user.UserInfo, error) {
+func (u *User) GetUserInfo(ctx context.Context, userID string) (*user.UserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, []string{userID})
 	if err != nil {
 		return nil, err
@@ -89,7 +59,7 @@ func (u *UserRpcClient) GetUserInfo(ctx context.Context, userID string) (*user.U
 }
 
 // GetUsersInfoMap retrieves a map of user information indexed by their user IDs.
-func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*user.UserInfo, error) {
+func (u *User) GetUsersInfoMap(ctx context.Context, userIDs []string) (map[string]*user.UserInfo, error) {
 	users, err := u.GetUsersInfo(ctx, userIDs)
 	if err != nil {
 		return nil, err
@@ -100,7 +70,7 @@ func (u *UserRpcClient) GetUsersInfoMap(ctx context.Context, userIDs []string) (
 }
 
 // GetPublicUserInfos retrieves public information for multiple users based on their user IDs.
-func (u *UserRpcClient) GetPublicUserInfos(
+func (u *User) GetPublicUserInfos(
 	ctx context.Context,
 	userIDs []string,
 	complete bool,
@@ -118,7 +88,7 @@ func (u *UserRpcClient) GetPublicUserInfos(
 }
 
 // GetPublicUserInfo retrieves public information for a single user based on the provided user ID.
-func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
+func (u *User) GetPublicUserInfo(ctx context.Context, userID string) (*sdkws.PublicUserInfo, error) {
 	users, err := u.GetPublicUserInfos(ctx, []string{userID}, true)
 	if err != nil {
 		return nil, err
@@ -127,7 +97,7 @@ func (u *UserRpcClient) GetPublicUserInfo(ctx context.Context, userID string) (*
 }
 
 // GetPublicUserInfoMap retrieves a map of public user information indexed by their user IDs.
-func (u *UserRpcClient) GetPublicUserInfoMap(
+func (u *User) GetPublicUserInfoMap(
 	ctx context.Context,
 	userIDs []string,
 	complete bool,

@@ -2,13 +2,14 @@ package meeting
 
 import (
 	"context"
-	"github.com/openimsdk/openmeeting-server/internal/rpc/meeting/rtc"
-	"github.com/openimsdk/openmeeting-server/internal/rpc/meeting/rtc/livekit"
 	"github.com/openimsdk/openmeeting-server/pkg/common/config"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/cache/redis"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/controller"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database/mgo"
 	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
+	"github.com/openimsdk/openmeeting-server/pkg/rtc"
+	"github.com/openimsdk/openmeeting-server/pkg/rtc/livekit"
+	userfind "github.com/openimsdk/openmeeting-server/pkg/user"
 	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
 	"github.com/openimsdk/tools/db/mongoutil"
 	"github.com/openimsdk/tools/db/redisutil"
@@ -51,8 +52,10 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	database := controller.NewMeeting(meetingDB, meetingCache, mgoCli.GetTx())
 	meetingRtc := livekit.NewLiveKit(&config.Rtc)
 
+	user := userfind.NewMeeting(client, config.Share.RpcRegisterName.User)
+
 	// init rpc client here
-	userRpc := rpcclient.NewUser(client, config.Share.RpcRegisterName.User)
+	userRpc := rpcclient.NewUser(user)
 
 	u := &meetingServer{
 		meetingStorageHandler: database,

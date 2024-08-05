@@ -2,7 +2,7 @@ package livekit
 
 import (
 	"context"
-	"github.com/openimsdk/openmeeting-server/internal/rpc/meeting/rtc"
+	"github.com/openimsdk/openmeeting-server/pkg/rtc"
 	"github.com/openimsdk/tools/log"
 )
 

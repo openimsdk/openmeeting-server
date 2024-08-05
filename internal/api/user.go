@@ -16,15 +16,16 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/openimsdk/openmeeting-server/pkg/rpcclient"
 	"github.com/openimsdk/protocol/openmeeting/user"
 	"github.com/openimsdk/tools/a2r"
 )
 
-type UserApi rpcclient.User
+type UserApi struct {
+	Client user.UserClient
+}
 
-func NewUserApi(client rpcclient.User) UserApi {
-	return UserApi(client)
+func NewUserApi(client user.UserClient) *UserApi {
+	return &UserApi{Client: client}
 }
 
 func (u *UserApi) UserRegister(c *gin.Context) {
