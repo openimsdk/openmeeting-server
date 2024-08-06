@@ -77,6 +77,29 @@ func (x *LiveKit) GetJoinToken(ctx context.Context, roomID, identity string, met
 }
 
 func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, roomMetaData *meeting.MeetingMetadata, participantMetaData *meeting.ParticipantMetaData, userRpc *rpcclient.User) (sID, token, liveUrl string, err error) {
+	return x.createRoom(ctx, meetingID, identify, roomMetaData, participantMetaData, userRpc, func(room *livekit.Room) *lksdk.RoomCallback {
+		cb := NewRTC(meetingID, x)
+		callback := rtc.NewRoomCallback(
+			mcontext.NewCtx("room_callback_"+mcontext.GetOperationID(ctx)), meetingID, room.Sid, cb, userRpc)
+		return &lksdk.RoomCallback{
+			ParticipantCallback: lksdk.ParticipantCallback{
+				OnDataReceived: func(data []byte, rp *lksdk.RemoteParticipant) {
+					log.ZDebug(ctx, "data received:", "data:", string(data))
+				},
+			},
+			OnRoomMetadataChanged: func(metadata string) {
+				log.ZDebug(ctx, "meta data change", "metaData:", metadata)
+			},
+			OnParticipantConnected:    callback.OnParticipantConnected,
+			OnParticipantDisconnected: callback.OnParticipantDisconnected,
+			OnDisconnected:            callback.OnDisconnected,
+			OnReconnected:             callback.OnReconnected,
+			OnReconnecting:            callback.OnReconnecting,
+		}
+	})
+}
+
+func (x *LiveKit) createRoom(ctx context.Context, meetingID, identify string, roomMetaData any, participantMetaData *meeting.ParticipantMetaData, userRpc *rpcclient.User, callback func(room *livekit.Room) *lksdk.RoomCallback) (sID, token, liveUrl string, err error) {
 	req := &livekit.CreateRoomRequest{
 		Name:            meetingID,
 		EmptyTimeout:    86400,
@@ -94,27 +117,7 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, ro
 		log.ZError(ctx, "Marshal failed", err)
 		return "", "", "", errs.WrapMsg(err, "create livekit room failed, meetingID", meetingID)
 	}
-	cb := NewRTC(meetingID, x)
-	callback := rtc.NewRoomCallback(
-		mcontext.NewCtx("room_callback_"+mcontext.GetOperationID(ctx)), meetingID, room.Sid, cb, userRpc)
-	roomCallback := &lksdk.RoomCallback{
-		ParticipantCallback: lksdk.ParticipantCallback{
-			OnDataReceived: func(data []byte, rp *lksdk.RemoteParticipant) {
-				log.ZDebug(ctx, "data received:", "data:", string(data))
-			},
-		},
-		OnRoomMetadataChanged: func(metadata string) {
-			log.ZDebug(ctx, "meta data change", "metaData:", metadata)
-		},
-		OnParticipantConnected:    callback.OnParticipantConnected,
-		OnParticipantDisconnected: callback.OnParticipantDisconnected,
-		OnDisconnected:            callback.OnDisconnected,
-		OnReconnected:             callback.OnReconnected,
-		OnReconnecting:            callback.OnReconnecting,
-	}
-
 	listenerInfo := &meeting.UserInfo{UserID: meetingID, Nickname: meetingID, Account: meetingID}
-
 	listenerMetaData := &meeting.ParticipantMetaData{
 		UserInfo: listenerInfo,
 	}
@@ -122,7 +125,7 @@ func (x *LiveKit) CreateRoom(ctx context.Context, meetingID, identify string, ro
 	if err != nil {
 		return "", "", "", errs.WrapMsg(err, "get join token failed, meetingID:", meetingID)
 	}
-	if _, err = lksdk.ConnectToRoomWithToken(x.conf.InnerURL, token, roomCallback); err != nil {
+	if _, err = lksdk.ConnectToRoomWithToken(x.conf.InnerURL, token, callback(room)); err != nil {
 		return "", "", "", errs.WrapMsg(err, "connect to room with token failed, meetingID: ", meetingID)
 	}
 	token, liveUrl, err = x.GetJoinToken(ctx, meetingID, identify, participantMetaData, false)
