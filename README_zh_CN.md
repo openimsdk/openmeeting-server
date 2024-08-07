@@ -45,7 +45,48 @@ OpenMeeting是一个使用Golang开发的开源实时音视频会议系统。Ope
 
 为了便于用户体验，我们提供了多种部署解决方案，您可以根据以下列表选择适合您的部署方式：
 
-+ **[源代码部署指南](https://github.com/openimsdk/openmeeting-server/blob/main/deployments/deployment_zh_CN.md)**
+[//]: # (+ **[源代码部署指南]&#40;https://github.com/openimsdk/openmeeting-server/blob/main/deployments/deployment_zh_CN.md&#41;**)
+### 源代码部署
+
+#### 1. 下载源码
+
+```bash
+git clone https://github.com/openimsdk/openmeeting-server.git && cd openmeeting-server
+```
+
+
+#### 2. 部署相关依赖组件(Etcd, MongoDB, Redis, LiveKit)
+```bash
+# 安装依赖组件
+docker compose up -d
+
+# 检查相关依赖组件是否正常运行
+docker ps
+```
+
+#### 3. 设置外部IP
+```bash
+Modify the `url` in `config/live.yml` to `ws://external_IP:17880` or a domain name.
+```
+
+#### 4. 初始化
+第一次编译前，linux/mac平台下执行：
+```bash
+bash bootstrap.sh
+```
+
+windows执行
+```bash
+bootstrap.bat
+```
+
+#### 5. 编译以及运行
+```bash
+mage && mage start
+```
+
+
+
 + **[Docker 部署指南]()**
 
 ## 系统支持
