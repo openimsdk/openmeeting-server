@@ -97,6 +97,25 @@ type RTC struct {
 	InnerURL  string   `mapstructure:"innerURL"`
 }
 
+type Record struct {
+	Enable bool `yaml:"enable"`
+}
+
+type S3 struct {
+	AccessKey string `mapstructure:"access_key"`
+	Secret    string `mapstructure:"secret"`
+	Region    string `mapstructure:"region"`
+	Endpoint  string `mapstructure:"endpoint"`
+	Bucket    string `mapstructure:"bucket"`
+}
+
+type Upload struct {
+	Record    Record `mapstructure:"record"`
+	Layout    string `mapstructure:"layout"`
+	FrameRate int32  `mapstructure:"frame_rate"`
+	S3        S3     `mapstructure:"s3"`
+}
+
 type Redis struct {
 	Address        []string `mapstructure:"address"`
 	Username       string   `mapstructure:"username"`

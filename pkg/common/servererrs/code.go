@@ -25,10 +25,11 @@ const (
 	NotFoundUserTokenErr = 100004 // not found user token
 	KickOffMeetingError  = 100010
 
-	MeetingUserLimitError = 200001 // one user joins more than one meeting
-	MeetingPasswordError  = 200002 // password not match error
-	MeetingAuthCheckError = 200003 // meeting auth check permission error
-	MeetingCompleteError  = 200004 // meeting update check error
+	MeetingUserLimitError           = 200001 // one user joins more than one meeting
+	MeetingPasswordError            = 200002 // password not match error
+	MeetingAuthCheckError           = 200003 // meeting auth check permission error
+	MeetingCompleteError            = 200004 // meeting update check error
+	MeetingRecordSwitchNotOpenError = 200006 // meeting cloud record switch is not open.
 )
 
 // General error codes.

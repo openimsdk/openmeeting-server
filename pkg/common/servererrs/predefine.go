@@ -29,8 +29,9 @@ var (
 	ErrUserTokenNotFoundErr   = errs.NewCodeError(NotFoundUserTokenErr, "NotFoundUserTokenErr")
 	ErrKickOffMeeting         = errs.NewCodeError(KickOffMeetingError, "KickOffMeetingError")
 
-	ErrMeetingUserLimit        = errs.NewCodeError(MeetingUserLimitError, "MeetingUserLimitError")
-	ErrMeetingPasswordNotMatch = errs.NewCodeError(MeetingPasswordError, "MeetingPasswordError")
-	ErrMeetingAuthCheck        = errs.NewCodeError(MeetingAuthCheckError, "MeetingAuthCheckError")
-	ErrMeetingAlreadyCompleted = errs.NewCodeError(MeetingCompleteError, "MeetingCompleteError")
+	ErrMeetingUserLimit           = errs.NewCodeError(MeetingUserLimitError, "MeetingUserLimitError")
+	ErrMeetingPasswordNotMatch    = errs.NewCodeError(MeetingPasswordError, "MeetingPasswordError")
+	ErrMeetingAuthCheck           = errs.NewCodeError(MeetingAuthCheckError, "MeetingAuthCheckError")
+	ErrMeetingAlreadyCompleted    = errs.NewCodeError(MeetingCompleteError, "MeetingCompleteError")
+	ErrMeetingRecordSwitchNotOpen = errs.NewCodeError(MeetingRecordSwitchNotOpenError, "RecordSwitchNotOpenError")
 )

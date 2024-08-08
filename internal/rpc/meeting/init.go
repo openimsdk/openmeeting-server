@@ -32,6 +32,7 @@ type Config struct {
 	Discovery config.Discovery
 	Share     config.Share
 	Rtc       config.RTC
+	Upload    config.Upload
 }
 
 func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegistry, server *grpc.Server) error {
@@ -50,7 +51,7 @@ func Start(ctx context.Context, config *Config, client registry.SvcDiscoveryRegi
 	}
 	meetingCache := redis.NewMeeting(rdb, meetingDB, redis.GetDefaultOpt())
 	database := controller.NewMeeting(meetingDB, meetingCache, mgoCli.GetTx())
-	meetingRtc := livekit.NewLiveKit(&config.Rtc)
+	meetingRtc := livekit.NewLiveKit(&config.Rtc, &config.Upload)
 
 	user := userfind.NewMeeting(client, config.Share.RpcRegisterName.User)
 

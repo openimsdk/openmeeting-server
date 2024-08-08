@@ -19,11 +19,13 @@ import (
 	"time"
 )
 
-func NewLiveKit(conf *config.RTC) rtc.MeetingRtc {
+func NewLiveKit(conf *config.RTC, uploadConf *config.Upload) rtc.MeetingRtc {
 	return &LiveKit{
-		index:      0,
-		conf:       conf,
-		roomClient: lksdk.NewRoomServiceClient(conf.InnerURL, conf.ApiKey, conf.ApiSecret),
+		index:        0,
+		conf:         conf,
+		uploadConf:   uploadConf,
+		roomClient:   lksdk.NewRoomServiceClient(conf.InnerURL, conf.ApiKey, conf.ApiSecret),
+		egressClient: lksdk.NewEgressClient(conf.InnerURL, conf.ApiKey, conf.ApiSecret),
 	}
 }
 

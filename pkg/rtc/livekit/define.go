@@ -6,7 +6,9 @@ import (
 )
 
 type LiveKit struct {
-	roomClient *lksdk.RoomServiceClient
-	index      uint64
-	conf       *config.RTC
+	roomClient   *lksdk.RoomServiceClient
+	egressClient *lksdk.EgressClient
+	uploadConf   *config.Upload
+	index        uint64
+	conf         *config.RTC
 }
