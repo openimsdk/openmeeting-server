@@ -83,6 +83,25 @@ mage && mage start
 
 + **[Docker Deployment Guide]()**
 
+### How to add user in meeting server
++ Replace your_ip_or_domain, your_userID, your_password, your_account, and your_nickname with the appropriate values. Then, run the command in your Bash terminal.
+```bash
+curl -X POST "http://your_ip_or_domain:11022/admin/user/register" \
+-H "Content-Type: application/json" \
+-H "operationID: 123456789" \
+-d '{
+  "userID": "your_userID",
+  "password": "your_password",
+  "account": "your_account",
+  "nickname": "your_nickname"
+}'
+```
+
++ Then you can use this account's account and password to log in to the client.
+
+
+
+
 ## System Support
 Supports Linux, Windows, Mac systems, as well as ARM and AMD CPU architectures.
 

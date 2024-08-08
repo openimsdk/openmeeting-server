@@ -89,6 +89,24 @@ mage && mage start
 
 + **[Docker 部署指南]()**
 
+
+### 如何增加会议的用户
++ 把请求地址替换为你的IP或者域名，端口号默认为11022，把用户的账号信息填写下。
+```bash
+curl -X POST "替换成你的IP或域名:11022/admin/user/register" \
+-H "Content-Type: application/json" \
+-H "operationID: 123456789" \
+-d '{
+  "userID": "your_userID",
+  "password": "your_password",
+  "account": "your_account",
+  "nickname": "your_nickname"
+}'
+```
+
++ 然后可以用这个账号的account和password登陆到客户端了。
+
+
 ## 系统支持
 
 支持 Linux、Windows、Mac 系统以及 ARM 和 AMD CPU 架构。
