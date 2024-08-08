@@ -14,7 +14,7 @@
 ## Ⓜ️ About OpenMeeting
 OpenMeeting is an open-source real-time audio and video conferencing system developed using Golang. OpenMeeting provides user management, meeting management, audio and video transmission, instant meetings, scheduled meetings, screen sharing, and more, aiming to offer users a convenient remote meeting experience. It is similar to Zoom and Tencent Meeting, with support for private deployment to ensure the security and privacy of enterprise and individual user data.
 
-![Relations of App-OpenMeeting](./assets/open-meeting-design.png)
+[//]: # (![Relations of App-OpenMeeting]&#40;./assets/open-meeting-design.png&#41;)
 
 
 
@@ -33,7 +33,7 @@ OpenMeeting is an open-source real-time audio and video conferencing system deve
 + **REST API**：Provides REST API for business systems, offering client interfaces.
 + **RPC API**： Provides corresponding services through gRPC, including user and meeting, to extend more business forms.
 
-![architecture](./assets/architecture-layers.png)
+[//]: # (![architecture]&#40;./assets/architecture-layers.png&#41;)
 
 
 
