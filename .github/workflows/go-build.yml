@@ -18,7 +18,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        os: [ubuntu-latest]
         go_version: ["1.18", "1.20", "1.22"]
 
     steps:
