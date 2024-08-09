@@ -46,9 +46,9 @@ jobs:
 
       - name: Build and test Server Services
         run: |
-          sudo mage build
-          sudo mage start
-          sudo mage check
+           mage build
+           mage start
+           mage check
 
   dockerfile-test:
     name: Build and Test Dockerfile
