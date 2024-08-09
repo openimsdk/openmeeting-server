@@ -23,7 +23,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=openMeeting123
       - MONGO_INITDB_DATABASE=openmeeting_v1
       - MONGO_OPENIM_USERNAME=openmeeting
-      - MONGO_OPENIM_PASSWORD=openmeeting123
+      - MONGO_OPENIM_PASSWORD=openMeeting123
     restart: always
     networks:
       - openmeeting
