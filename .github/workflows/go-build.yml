@@ -29,9 +29,10 @@ jobs:
         with:
           go-version: ${{ matrix.go_version }}
 
-      - name: Set up infra on Docker
-        run: |
-          sudo docker compose up -d
+      - name: Set up infra services
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        # with:
+          # compose-file: "./docker/docker-compose.yml"
 
       - name: Checkout chat repository
         uses: actions/checkout@v4
