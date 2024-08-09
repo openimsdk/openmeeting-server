@@ -42,6 +42,11 @@ jobs:
         #  with:
         #    compose-file: "./docker/docker-compose.yml"
 
+      - name: Setup Environment
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+
       - name: Build and test Server Services
         run: |
           sudo mage build
