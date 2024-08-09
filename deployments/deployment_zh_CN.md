@@ -21,7 +21,18 @@ docker ps
 Modify the `url` in `config/live.yml` to `ws://external_IP:17880` or a domain name.
 ```
 
-### 4. 编译以及运行
+### 4. 初始化
+第一次编译前，linux/mac平台下执行：
+```bash
+bash bootstrap.sh
+```
+
+windows执行
+```bash
+bootstrap.bat
+```
+
+### 5. 编译以及运行
 ```bash
 mage && mage start
 ```

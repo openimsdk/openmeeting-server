@@ -16,6 +16,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/tools/errs"
@@ -101,11 +102,11 @@ func (u *User) GetUserByAccount(ctx context.Context, account string) (*model.Use
 }
 
 func (u *User) CacheUserToken(ctx context.Context, userID, userToken string) error {
-	return errs.Wrap(u.rdb.Set(ctx, userID, userToken, u.expireTime).Err())
+	return errs.Wrap(u.rdb.Set(ctx, cachekey.GetUserTokenKey(userID), userToken, u.expireTime).Err())
 }
 
 func (u *User) GetUserToken(ctx context.Context, userID string) (string, error) {
-	token, err := u.rdb.Get(ctx, userID).Result()
+	token, err := u.rdb.Get(ctx, cachekey.GetUserTokenKey(userID)).Result()
 	if err != nil {
 		return "", errs.Wrap(err)
 	}
@@ -113,7 +114,15 @@ func (u *User) GetUserToken(ctx context.Context, userID string) (string, error) 
 }
 
 func (u *User) ClearUserToken(ctx context.Context, userID string) error {
-	return errs.Wrap(u.rdb.Del(ctx, userID).Err())
+	return errs.Wrap(u.rdb.Del(ctx, cachekey.GetUserTokenKey(userID)).Err())
+}
+
+func (u *User) GenerateUserID(ctx context.Context) (string, error) {
+	index, err := u.rdb.Incr(ctx, cachekey.GetGenerateUserIDKey()).Result()
+	if err != nil {
+		return "", errs.WrapMsg(err, "incr key failed from redis")
+	}
+	return fmt.Sprintf("%08d", index), nil
 }
 
 type Comparable interface {

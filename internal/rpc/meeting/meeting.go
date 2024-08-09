@@ -153,7 +153,8 @@ func (s *meetingServer) JoinMeeting(ctx context.Context, req *pbmeeting.JoinMeet
 		}
 	}
 
-	if req.UserID != s.getHostUserID(metaData) && req.Password != metaData.Detail.Info.CreatorDefinedMeeting.Password {
+	if req.UserID != s.getHostUserID(metaData) && req.UserID != s.getCreatorUserID(metaData) &&
+		req.Password != metaData.Detail.Info.CreatorDefinedMeeting.Password {
 		return resp, servererrs.ErrMeetingPasswordNotMatch.WrapMsg("meeting password not match, please check and try again!")
 	}
 

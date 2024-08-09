@@ -1,6 +1,6 @@
 enable: "etcd"
 etcd:
   rootDirectory: openmeeting
-  address: [ localhost:2379 ]
+  address: [ localhost:12379 ]
   username: ''
   password: ''
