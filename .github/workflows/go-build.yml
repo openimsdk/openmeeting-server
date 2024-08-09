@@ -22,56 +22,52 @@ jobs:
         go_version: ["1.18", "1.20", "1.22"]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Server repository
+        uses: actions/checkout@v4
 
       - name: Set up Go ${{ matrix.go_version }}
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go_version }}
 
-      - name: Set up infra services
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        # with:
-        # compose-file: "./docker/docker-compose.yml"
-
-      - name: Setup Environment
-        run: |
-          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-
-      - name: Cache Go modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ matrix.go_version }}-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-${{ matrix.go_version }}-
-
-      - name: Get dependencies
+      - name: Get Server dependencies
         run: |
           go install github.com/magefile/mage@latest
+          go mod tidy
           go mod download
 
-      - name: Build test for Server Services
-        run: |
-          sudo mage build
-          sudo mage start
-          sudo mage check
+      - name: Set up infra services
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        # Uncomment and set the correct path to your docker-compose file
+        # with:
+        #   compose-file: "./docker/docker-compose.yml"
 
-      - name: Checkout chat repository
+      - name: Build and test Server Services
+        run: |
+          mage build
+          mage start
+          mage check
+
+      - name: Checkout Chat repository
         uses: actions/checkout@v4
         with:
           repository: "openimsdk/chat"
           path: "chat-repo"
 
-      - name: Build test for Chat Services
+      - name: Get Chat dependencies
         run: |
           cd ${{ github.workspace }}/chat-repo
-          sudo mage build
-          sudo mage start
-          sudo mage check
+          go install github.com/magefile/mage@latest
+          go mod tidy
+          go mod download
+
+      - name: Build and test Chat Services
+        run: |
+          cd ${{ github.workspace }}/chat-repo
+          mage build
+          mage start
+          mage check
+
 
 #   build:
 #     strategy:
