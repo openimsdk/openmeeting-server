@@ -22,7 +22,6 @@ func Start() {
 		mageutil.PrintRed("setMaxOpenFiles failed " + err.Error())
 		os.Exit(1)
 	}
-	// 天
 	mageutil.StartToolsAndServices()
 }
 
