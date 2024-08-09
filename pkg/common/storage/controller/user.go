@@ -41,6 +41,9 @@ type User interface {
 
 	// ClearUserToken clear cache from storage
 	ClearUserToken(ctx context.Context, userID string) error
+
+	// GenerateUserID generate a unique user id
+	GenerateUserID(ctx context.Context) (string, error)
 }
 
 type UserStorageManager struct {
@@ -102,4 +105,8 @@ func (u *UserStorageManager) GetToken(ctx context.Context, userID string) (strin
 
 func (u *UserStorageManager) ClearUserToken(ctx context.Context, userID string) error {
 	return u.cache.ClearUserToken(ctx, userID)
+}
+
+func (u *UserStorageManager) GenerateUserID(ctx context.Context) (string, error) {
+	return u.cache.GenerateUserID(ctx)
 }

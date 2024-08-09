@@ -28,4 +28,5 @@ type User interface {
 	CacheUserToken(ctx context.Context, userID, userToken string) error
 	GetUserToken(ctx context.Context, userID string) (string, error)
 	ClearUserToken(ctx context.Context, userID string) error
+	GenerateUserID(ctx context.Context) (string, error)
 }

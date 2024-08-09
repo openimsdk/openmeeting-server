@@ -1,7 +1,6 @@
 package definition
 
 type User struct {
-	UserID   string `json:"user_id" column:"user_id"`
 	Account  string `json:"account" column:"account"`
 	Nickname string `json:"nickname" column:"nickname"`
 	Password string `json:"password" column:"password"`
