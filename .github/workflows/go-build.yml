@@ -33,6 +33,17 @@ jobs:
         uses: hoverkraft-tech/compose-action@v2.0.1
         # with:
           # compose-file: "./docker/docker-compose.yml"
+      
+      - name: Get dependencies
+        run: |
+          go install github.com/magefile/mage@latest
+          go mod download
+      
+      - name: Build test for Server Services
+        run: |
+          sudo mage build
+          sudo mage start
+          sudo mage check
 
       - name: Checkout chat repository
         uses: actions/checkout@v4
@@ -43,7 +54,7 @@ jobs:
       - name: Build test for Chat Services
         run: |
           cd ${{ github.workspace }}/chat-repo
-          sudo mage
+          sudo mage build
           sudo mage start
           sudo mage check
 
