@@ -82,9 +82,12 @@ jobs:
           CONTAINER_NAME="${{ github.event.repository.name }}-container"
           docker run --name $CONTAINER_NAME -d $IMAGE_NAME
           docker ps -a
+          
 
       - name: Test Docker Container Logs
         run: |
+          CONTAINER_NAME="${{ github.event.repository.name }}-container"
+          docker exec -it $CONTAINER_NAME mage check
           CONTAINER_NAME="${{ github.event.repository.name }}-container"
           docker logs $CONTAINER_NAME
 
