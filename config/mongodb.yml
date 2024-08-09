@@ -7,7 +7,7 @@ database: openmeeting_v1
 # Username for database authentication
 username: "openmeeting"
 # Password for database authentication
-password: "openMeeting123"
+password: "openmeeting123"
 # Maximum number of connections in the connection pool
 maxPoolSize: 100
 # Maximum number of retry attempts for a failed database connection
