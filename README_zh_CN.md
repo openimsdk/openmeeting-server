@@ -97,7 +97,6 @@ curl -X POST "替换成你的IP或域名:11022/admin/user/register" \
 -H "Content-Type: application/json" \
 -H "operationID: 123456789" \
 -d '{
-  "userID": "your_userID",
   "password": "your_password",
   "account": "your_account",
   "nickname": "your_nickname"

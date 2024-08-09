@@ -18,6 +18,7 @@ const (
 	UserInfoKey             = "USER_INFO:"
 	UserTokenKey            = "USER_TOKEN:"
 	UserGlobalRecvMsgOptKey = "USER_GLOBAL_RECV_MSG_OPT_KEY:"
+	GenerateUserIDKey       = "GENERATE_USER_ID_KEY"
 )
 
 func GetUserInfoKey(userID string) string {
@@ -26,6 +27,10 @@ func GetUserInfoKey(userID string) string {
 
 func GetUserTokenKey(userID string) string {
 	return UserTokenKey + userID
+}
+
+func GetGenerateUserIDKey() string {
+	return GenerateUserIDKey
 }
 
 func GetUserGlobalRecvMsgOptKey(userID string) string {
