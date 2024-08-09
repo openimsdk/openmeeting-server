@@ -1,5 +1,5 @@
 rpcRegisterName:
-  user: user
-  meeting: meeting
+  user: openmeeting-user
+  meeting: openmeeting-meeting
  
 
