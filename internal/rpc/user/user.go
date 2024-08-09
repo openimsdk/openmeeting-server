@@ -16,6 +16,7 @@ package user
 
 import (
 	"context"
+	"errors"
 	"github.com/openimsdk/openmeeting-server/pkg/common/config"
 	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
 	"github.com/openimsdk/openmeeting-server/pkg/common/convert"
@@ -181,7 +182,10 @@ func (s *userServer) GetUserInfo(ctx context.Context, req *pbuser.GetUserInfoReq
 	resp := &pbuser.GetUserInfoResp{}
 	userInfo, err := s.userStorageHandler.FindWithError(ctx, []string{req.UserID})
 	if err != nil {
-		return resp, servererrs.ErrUserAccountNotFoundErr.WrapMsg("not found user")
+		if errors.Is(err, errs.ErrRecordNotFound) {
+			return resp, servererrs.ErrUserAccountNotFoundErr.WrapMsg("not found user")
+		}
+		return resp, servererrs.ErrDatabase.WrapMsg("get user failed")
 	}
 	resp.Account = userInfo[0].Account
 	resp.Nickname = userInfo[0].Nickname
