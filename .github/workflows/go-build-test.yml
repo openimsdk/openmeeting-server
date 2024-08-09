@@ -30,11 +30,7 @@ jobs:
         with:
           go-version: ${{ matrix.go_version }}
 
-      - name: Get Server dependencies
-        run: |
-          go install github.com/magefile/mage@latest
-          go mod tidy
-          go mod download
+
 
       - name: Set up infra services
         uses: hoverkraft-tech/compose-action@v2.0.1
@@ -42,10 +38,11 @@ jobs:
         #  with:
         #    compose-file: "./docker/docker-compose.yml"
 
-      - name: Setup Environment
+      - name: Get Server dependencies
         run: |
-          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          go install github.com/magefile/mage@latest
+          go mod tidy
+          go mod download
 
       - name: Build and test Server Services
         run: |
