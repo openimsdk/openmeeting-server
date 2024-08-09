@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        go_version: [ "1.21.x", "1.22.x"]
+        go_version: ["1.21.x", "1.22.x"]
 
     steps:
       - name: Checkout Server repository
@@ -37,10 +37,10 @@ jobs:
           go mod download
 
       - name: Set up infra services
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        # Uncomment and set the correct path to your docker-compose file
-        # with:
-        #   compose-file: "./docker/docker-compose.yml"
+        run: |
+          sudo docker compose up -d
+          sudo sleep 30  # Increased sleep time for better stability
+        timeout-minutes: 20 # Increased timeout for Docker setup
 
       - name: Build and test Server Services
         run: |
@@ -67,7 +67,6 @@ jobs:
           mage build
           mage start
           mage check
-
 
 #   build:
 #     strategy:
