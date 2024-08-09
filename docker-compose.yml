@@ -82,3 +82,21 @@ services:
       - openmeeting
     depends_on:
       - redis
+
+  minio:
+    image: "${MINIO_IMAGE}"
+    ports:
+      - "10005:9000"
+      - "19090:9090"
+    container_name: minio
+    volumes:
+      - "${DATA_DIR}/mnt/data:/data"
+      - "${DATA_DIR}/mnt/config:/root/.minio"
+    environment:
+      TZ: Asia/Shanghai
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: openMeeting123
+    restart: always
+    command: minio server /data --console-address ':9090'
+    networks:
+      - openmeeting
