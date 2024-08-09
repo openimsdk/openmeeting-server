@@ -28,7 +28,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go_version }}
-        id: go
 
       - name: Set up infra on Docker
         run: |
