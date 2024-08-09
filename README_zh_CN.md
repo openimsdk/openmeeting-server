@@ -18,7 +18,7 @@
 OpenMeeting是一个使用Golang开发的开源实时音视频会议系统。OpenMeeting提供了用户管理、会议管理、音视频收发、即刻会议、预约会议、共享屏幕等功能，旨在为用户提供便捷的远程会议体验。它类似于Zoom和腾讯会议，同时支持私有化部署，确保企业和个人用户的数据安全和隐私。
 
 
-![App-OpenMeeting 关系](./assets/open-meeting-design.png)
+[//]: # (![App-OpenMeeting 关系]&#40;./assets/open-meeting-design.png&#41;)
 
 ## 🌐 OpenMeetingServer 介绍
 
@@ -37,7 +37,7 @@ OpenMeeting是一个使用Golang开发的开源实时音视频会议系统。Ope
 
 + **RPC API**：通过grpc为API提供相应的服务，包括user和meeting，扩展更多的业务形态。
 
-  ![整体架构](./assets/architecture-layers.png)
+[//]: # (  ![整体架构]&#40;./assets/architecture-layers.png&#41;)
 
 
 
@@ -45,8 +45,67 @@ OpenMeeting是一个使用Golang开发的开源实时音视频会议系统。Ope
 
 为了便于用户体验，我们提供了多种部署解决方案，您可以根据以下列表选择适合您的部署方式：
 
-+ **[源代码部署指南](https://github.com/openimsdk/openmeeting-server/blob/main/deployments/deployment_zh_CN.md)**
+[//]: # (+ **[源代码部署指南]&#40;https://github.com/openimsdk/openmeeting-server/blob/main/deployments/deployment_zh_CN.md&#41;**)
+### 源代码部署
+
+#### 1. 下载源码
+
+```bash
+git clone https://github.com/openimsdk/openmeeting-server.git && cd openmeeting-server
+```
+
+
+#### 2. 部署相关依赖组件(Etcd, MongoDB, Redis, LiveKit)
+```bash
+# 安装依赖组件
+docker compose up -d
+
+# 检查相关依赖组件是否正常运行
+docker ps
+```
+
+#### 3. 设置外部IP
+```bash
+Modify the `url` in `config/live.yml` to `ws://external_IP:17880` or a domain name.
+```
+
+#### 4. 初始化
+第一次编译前，linux/mac平台下执行：
+```bash
+bash bootstrap.sh
+```
+
+windows执行
+```bash
+bootstrap.bat
+```
+
+#### 5. 编译以及运行
+```bash
+mage && mage start
+```
+
+
+
 + **[Docker 部署指南]()**
+
+
+### 如何增加会议的用户
++ 把请求地址替换为你的IP或者域名，端口号默认为11022，把用户的账号信息填写下。
+```bash
+curl -X POST "替换成你的IP或域名:11022/admin/user/register" \
+-H "Content-Type: application/json" \
+-H "operationID: 123456789" \
+-d '{
+  "userID": "your_userID",
+  "password": "your_password",
+  "account": "your_account",
+  "nickname": "your_nickname"
+}'
+```
+
++ 然后可以用这个账号的account和password登陆到客户端了。
+
 
 ## 系统支持
 
