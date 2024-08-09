@@ -30,8 +30,6 @@ jobs:
         with:
           go-version: ${{ matrix.go_version }}
 
-
-
       - name: Set up infra services
         uses: hoverkraft-tech/compose-action@v2.0.1
         # #  Uncomment and set the correct path to your docker-compose file
@@ -46,9 +44,9 @@ jobs:
 
       - name: Build and test Server Services
         run: |
-           mage build
-           mage start
-           mage check
+          mage build
+          mage start
+          mage check
 
   dockerfile-test:
     name: Build and Test Dockerfile
