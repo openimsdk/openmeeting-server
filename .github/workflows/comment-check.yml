@@ -1,0 +1,14 @@
+name: Non-English Comments Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  non-english-comments-checker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Comments Checker
+        uses: kubecub/comment-lang-detector@v1.0.0
