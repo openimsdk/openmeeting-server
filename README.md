@@ -90,7 +90,6 @@ curl -X POST "http://your_ip_or_domain:11022/admin/user/register" \
 -H "Content-Type: application/json" \
 -H "operationID: 123456789" \
 -d '{
-  "userID": "your_userID",
   "password": "your_password",
   "account": "your_account",
   "nickname": "your_nickname"

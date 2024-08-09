@@ -16,6 +16,7 @@ package redis
 
 import (
 	"context"
+	"fmt"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/database"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	"github.com/openimsdk/tools/errs"
@@ -114,6 +115,14 @@ func (u *User) GetUserToken(ctx context.Context, userID string) (string, error) 
 
 func (u *User) ClearUserToken(ctx context.Context, userID string) error {
 	return errs.Wrap(u.rdb.Del(ctx, cachekey.GetUserTokenKey(userID)).Err())
+}
+
+func (u *User) GenerateUserID(ctx context.Context) (string, error) {
+	index, err := u.rdb.Incr(ctx, cachekey.GetGenerateUserIDKey()).Result()
+	if err != nil {
+		return "", errs.WrapMsg(err, "incr key failed from redis")
+	}
+	return fmt.Sprintf("%08d", index), nil
 }
 
 type Comparable interface {

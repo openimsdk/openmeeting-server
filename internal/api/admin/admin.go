@@ -92,8 +92,13 @@ func (a *ApiAdmin) ImportUserByJson(c *gin.Context) {
 	dbUsers := make([]*model.User, 0, len(users))
 	for _, user := range users {
 		passwd, salt := securetools.HashPassword(user.Password)
+		userID, err := a.userStorageHandler.GenerateUserID(c)
+		if err != nil {
+			apiresp.GinError(c, errs.WrapMsg(err, "generate user id failed"))
+			return
+		}
 		dbUsers = append(dbUsers, &model.User{
-			UserID:    user.UserID,
+			UserID:    userID,
 			Nickname:  user.Nickname,
 			Account:   user.Account,
 			Password:  passwd,
@@ -146,8 +151,13 @@ func (a *ApiAdmin) ImportUserByXlsx(c *gin.Context) {
 	dbUsers := make([]*model.User, 0, len(users))
 	for _, user := range users {
 		passwd, salt := securetools.HashPassword(user.Password)
+		userID, err := a.userStorageHandler.GenerateUserID(c)
+		if err != nil {
+			apiresp.GinError(c, errs.WrapMsg(err, "generate user id failed"))
+			return
+		}
 		dbUsers = append(dbUsers, &model.User{
-			UserID:    user.UserID,
+			UserID:    userID,
 			Nickname:  user.Nickname,
 			Account:   user.Account,
 			Password:  passwd,
@@ -167,10 +177,14 @@ func (a *ApiAdmin) RegisterUser(c *gin.Context) {
 		apiresp.GinError(c, err)
 		return
 	}
-
+	userID, err := a.userStorageHandler.GenerateUserID(c)
+	if err != nil {
+		apiresp.GinError(c, errs.WrapMsg(err, "generate user id failed"))
+		return
+	}
 	passwd, salt := securetools.HashPassword(req.Password)
 	dbUser := &model.User{
-		UserID:    req.UserID,
+		UserID:    userID,
 		Nickname:  req.Nickname,
 		Account:   req.Account,
 		Password:  passwd,
