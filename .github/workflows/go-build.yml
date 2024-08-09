@@ -37,108 +37,61 @@ jobs:
           go mod download
 
       - name: Set up infra services
-        run: |
-          sudo docker compose up -d
-          sudo sleep 30  # Increased sleep time for better stability
-        timeout-minutes: 20 # Increased timeout for Docker setup
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        # #  Uncomment and set the correct path to your docker-compose file
+        #  with:
+        #    compose-file: "./docker/docker-compose.yml"
 
       - name: Build and test Server Services
         run: |
-          mage build
-          mage start
-          mage check
+          sudo mage build
+          sudo mage start
+          sudo mage check
 
-      - name: Checkout Chat repository
+  dockerfile-test:
+    name: Build and Test Dockerfile
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go_version: ["1.21"]
+
+    steps:
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          repository: "openimsdk/chat"
-          path: "chat-repo"
 
-      - name: Get Chat dependencies
+      - name: Set up Go ${{ matrix.go_version }}
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go_version }}
+
+      - name: Get dependencies
         run: |
-          cd ${{ github.workspace }}/chat-repo
-          go install github.com/magefile/mage@latest
           go mod tidy
           go mod download
+          go install github.com/magefile/mage@latest
 
-      - name: Build and test Chat Services
+      - name: Build Docker Image
         run: |
-          cd ${{ github.workspace }}/chat-repo
-          mage build
-          mage start
-          mage check
+          IMAGE_NAME="${{ github.event.repository.name }}-test"
+          CONTAINER_NAME="${{ github.event.repository.name }}-container"
+          docker build -t $IMAGE_NAME .
 
-#   build:
-#     strategy:
-#       matrix:
-#         go: [ 1.20.x, 1.21.x, 1.22.x ]
+      - name: Run Docker Container
+        run: |
+          IMAGE_NAME="${{ github.event.repository.name }}-test"
+          CONTAINER_NAME="${{ github.event.repository.name }}-container"
+          docker run --name $CONTAINER_NAME -d $IMAGE_NAME
+          docker ps -a
 
-#     name: build & test
-#     runs-on: ubuntu-latest
-#     services:
-#       etcd:
-#         image: gcr.io/etcd-development/etcd:v3.5.0
-#         ports:
-#           - 2379:2379
-#         env:
-#           ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
-#           ETCD_ADVERTISE_CLIENT_URLS: http://0.0.0.0:2379
-#       consul:
-#         image: consul:1.12.3
-#         ports:
-#           - 8500:8500
-#       nacos:
-#         image: nacos/nacos-server:v2.1.0
-#         env:
-#           MODE: standalone
-#         ports:
-#           - "8848:8848"
-#           - "9848:9848"
-#       polaris:
-#         image: polarismesh/polaris-standalone:latest
-#         ports:
-#           - 8090:8090
-#           - 8091:8091
-#           - 8093:8093
-#     steps:
-#       - uses: actions/checkout@v4
-#       - name: Set up Go
-#         uses: actions/setup-go@v5.0.2
-#         with:
-#           go-version: ${{ matrix.go }}
+      - name: Test Docker Container Logs
+        run: |
+          CONTAINER_NAME="${{ github.event.repository.name }}-container"
+          docker logs $CONTAINER_NAME
 
-#       - name: Setup Environment
-#         run: |
-#           echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
-#           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-
-#       - name: Module cache
-#         uses: actions/cache@v4
-#         with:
-#           path: |
-#             ~/.cache/go-build
-#             ~/go/pkg/mod
-#           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-#           restore-keys: |
-#             ${{ runner.os }}-go
-
-#       - name: Build
-#         run: go build ./...
-
-#       - name: Test
-#         run: make test-coverage
-
-#       - name: Upload coverage to Codecov
-#         run: bash <(curl -s https://codecov.io/bash)
-
-#       - name: Kratos
-#         run: |
-#           cd cmd/kratos
-#           go build ./...
-#           go test ./...
-
-#       - name: HTTP
-#         run: |
-#           cd cmd/protoc-gen-go-http
-#           go build ./...
-#           go test ./...
+      # - name: Cleanup Docker Container
+      #   run: |
+      #     CONTAINER_NAME="${{ github.event.repository.name }}-container"
+      #     IMAGE_NAME="${{ github.event.repository.name }}-test"
+      #     docker stop $CONTAINER_NAME
+      #     docker rm $CONTAINER_NAME
+      #     docker rmi $IMAGE_NAME
