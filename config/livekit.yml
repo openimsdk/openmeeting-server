@@ -1,4 +1,4 @@
-url: [ "ws://127.0.0.1:17880" ]
+url: [ "ws://external_ip:17880" ]
 apiKey: "APIftrpEkL9x2pa"
 apiSecret: "23ztfSqsfQ8hKkHzHTl3Z4bvaxro0snjk5jwbp5p6Q3"
 innerURL: "ws://127.0.0.1:17880"
