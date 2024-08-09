@@ -30,17 +30,17 @@ jobs:
         with:
           go-version: ${{ matrix.go_version }}
 
-      - name: Set up infra services
-        uses: hoverkraft-tech/compose-action@v2.0.1
-        # #  Uncomment and set the correct path to your docker-compose file
-        #  with:
-        #    compose-file: "./docker/docker-compose.yml"
-
       - name: Get Server dependencies
         run: |
           go install github.com/magefile/mage@latest
           go mod tidy
           go mod download
+
+      - name: Set up infra services
+        uses: hoverkraft-tech/compose-action@v2.0.1
+        # #  Uncomment and set the correct path to your docker-compose file
+        #  with:
+        #    compose-file: "./docker/docker-compose.yml"
 
       - name: Build and test Server Services
         run: |
