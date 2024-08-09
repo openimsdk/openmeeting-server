@@ -1,14 +1,28 @@
-name: Non-English Comments Check
+name: Check for Chinese Characters
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  non-english-comments-checker:
+  check-chinese:
+    name: Check for Chinese Characters in Code
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - name: Comments Checker
-        uses: kubecub/comment-lang-detector@v1.0.0
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Scan for Chinese characters
+        run: |
+          # 检查所有文件中是否包含中文字符并输出所有匹配结果
+          RESULT=$(grep -rn --include=\*.{go,py,js} --exclude-dir={.git,node_modules,html,md} '[\u4e00-\u9fff]' . || true)
+          if [ -n "$RESULT" ]; then
+            echo "$RESULT" | tee /dev/stderr
+            echo "Error: Chinese characters found in the code."
+            exit 1
+          else
+            echo "No Chinese characters found."
+          fi
