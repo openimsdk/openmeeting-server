@@ -160,9 +160,7 @@ func (s *userServer) UserLogin(ctx context.Context, req *pbuser.UserLoginReq) (*
 	}
 
 	if _, err := s.meetingRpc.Client.CleanPreviousMeetings(ctx, cleanMsg); err != nil {
-		if err != nil {
-			return nil, errs.WrapMsg(err, "clean meeting failed")
-		}
+		return nil, errs.WrapMsg(err, "clean meeting failed")
 	}
 
 	return resp, nil
@@ -222,9 +220,7 @@ func (s *userServer) UserLogout(ctx context.Context, req *pbuser.LogoutReq) (*pb
 		ReasonCode: int32(pbmeeting.KickOffReason_Logout),
 	}
 	if _, err := s.meetingRpc.Client.CleanPreviousMeetings(ctx, cleanMsg); err != nil {
-		if err != nil {
-			return nil, errs.WrapMsg(err, "clean meeting failed")
-		}
+		return nil, errs.WrapMsg(err, "clean meeting failed")
 	}
 
 	return resp, nil
