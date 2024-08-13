@@ -1,0 +1,29 @@
+# Required fields
+api_key: "APIftrpEkL9x2pa"
+api_secret: "23ztfSqsfQ8hKkHzHTl3Z4bvaxro0snjk5jwbp5p6Q3"
+ws_url: "ws://external_ip:17880"
+redis:
+  address: 127.0.0.1:6379
+  username: ""
+  password: ""
+  db: 0
+
+# Optional fields
+#health_port: if used, will open an http port for health checks
+#template_port: port used to host default templates (default 7980)
+#prometheus_port: port used to collect prometheus metrics. Used for autoscaling
+#  debug, info, warn, or error (default info)
+log_level: debug
+#template_base: can be used to host custom templates (default http://localhost:<template_port>/)
+#enable_chrome_sandbox: if true, egress will run Chrome with sandboxing enabled. This requires a specific Docker setup, see below.
+#insecure: can be used to connect to an insecure websocket (default false)
+insecure: false
+
+
+# File upload config - only one of the following. Can be overridden per-request
+s3:
+  access_key: root
+  secret: openMeeting123
+  region: us-east-1
+  endpoint: http://127.0.0.1:10005
+  bucket: openmeeting

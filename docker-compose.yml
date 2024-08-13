@@ -100,3 +100,18 @@ services:
     command: minio server /data --console-address ':9090'
     networks:
       - openmeeting
+
+  egress:
+    image: "${LIVEKIT_EGRESS_IMAGE}"
+    container_name: egress
+    volumes:
+      - ${CONFIG_DIR}/egress.yml:${DOCKER_DIR}/livekit-egress.yaml
+      - ${DATA_DIR}/livekit-egress:/out
+    environment:
+      TZ: Asia/Shanghai
+    restart: always
+    command: --cap-add SYS_ADMIN -e EGRESS_CONFIG_FILE=${DOCKER_DIR}/livekit-egress.yaml
+    networks:
+      - openmeeting
+    depends_on:
+      - redis

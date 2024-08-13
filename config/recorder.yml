@@ -1,0 +1,12 @@
+record:
+  enable: 1
+
+layout: speaker
+frame_rate: 24
+
+s3:
+  access_key: root
+  secret: openMeeting123
+  region: us-east-1
+  endpoint: http://127.0.0.1:10005
+  bucket: openmeeting
