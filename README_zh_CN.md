@@ -67,6 +67,7 @@ docker ps
 #### 3. 设置外部IP
 ```bash
 Modify the `url` in `config/live.yml` to `ws://external_IP:17880` or a domain name.
+Modify the `node_ip` 在 `components/livekit/config/livekit.yml` rtc中 to `external_IP`.
 ```
 
 #### 4. 初始化
