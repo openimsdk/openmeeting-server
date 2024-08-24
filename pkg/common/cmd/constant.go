@@ -29,6 +29,7 @@ var (
 	LogConfigFileName                string
 	ShareFileName                    string
 	LiveKitConfigFilename            string
+	RecordMeetingFilename            string
 )
 
 const envPrefix = "IMENV_"
@@ -47,6 +48,7 @@ func init() {
 	LogConfigFileName = "log.yml"
 	ShareFileName = "share.yml"
 	LiveKitConfigFilename = "livekit.yml"
+	RecordMeetingFilename = "recorder.yml"
 
 	ConfigEnvPrefixMap = make(map[string]string)
 	fileNames := []string{
@@ -59,6 +61,7 @@ func init() {
 		OpenMeetingAdminAPICfgFileName,
 		LogConfigFileName,
 		ShareFileName,
+		RecordMeetingFilename,
 	}
 
 	for _, fileName := range fileNames {

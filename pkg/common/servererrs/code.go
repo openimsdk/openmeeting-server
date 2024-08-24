@@ -30,6 +30,8 @@ const (
 	MeetingAuthCheckError           = 200003 // meeting auth check permission error
 	MeetingCompleteError            = 200004 // meeting update check error
 	MeetingRecordSwitchNotOpenError = 200006 // meeting cloud record switch is not open.
+	MeetingRecordSwitchError        = 200007 // enable meeting cloud record meeting error.
+
 )
 
 // General error codes.

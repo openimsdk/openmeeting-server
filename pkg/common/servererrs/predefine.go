@@ -34,4 +34,5 @@ var (
 	ErrMeetingAuthCheck           = errs.NewCodeError(MeetingAuthCheckError, "MeetingAuthCheckError")
 	ErrMeetingAlreadyCompleted    = errs.NewCodeError(MeetingCompleteError, "MeetingCompleteError")
 	ErrMeetingRecordSwitchNotOpen = errs.NewCodeError(MeetingRecordSwitchNotOpenError, "RecordSwitchNotOpenError")
+	ErrEnableRecordMeetingFailed  = errs.NewCodeError(MeetingRecordSwitchError, "MeetingRecordSwitchError")
 )

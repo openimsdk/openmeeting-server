@@ -6,10 +6,10 @@ rtc:
   tcp_port: 7881
   use_external_ip: true
 
-#redis:
-#  address: 127.0.0.1:16379
-#  db: 2
-#  password: openmeeting_v1
+redis:
+  address: 192.168.124.3:16379
+  db: 0
+  password: openmeeting_v1
 
 keys:
   APIGPW3gnFTzqHH: 23ztfSqsfQ8hKkHzHTl3Z4bvaxro0snjk5jwbp5p6Q3

@@ -72,3 +72,7 @@ func (m *MeetingApi) UpdateMeeting(c *gin.Context) {
 func (m *MeetingApi) OperateMeetingAllStream(c *gin.Context) {
 	a2r.Call(meeting.MeetingServiceClient.OperateRoomAllStream, m.Client, c)
 }
+
+func (m *MeetingApi) ToggleRecordMeeting(c *gin.Context) {
+	a2r.Call(meeting.MeetingServiceClient.ToggleRecordMeeting, m.Client, c)
+}

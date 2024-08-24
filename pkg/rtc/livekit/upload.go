@@ -5,27 +5,31 @@ import (
 	"fmt"
 	"github.com/livekit/protocol/livekit"
 	"github.com/openimsdk/openmeeting-server/pkg/common/servererrs"
+	"github.com/openimsdk/tools/errs"
 	"github.com/openimsdk/tools/log"
 	"github.com/openimsdk/tools/utils/timeutil"
 )
 
 func (x *LiveKit) StartUpload(ctx context.Context, roomID string) (egressID, downloadURL string, err error) {
-	egressID, downloadURL, err = "", "", nil
+	fmt.Println("into start upload")
 	if !x.uploadConf.Record.Enable {
 		log.ZInfo(ctx, "server do not enable record meeting, please check", "roomID", roomID)
 		err = servererrs.ErrMeetingRecordSwitchNotOpen.WrapMsg("server do not enable record meeting, please check")
-		return
+		return "", "", err
 	}
 	filename := x.getUploadFilename(roomID)
 	downloadURL = x.getDownloadURL(filename)
 	request := x.generateRoomCompositeEgressRequest(roomID, filename)
+	fmt.Println("begin to start")
 	egressInfo, err := x.egressClient.StartRoomCompositeEgress(ctx, request)
 	if err != nil {
+		fmt.Println("error", err.Error())
 		log.ZError(ctx, "", err, "roomID", roomID)
-		return
+		return "", "", errs.WrapMsg(err, "StartRoomCompositeEgress returns error.")
 	}
 	egressID = egressInfo.EgressId
-	return
+	fmt.Println("egressID, downloadURL:", egressID, downloadURL)
+	return egressID, downloadURL, nil
 }
 
 func (u *LiveKit) StopUpload(ctx context.Context, egressID string) error {
@@ -40,7 +44,7 @@ func (u *LiveKit) StopUpload(ctx context.Context, egressID string) error {
 
 func (u *LiveKit) getUploadFilename(roomID string) string {
 	nowTime := timeutil.GetCurrentTimestampBySecond()
-	return "meeting_" + roomID + "_" + fmt.Sprintf("%s", nowTime) + ".mp4"
+	return "meeting_" + roomID + "_" + fmt.Sprintf("%d", nowTime) + ".mp4"
 }
 
 func (u *LiveKit) getDownloadURL(filename string) string {

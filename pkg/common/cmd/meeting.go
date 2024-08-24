@@ -28,6 +28,7 @@ func NewMeetingRpcCmd() *MeetingRpcCmd {
 		ShareFileName:                    &meetingConfig.Share,
 		DiscoveryConfigFilename:          &meetingConfig.Discovery,
 		LiveKitConfigFilename:            &meetingConfig.Rtc,
+		RecordMeetingFilename:            &meetingConfig.Upload,
 	}
 	ret.RootCmd = NewRootCmd(program.GetProcessName(), WithConfigMap(ret.configMap))
 	ret.ctx = context.WithValue(context.Background(), "version", config.Version)

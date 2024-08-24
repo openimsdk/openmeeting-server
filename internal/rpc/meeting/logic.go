@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/openimsdk/openmeeting-server/pkg/common/constant"
+	"github.com/openimsdk/openmeeting-server/pkg/common/servererrs"
 	"github.com/openimsdk/openmeeting-server/pkg/common/storage/model"
 	pbmeeting "github.com/openimsdk/protocol/openmeeting/meeting"
 	"github.com/openimsdk/tools/errs"
@@ -463,4 +464,33 @@ func (s *meetingServer) handleCompleteMeeting(ctx context.Context, meetingID str
 		return err
 	}
 	return nil
+}
+
+func (s *meetingServer) toggleEnableMeeting(ctx context.Context, meetingID string) (*pbmeeting.ToggleRecordMeetingResp, error) {
+	resp := &pbmeeting.ToggleRecordMeetingResp{}
+	egressID, downloadUrl, err := s.meetingRtc.StartUpload(ctx, meetingID)
+	if err != nil {
+		return resp, servererrs.ErrEnableRecordMeetingFailed.WrapMsg("toggle enable record meeting failed.")
+	}
+	updateData := map[string]any{
+		"egress_id":    egressID,
+		"download_url": downloadUrl,
+	}
+	if err := s.meetingStorageHandler.Update(ctx, meetingID, updateData); err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
+
+func (s *meetingServer) toggleDisableMeeting(ctx context.Context, egressID string) (*pbmeeting.ToggleRecordMeetingResp, error) {
+	resp := &pbmeeting.ToggleRecordMeetingResp{}
+
+	if egressID == "" {
+		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("egress_id is null, no need to disable")
+	}
+
+	if err := s.meetingRtc.StopUpload(ctx, egressID); err != nil {
+		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("toggle disable record meeting failed.")
+	}
+	return resp, nil
 }

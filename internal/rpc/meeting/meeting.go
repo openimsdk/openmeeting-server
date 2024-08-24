@@ -559,3 +559,28 @@ func (s *meetingServer) CleanPreviousMeetings(ctx context.Context, req *pbmeetin
 
 	return resp, nil
 }
+
+func (s *meetingServer) ToggleRecordMeeting(ctx context.Context, req *pbmeeting.ToggleRecordMeetingReq) (*pbmeeting.ToggleRecordMeetingResp, error) {
+	resp := &pbmeeting.ToggleRecordMeetingResp{}
+	dbInfo, err := s.meetingStorageHandler.TakeWithError(ctx, req.MeetingID)
+	if err != nil {
+		return resp, errs.WrapMsg(err, "get meeting data failed")
+	}
+
+	hostUserID := dbInfo.CreatorUserID
+	metaData, err := s.meetingRtc.GetRoomData(ctx, req.MeetingID)
+	if err != nil {
+		log.ZDebug(ctx, "get room failed still can end meeting", "roomID", req.MeetingID)
+	} else {
+		hostUserID = metaData.Detail.Info.CreatorDefinedMeeting.HostUserID
+	}
+	if !s.checkAuthPermission(dbInfo.CreatorUserID, hostUserID, req.UserID) {
+		return resp, servererrs.ErrMeetingAuthCheck.WrapMsg("user did not have permission to toggle record meeting")
+	}
+
+	if req.EnableRecord {
+		return s.toggleEnableMeeting(ctx, req.MeetingID)
+	}
+
+	return s.toggleDisableMeeting(ctx, dbInfo.EgressID)
+}

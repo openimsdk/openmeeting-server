@@ -18,4 +18,6 @@ type MeetingInfo struct {
 	Interval        int32   `bson:"interval"`           // only used when repeat_type is custom
 	RepeatDayOfWeek []int32 `bson:"repeat_day_of_week"` // only used when repeat_type is custom
 	Setting         string  `bson:"setting"`
+	EgressID        string  `bson:"egress_id"`
+	DownloadUrl     string  `bson:"download_url"`
 }

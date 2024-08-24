@@ -23,4 +23,6 @@ type MeetingRtc interface {
 	GetParticipantUserIDs(ctx context.Context, roomID string) ([]string, error)
 	UpdateParticipantData(ctx context.Context, data *meeting.ParticipantMetaData, roomID, userID string) error
 	GetParticipantMetaData(ctx context.Context, roomID, userID string) (*meeting.ParticipantMetaData, error)
+	StartUpload(ctx context.Context, roomID string) (egressID, downloadURL string, err error)
+	StopUpload(ctx context.Context, egressID string) error
 }
